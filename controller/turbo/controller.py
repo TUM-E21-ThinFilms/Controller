@@ -16,7 +16,7 @@
 from stp_ix455.factory import STPPumpFactory
 from stp_ix455.messages.SetOptionFunc import SetOptionFuncMessage
 
-class RelaisController(object):
+class TurboController(object):
         
     def __init__(self, pump=None):
         if pump is None:
