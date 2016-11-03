@@ -52,5 +52,14 @@ class RelaisController(object):
     def off(self):
         self.relais.set_port(0)
         
+    def is_scroll_on(self):
+        return self.relais.get_ports().get_ports() & self.SCROLL_PORT > 0
+    
+    def is_lamp_on(self):
+        return self.relais.get_ports().get_ports() & self.LAMP_PORT > 0
+    
+    def is_bypass_on(self):
+        return self.relais.get_ports().get_ports() & self.BYPASS_PORT > 0
+        
     def get_relais(self):
         return self.relais
