@@ -46,6 +46,14 @@ class ADLController(object):
         self.sputter.set_ramp(2000) # 2 seconds
         self.sputter.activate_ramp()
         self.turn_on()
+
+    def sputter_voltage(self, voltage=1000):
+	voltage_coeff = self.sputter.convert_into_voltage(voltage)
+        self.sputter.clear()
+        self.sputter.set_mode_u(voltage_coeff)
+        self.sputter.set_ramp(2000)
+        self.sputter.activate_ramp()
+        self.turn_on()
         
     def turn_on(self):
         self.thread = TurnOnThread()
