@@ -13,24 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+import logging
 
-from setuptools import setup, find_packages
+class LoggerFactory()
 
-requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x']
-
-desc = ('Controllers')
-
-setup(
-    name='controller',
-    version=__import__('controller').__version__,
-    author='Alexander Book',
-    author_email='alexander.book@frm2.tum.de',
-    license = 'GNU General Public License (GPL), Version 3',
-    url='https://github.com/TUM-E21-ThinFilms/Controller',
-    description=desc,
-    long_description=open('README.md').read(),
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires=requires,
-)
+    def get_turbo_logger(self):
+        logger = logging.getLogger('Controller: Turbo')
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh = logging.FileHandler('controller.log')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger
+    
