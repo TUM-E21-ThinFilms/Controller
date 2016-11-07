@@ -17,7 +17,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x']
+requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547']
 
 desc = ('Controllers')
 
