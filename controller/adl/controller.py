@@ -19,7 +19,7 @@ from controller.logger import LoggerFactory
 
 class ADLController(object):
         
-    def __init__(self, sputter=None)
+    def __init__(self, sputter=None):
         if logger is None:
             logger = LoggerFactory().get_adl_sputter_logger()
         

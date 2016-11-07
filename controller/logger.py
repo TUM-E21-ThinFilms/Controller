@@ -15,7 +15,7 @@
 
 import logging
 
-class LoggerFactory()
+class LoggerFactory(object):
 
     def get_turbo_logger(self):
         logger = logging.getLogger('Controller: Turbo')

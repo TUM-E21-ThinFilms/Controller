@@ -104,7 +104,7 @@ class SafeController(TurboController):
             
         self.relais = relais
         
-    def get_relais(self).
+    def get_relais(self):
         return self.relais
     
     def check_pressure(self):
