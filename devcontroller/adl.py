@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import threading
+import time
 from adl_x547.factory import ADLSputterFactory
 from adl_x547.driver import ADLSputterDriver
 from devcontroller.logger import LoggerFactory
