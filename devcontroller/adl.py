@@ -13,13 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from adl_547.factory import ADLSputterFactory
-from adl_547.driver import ADLSputterDriver
-from controller.logger import LoggerFactory
+import threading
+from adl_x547.factory import ADLSputterFactory
+from adl_x547.driver import ADLSputterDriver
+from devcontroller.logger import LoggerFactory
 
 class ADLController(object):
         
-    def __init__(self, sputter=None):
+    def __init__(self, sputter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_adl_sputter_logger()
         
@@ -73,8 +74,8 @@ class StoppableThread(threading.Thread):
         self._stop = False
 
     def run(self):
-	    while not self._stop:
-	        self.do_execute()
+        while not self._stop:
+	    self.do_execute()
 
     def stop(self):
         self._stop = True

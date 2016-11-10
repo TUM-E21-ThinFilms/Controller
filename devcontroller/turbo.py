@@ -16,8 +16,8 @@
 from stp_ix455.factory import STPPumpFactory
 from stp_ix455.messages.SetOptionFunc import SetOptionFuncMessage
 from tpg26x.driver import PfeifferTPG26xDriver
-from controller.relais import RelaisController
-from controller.logger import LoggerFactory
+from devcontroller.relais import RelaisController
+from devcontroller.logger import LoggerFactory
 
 class TurboController(object):
         
