@@ -13,7 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import threading
+import time
+from thread import StoppableThread
+from error import ExecutionError
 from adl_x547.factory import ADLSputterFactory
 from adl_x547.driver import ADLSputterDriver
 from devcontroller.logger import LoggerFactory
@@ -33,61 +35,68 @@ class ADLController(object):
             self.sputter = sputter
             
         self.thread = None
+        self.current_mode = None
             
     def get_sputter(self):
         return self.sputter
             
     def get_logger(self):
         return self.logger
-    
-    def sputter_power(self, power=50):
-        power_coeff = self.sputter.convert_into_power(power)
+
+    def __check_mode(self, new_mode):
+        if self.mode is not None and not self.mode == new_mode:
+            self.logger.error("Already sputtering in mode %s. Cannot sputter in new mode %s" % self.mode % new_mode)
+            raise ExecutionError("Already sputting in different mode.")
+
+        self.mode = new_mode
+
+    def sputter(self, value, mode=ADLSputterDriver.MODE_POWER):
+        self.__check_mode(mode)
         self.sputter.clear()
-        self.sputter.set_mode_p(power_coeff)
-        self.sputter.set_ramp(2000) # 2 seconds
-        self.sputter.activate_ramp()
+        self.sputter.set_mode(mode, value)
+        self.turn_on()
+
+    def sputter_power(self, power=50):
+        self.__check_mode(ADLSputterDriver.MODE_POWER)
+
+        power = self.sputter.convert_into_power(power)
+        self.sputter.clear()
+        self.sputter.set_mode_p(power)
+        #self.sputter.set_ramp(2000) # 2 seconds
+        #self.sputter.activate_ramp()
         self.turn_on()
 
     def sputter_voltage(self, voltage=1000):
-	voltage_coeff = self.sputter.convert_into_voltage(voltage)
+        self.__check_mode(ADLSputterDriver.MODE_VOLTAGE)
+
+        voltage = self.sputter.convert_into_voltage(voltage)
         self.sputter.clear()
-        self.sputter.set_mode_u(voltage_coeff)
-        self.sputter.set_ramp(2000)
-        self.sputter.activate_ramp()
+        self.sputter.set_mode_u(voltage)
+        #self.sputter.set_ramp(2000)
+        #self.sputter.activate_ramp()
         self.turn_on()
         
     def turn_on(self):
-        self.thread = TurnOnThread()
-        self.thread.daemon = True
-        self.thread.set_driver(self.sputter)
-        self.thread.start()	
-        
+        if self.thread is None or not self.thread.is_running():
+            self.thread = TurnOnThread()
+            self.thread.daemon = True
+            self.thread.set_driver(self.sputter)
+            self.thread.start()
+        else:
+            self.logger.info('Sputter thread already running. Will continue...')
+
     def turn_off(self):
         if not self.thread is None:
             self.thread.stop()
 
+        self.mode = None
         self.sputter.turn_off()
-        
-class StoppableThread(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self._stop = False
-
-    def run(self):
-        while not self._stop:
-	    self.do_execute()
-
-    def stop(self):
-        self._stop = True
-
-    def do_execute():
-	    pass
 
 class TurnOnThread(StoppableThread):
 
     def set_driver(self, driver):
-	    self.driver = driver
+        self.driver = driver
 
     def do_execute(self):
-	    self.driver.turn_on()
-	    time.sleep(1)		
+        self.driver.turn_on()
+        time.sleep(1)
