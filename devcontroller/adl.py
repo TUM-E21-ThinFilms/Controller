@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import time
 from thread import StoppableThread
 from error import ExecutionError
@@ -59,7 +60,7 @@ class ADLController(object):
     def sputter_power(self, power=50):
         self.__check_mode(ADLSputterDriver.MODE_POWER)
 
-        power = self.sputter.convert_into_power(power)
+        power = self.sputter.convert_into_power(git )
         self.sputter.clear()
         self.sputter.set_mode_p(power)
         #self.sputter.set_ramp(2000) # 2 seconds
