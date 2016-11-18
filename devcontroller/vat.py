@@ -27,7 +27,7 @@ class VATController(object):
 
         if valve is None:
             factory = VAT590Factory()
-            self.valve = factory.create_valve()
+            self.valve = factory.create_argon_valve()
         else:
             self.valve = valve
 
