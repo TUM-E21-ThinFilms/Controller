@@ -15,6 +15,7 @@
 
 from math import log10
 from devcontroller.misc.logger import LoggerFactory
+from devcontroller.misc.error import ExecutionError
 from vat_590.factory import VAT590Factory
 
 class VATController(object):
@@ -65,11 +66,35 @@ class VATController(object):
     def get_pressure(self):
         return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
 
+    """
+        Sets the pressure in mbar
+    """
     def set_pressure(self, pressure):
+        if pressure >= 1:
+            raise ValueError("Will not set pressure higher than 1 mbar.")
+
+        self.valve.clear()
+
         voltage = self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset
-	#print(voltage)
         self.valve.set_pressure(int(voltage))
 
     def initialize(self):
-        self._pressure_range = int(self.valve.get_pressure_range())
-        self._sensor_offset  = 0#self.valve.get_sensor_offset()
+        try:
+            self.valve.clear()
+            self._pressure_range = int(self.valve.get_pressure_range())
+            self._sensor_offset  = int(self.valve.get_sensor_offset())
+        except Exception as e:
+            self.logger.error("Exception while initializng VAT Controller: %e", e)
+            raise ExecutionError("Could not initialize VAT. See log files")
+
+    def open(self):
+        self.valve.clear()
+        self.valve.open()
+
+    def close(self):
+        self.valve.clear()
+        self.valve.close()
+
+    def hold(self):
+        self.valve.clear()
+        self.valve.hold()

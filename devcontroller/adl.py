@@ -39,6 +39,7 @@ class ADLController(object):
             
         self.thread = None
         self.current_mode = None
+        self.semaphore = Semaphore(1)
             
     def get_sputter(self):
         return self.sputter
