@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from math import log10
-from devcontroller.lib.logger import LoggerFactory
+from devcontroller.misc.logger import LoggerFactory
 from vat_590.factory import VAT590Factory
 
 class VATController(object):

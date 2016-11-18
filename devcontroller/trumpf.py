@@ -17,7 +17,7 @@ import threading
 
 from truplasmadc_3000.factory import TruPlasmaDC3000Factory
 
-from devcontroller.lib.logger import LoggerFactory
+from devcontroller.misc.logger import LoggerFactory
 
 
 class TruPlasmaDC3000Controller(object):

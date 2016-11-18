@@ -13,24 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+import threading
 
-from setuptools import setup, find_packages
+class StoppableThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self._stop = False
 
-requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590']
+    def run(self):
+        while not self._stop:
+            self.do_execute()
 
-desc = ('Controller')
+    def is_running(self):
+        return not self._stop
 
-setup(
-    name='devcontroller',
-    version=__import__('devcontroller').__version__,
-    author='Alexander Book',
-    author_email='alexander.book@frm2.tum.de',
-    license = 'GNU General Public License (GPL), Version 3',
-    url='https://github.com/TUM-E21-ThinFilms/Controller',
-    description=desc,
-    long_description=open('README.md').read(),
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires=requires,
-)
+    def stop(self):
+        self._stop = True
+
+    def do_execute(self):
+        pass

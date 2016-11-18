@@ -17,7 +17,7 @@ from stp_ix455.factory import STPPumpFactory
 from stp_ix455.messages.SetOptionFunc import SetOptionFuncMessage
 from tpg26x.driver import PfeifferTPG26xDriver
 
-from devcontroller.lib.logger import LoggerFactory
+from devcontroller.misc.logger import LoggerFactory
 from devcontroller.relais import RelaisController
 
 

@@ -19,9 +19,9 @@ import time
 from adl_x547.driver import ADLSputterDriver
 from adl_x547.factory import ADLSputterFactory
 
-from devcontroller.lib.error import ExecutionError
-from devcontroller.lib.logger import LoggerFactory
-from devcontroller.lib.thread import StoppableThread
+from devcontroller.misc.error import ExecutionError
+from devcontroller.misc.logger import LoggerFactory
+from devcontroller.misc.thread import StoppableThread
 
 
 class ADLController(object):
