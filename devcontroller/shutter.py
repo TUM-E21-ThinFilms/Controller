@@ -16,7 +16,7 @@
 
 import time
 
-from shutter.factory import ShutterFactory
+from trinamic_pd110.factory import ShutterFactory
 from devcontroller.misc.logger import LoggerFactory
 
 class ADLController(object):
