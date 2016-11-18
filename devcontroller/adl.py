@@ -23,7 +23,6 @@ from devcontroller.misc.error import ExecutionError
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
 
-
 class ADLController(object):
         
     def __init__(self, sputter=None, logger=None):
@@ -48,11 +47,11 @@ class ADLController(object):
         return self.logger
 
     def __check_mode(self, new_mode):
-        if self.mode is not None and not self.mode == new_mode:
+        if self.current_mode is not None and not self.current_mode == new_mode:
             self.logger.error("Already sputtering in mode %s. Cannot sputter in new mode %s" % self.mode % new_mode)
             raise ExecutionError("Already sputting in different mode.")
 
-        self.mode = new_mode
+        self.current_mode = new_mode
 
     def sputter(self, value, mode=ADLSputterDriver.MODE_POWER):
         self.__check_mode(mode)
@@ -60,17 +59,17 @@ class ADLController(object):
         self.sputter.set_mode(mode, value)
         self.turn_on()
 
-    def sputter_power(self, power=50):
+    def sputter_power(self, power):
         self.__check_mode(ADLSputterDriver.MODE_POWER)
 
-        power = self.sputter.convert_into_power(git )
+        power = self.sputter.convert_into_power(power)
         self.sputter.clear()
         self.sputter.set_mode_p(power)
         #self.sputter.set_ramp(2000) # 2 seconds
         #self.sputter.activate_ramp()
         self.turn_on()
 
-    def sputter_voltage(self, voltage=1000):
+    def sputter_voltage(self, voltage):
         self.__check_mode(ADLSputterDriver.MODE_VOLTAGE)
 
         voltage = self.sputter.convert_into_voltage(voltage)

@@ -63,12 +63,13 @@ class VATController(object):
         return 6.8 + 0.6 * log10(pressure)
 
     def get_pressure(self):
-        return self._voltage_to_pressure(float(self.valve.get_pressure())/self._pressure_range + self._sensor_offset)
+        return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
 
     def set_pressure(self, pressure):
-        voltage = self._pressure_to_voltage(pressure)*self._pressure_range - self._sensor_offset
+        voltage = self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset
+	#print(voltage)
         self.valve.set_pressure(int(voltage))
 
     def initialize(self):
-        self._pressure_range = self.valve.get_pressure_range()
-        self._sensor_offset  = self.valve.get_sensor_offset()
+        self._pressure_range = int(self.valve.get_pressure_range())
+        self._sensor_offset  = 0#self.valve.get_sensor_offset()
