@@ -16,8 +16,10 @@
 from stp_ix455.factory import STPPumpFactory
 from stp_ix455.messages.SetOptionFunc import SetOptionFuncMessage
 from tpg26x.driver import PfeifferTPG26xDriver
+
+from devcontroller.lib.logger import LoggerFactory
 from devcontroller.relais import RelaisController
-from devcontroller.logger import LoggerFactory
+
 
 class TurboController(object):
         
@@ -76,6 +78,7 @@ class TurboController(object):
         opts.set_remote_operation_mode(SetOptionFuncMessage.REMOTE_OPERATION_MODE_POWER_SUPPLY)
         self.pump.set_options(opts)
 
+# TODO: set gauge and relais if given None.
 class SafeController(TurboController):
 
     def __init__(self, pump=None, gauge=None, relais=None, logger=None):
@@ -126,8 +129,7 @@ class SafeController(TurboController):
         return True
     
     def check_scroll(self):
-        
-        if self.scroll is None:
+        if self.relais is None:
             self.logger.error("Cannot check whether the scroll pump is running...")
             return False
         

@@ -14,9 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import threading
+
 from truplasmadc_3000.factory import TruPlasmaDC3000Factory
-from truplasmadc_3000.driver import TruPlasmaDC3000Driver
-from devcontroller.logger import LoggerFactory
+
+from devcontroller.lib.logger import LoggerFactory
+
 
 class TruPlasmaDC3000Controller(object):
         
