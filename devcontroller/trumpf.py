@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import threading
+import time
 
 from truplasmadc_3000.factory import TruPlasmaDC3000Factory
-
 from devcontroller.misc.logger import LoggerFactory
+from devcontroller.misc.thread import StoppableThread
 
 
 class TruPlasmaDC3000Controller(object):
@@ -41,7 +41,17 @@ class TruPlasmaDC3000Controller(object):
     NORMAL_RUN_BIT_PC_CONTROL = 32
     NORMAL_RUN_BIT_PROFIBUS_CONTROL = 64
     NORMAL_RUN_BIT_DISPLAY_CONTROL = 128
-        
+
+    DOC = """
+        TruPlasmaDC3000Controller - Controller for the Trumpf Sputter power supply
+
+        Usage:
+            prepare_sputter(voltage [V], current [mA], power [W], bits = None): sets values for sputtering
+            turn_on: sputters with previously set values
+            turn_off: turns sputtering off
+
+    """
+
     def __init__(self, sputter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_sputter_logger()
@@ -57,6 +67,7 @@ class TruPlasmaDC3000Controller(object):
         self.voltage, self.current, self.power, self.bits = None, None, None, None
             
         self.thread, self.set, self.last_sputter_response = None, False, None
+        print(self.DOC)
 
     def get_sputter(self):
         return self.sputter
@@ -66,19 +77,14 @@ class TruPlasmaDC3000Controller(object):
         
     def local_control(self):
         self.sputter.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_DISPLAY)
-        
-    def init(self):
-        pass
-    
 
-    
     def sputter_with_set_values(self):
         self.last_sputter_response = self.sputter(self.voltage, self.current, self.power, self.bits)
     
     def get_last_sputter_response(self):
         return self.last_sputter_response
     
-    def sputter(self, volage, current, power, bits):
+    def sputter(self, voltage, current, power, bits):
         if bits is None:
             bits = self.NORMAL_RUN_BIT_MAINS_RELAY | self.NORMAL_RUN_BIT_POWER_ON | self.NORMAL_RUN_BIT_PC_CONTROL | self.NORMAL_RUN_BIT_DISPLAY_CONTROL
         
@@ -121,52 +127,37 @@ class TruPlasmaDC3000Controller(object):
             return False
         
     def get_voltage_on_threshold(self):
-        return self.read_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD)
+        return self.sputter.read_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD)
     
     def set_voltage_on_threshold(self, threshold):
-        return self.set_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD, threshold)
+        return self.sputter.set_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD, threshold)
     
     def get_voltage_off_threshold(self):
-        return self.read_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD)
+        return self.sputter.read_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD)
     
     def set_voltage_off_threshold(self, threshold):
-        return self.set_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD, threshold)
+        return self.sputter.set_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD, threshold)
     
     def get_voltage_arc_threshold(self):
-        return self.read_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD)
+        return self.sputter.read_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD)
     
     def set_voltage_arc_threshold(self, threshold):
-        return self.set_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD, threshold)
+        return self.sputter.set_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD, threshold)
     
     def get_long_ramp(self):
-        return self.read_byte(self.BYTE_CHANNEL_LONG_RAMP)
+        return self.sputter.read_byte(self.BYTE_CHANNEL_LONG_RAMP)
     
     def set_long_ramp(self, ramp_type):
         if ramp_type not in [self.LONG_RAMP_POWER, self.LONG_RAMP_CURRENT]:
             raise ValueError("type of ramp must be either POWER or CURRENT")
             
-        return self.set_byte(self.BYTE_CHANNEL_LONG_RAMP, ramp_type)
-        
-class StoppableThread(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self._stop = False
-
-    def run(self):
-        while not self._stop:
-            self.do_execute()
-
-    def stop(self):
-        self._stop = True
-
-    def do_execute():
-	    pass
+        return self.sputter.set_byte(self.BYTE_CHANNEL_LONG_RAMP, ramp_type)
 
 class SputterThread(StoppableThread):
 
     def set_driver(self, driver):
-	    self.driver = driver
+        self.driver = driver
 
     def do_execute(self):
-	    self.driver.sputter_with_set_values()
-	    time.sleep(1)		
+        self.driver.sputter_with_set_values()
+        time.sleep(1)

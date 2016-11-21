@@ -24,7 +24,19 @@ from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
 
 class ADLController(object):
-        
+
+    DOC = """
+        ADLController - Controls the ADL Sputter power supply
+
+        Usage:
+            get_sputter(): Returns the ADLDriver
+            sputter(value, mode): Sputters with mode and value, i.e. mode=ADLSputterDriver.MODE_POWER, value=50 [Watt]
+            sputter_power(power [W]): Sputters in power mode with power in Watt
+            sputter_voltage(voltage [V]): Sputters in voltage mode with voltage
+            turn_off(): Turns off sputtering immediately
+
+    """
+
     def __init__(self, sputter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_adl_sputter_logger()
@@ -39,7 +51,7 @@ class ADLController(object):
             
         self.thread = None
         self.current_mode = None
-        self.semaphore = Semaphore(1)
+        print(self.DOC)
             
     def get_sputter(self):
         return self.sputter

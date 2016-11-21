@@ -19,6 +19,19 @@ from devcontroller.misc.error import ExecutionError
 from vat_590.factory import VAT590Factory
 
 class VATController(object):
+
+    DOC = """
+        VATController - Controller for the VAT valve
+
+        Usage:
+            open(): Immediately opens the valve
+            close(): Immediately closes the valve
+            hold(): Holds the current open-status of the valve
+            get_pressure() [mbar]: Returns the current pressure of the valve in mbar.
+            set_pressure(pressure [mbar]): Sets the pressure for the valve in mbar.
+
+    """
+
     def __init__(self, valve=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_vat_valve_logger()
@@ -34,6 +47,8 @@ class VATController(object):
         self._pressure_range = 0
         self._sensor_offset = 0
         self.initialize()
+
+        print(self.DOC)
 
     def get_valve(self):
         return self.valve

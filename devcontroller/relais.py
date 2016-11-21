@@ -21,7 +21,20 @@ class RelaisController(object):
     SCROLL_PORT = RelaisDriver.RELAIS_K1
     LAMP_PORT   = RelaisDriver.RELAIS_K3
     BYPASS_PORT = RelaisDriver.RELAIS_K4
-    
+
+    DOC = """
+        RelaisController - Controls the Conrad 197720 Relais.
+
+        Usage:
+            scroll_on(), scroll_off(): Turns the scroll pump on/off
+            lamp_on(), lamp_off()    : Turns the lamp on/off
+            bypass_on(), bypass_off(): Opens/Closes the bypass
+            off()                    : Turns all off (scroll, lamp, bypass)
+            is_scroll_on(), ....     : Returns True if the scroll(...) is On.
+            get_relais               : Returns the RelaisDriver
+
+    """
+
     def __init__(self, relais=None):
         if relais is None:
             self.factory = RelaisFactory()
@@ -30,6 +43,8 @@ class RelaisController(object):
             self.relais = relais
             
         self.relais.setup()
+
+        print(self.DOC)
     
     def scroll_on(self):
         self.relais.set_single(self.SCROLL_PORT)

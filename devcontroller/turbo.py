@@ -22,7 +22,20 @@ from devcontroller.relais import RelaisController
 
 
 class TurboController(object):
-        
+
+    DOC = """
+        TurboController - Controlls the turbo pump
+
+        WARNING: For safety, use TurboSafeController instead. This class checks the pressures!
+
+        Usage:
+            get_pump(): Returns the TurboDriver
+            start(): Turns the pump on
+            stop(): Turns the pump off
+            get_rotation_speed(): Returns the rotation speed in rpm.
+
+    """
+
     def __init__(self, pump=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_turbo_logger()
@@ -33,7 +46,9 @@ class TurboController(object):
             factory = STPPumpFactory()
             self.pump  = factory.create_pump()
         else:
-            self.pump = pump  
+            self.pump = pump
+
+        print(self.DOC)
             
     def get_pump(self):
         return self.pump
@@ -79,10 +94,10 @@ class TurboController(object):
         self.pump.set_options(opts)
 
 # TODO: set gauge and relais if given None.
-class SafeController(TurboController):
+class TurboSafeController(TurboController):
 
     def __init__(self, pump=None, gauge=None, relais=None, logger=None):
-        super(SafeController, self).__init__(pump, logger)
+        super(TurboSafeController, self).__init__(pump, logger)
         
         if gauge is not None:
             self.set_gauge(gauge)
@@ -155,8 +170,9 @@ class SafeController(TurboController):
                 self.logger.error("Will not start the pump, if the scroll pump is not running")
                 return False
         
-        self.unforce()        
-        return super(SafeController, self).start()
+        self.unforce()
+
+        return super(TurboSafeController, self).start()
         
     def force(self):
         self.force = True
