@@ -16,7 +16,7 @@
 
 import time
 
-from trinamic_pd110.factory import ShutterFactory
+from trinamic_pd110.factory import TrinamicPD110Factory
 from devcontroller.misc.logger import LoggerFactory
 
 class ADLController(object):
@@ -27,7 +27,7 @@ class ADLController(object):
         self.logger = logger
 
         if shutter is None:
-            factory = ShutterFactory()
+            factory = TrinamicPD110Factory()
             self.shutter = factory.create_shutter()
         else:
             self.shutter = shutter
