@@ -13,13 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 
 from trinamic_pd110.factory import TrinamicPD110Factory
 from devcontroller.misc.logger import LoggerFactory
 
 class ShutterController(object):
+
+    DOC = """
+        ShutterController - Controls the Trinamic PD 110 Shutter.
+
+        Usage:
+            sputter(time [s]): opens the shutter, waits time, closes shutter
+            automatic_sputter(time [s]): same as sputter(time), except no user input required.
+            get_shutter(): returns the TrinamicPD110Driver (for configuration purposes)
+            get_logger(): returns the logger for this controller
+    """
+
     def __init__(self, shutter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_shutter_logger()
@@ -31,6 +41,8 @@ class ShutterController(object):
             self.shutter = factory.create_shutter()
         else:
             self.shutter = shutter
+
+        print(self.DOC)
 
     def get_shutter(self):
         return self.shutter
