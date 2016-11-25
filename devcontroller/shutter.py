@@ -54,16 +54,16 @@ class ShutterController(object):
         try:
             self.shutter.move(180)
         except Exception as e:
-            self.logger.error("Received exception while opening shutter: %s", e)
-            print("Exception...")
+            self.logger.exception("Received exception while opening")
+            print("Error on execution")
 
         time.sleep(sputter_time)
 
         try:
             self.shutter.move(180)
         except:
-            self.logger.error("Received exception while closing shutter: %s", e)
-            print("Exception....")
+            self.logger.exception("Received exception while closing")
+            print("Error on execution")
 
         self.logger.info("Sputtered for %s seconds.", str(sputter_time))
 

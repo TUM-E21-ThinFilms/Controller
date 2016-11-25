@@ -29,6 +29,7 @@ class VATController(object):
             hold(): Holds the current open-status of the valve
             get_pressure() [mbar]: Returns the current pressure of the valve in mbar.
             set_pressure(pressure [mbar]): Sets the pressure for the valve in mbar.
+            get_valve(): Returns the valve driver
 
     """
 
@@ -99,14 +100,16 @@ class VATController(object):
             self._pressure_range = int(self.valve.get_pressure_range())
             self._sensor_offset  = int(self.valve.get_sensor_offset())
         except Exception as e:
-            self.logger.error("Exception while initializng VAT Controller: %e", str(e))
+            self.logger.exception("Could not initialize VAT Controller")
             raise ExecutionError("Could not initialize VAT. See log files")
 
     def open(self):
+        self.logger.info('Opening valve...')
         self.valve.clear()
         self.valve.open()
 
     def close(self):
+        self.logger.info('Closing valve...')
         self.valve.clear()
         self.valve.close()
 

@@ -16,6 +16,7 @@
 from stp_ix455.factory import STPPumpFactory
 from stp_ix455.messages.SetOptionFunc import SetOptionFuncMessage
 from tpg26x.driver import PfeifferTPG26xDriver
+from tpg26x.factory import PfeifferTPG26xFactory
 
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.relais import RelaisController
@@ -26,7 +27,7 @@ class TurboController(object):
     DOC = """
         TurboController - Controlls the turbo pump
 
-        WARNING: For safety, use TurboSafeController instead. This class checks the pressures!
+        WARNING: For safety, use TurboSafeController instead, which checks the pressure.
 
         Usage:
             get_pump(): Returns the TurboDriver
@@ -63,7 +64,7 @@ class TurboController(object):
             self._to_remote_operation()
             self.pump.start()
         except Exception as e:
-            self.logger.error("Error while starting pump: %s", e)
+            self.logger.exception("Error while starting pump")
             return False
         finally:
             self._to_local_operation()
@@ -73,7 +74,7 @@ class TurboController(object):
             self._to_remote_operation()
             self.pump.stop()
         except Exception as e:
-            self.logger.error("Error while stopping pump: %s", e)
+            self.logger.exception("Error while stopping pump")
             return False
         finally:
             self._to_local_operation()
@@ -82,30 +83,46 @@ class TurboController(object):
         return self.pump.get_rotation().get_rotation_speed()
         
     def _to_remote_operation(self):
-        self.logger.debug("Switching pump to remote operation mode...")
+        self.logger.debug("Switching pump to remote operation mode")
         opts = self.pump.prepare_options()
         opts.set_remote_operation_mode(SetOptionFuncMessage.REMOTE_OPERATION_MODE_X3)
         self.pump.set_options(opts)
         
     def _to_local_operation(self):
-        self.logger.debug("Switching pump to local operation mode...")
+        self.logger.debug("Switching pump to local operation mode")
         opts = self.pump.prepare_options()
         opts.set_remote_operation_mode(SetOptionFuncMessage.REMOTE_OPERATION_MODE_POWER_SUPPLY)
         self.pump.set_options(opts)
 
-# TODO: set gauge and relais if given None.
 class TurboSafeController(TurboController):
+
+    DOC = """
+        TurboSafeController - Controlls the turbo pump in a safe manner
+
+        Usage:
+            set_gauge(gauge [PfeifferTPG26xDriver]): Sets the gauge. (Can be accessed via get_gauge())
+            set_relais(relais [RelaisController]): Sets the relais. (Can be accessed via get_relais())
+            start(): Turns the pump on - ONLY if the pressure is okay, and the scroll pump is on (via relais)
+            stop(): Turns the pump off
+            get_rotation_speed(): Returns the rotation speed in rpm.
+    """
 
     def __init__(self, pump=None, gauge=None, relais=None, logger=None):
         super(TurboSafeController, self).__init__(pump, logger)
         
         if gauge is not None:
             self.set_gauge(gauge)
+        else:
+            self.set_gauge(PfeifferTPG26xFactory().create_gauge())
             
         if relais is not None:
             self.set_relais(relais)
+        else:
+            self.set_relais(RelaisController())
             
         self.force = False
+
+        print(self.DOC)
     
     def set_gauge(self, gauge):
         if not isinstance(gauge, PfeifferTPG26xDriver):
@@ -127,7 +144,7 @@ class TurboSafeController(TurboController):
     
     def check_pressure(self):
         if self.gauge is None:
-            self.logger.error("No gauge controller set. Cannot check whether pressure is low enough...")
+            self.logger.error("No gauge controller set. Cannot check whether pressure is low enough.")
             return False
         
         try:
@@ -138,7 +155,7 @@ class TurboSafeController(TurboController):
                 return False
             
         except Exception as e:
-            self.logger.error("Could not read pressure: %s", e)
+            self.logger.exception("Could not read pressure")
             return False
         
         return True
@@ -155,7 +172,7 @@ class TurboSafeController(TurboController):
                 self.logger.error("Scroll pump is not turned on. Then Turbo cannot be turned on")
                 return False
         except Exception as e:
-            self.logger.error("Could not read scroll status: %s", e)
+            self.logger.exception("Could not read scroll status")
             return False
             
         return True
@@ -173,10 +190,9 @@ class TurboSafeController(TurboController):
         self.unforce()
 
         return super(TurboSafeController, self).start()
-        
+
     def force(self):
         self.force = True
     
     def unforce(self):
         self.force = False
-    
