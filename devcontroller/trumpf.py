@@ -47,8 +47,8 @@ class TruPlasmaDC3000Controller(object):
 
         Usage:
             prepare_sputter(voltage [V], current [mA], power [W], bits = None): sets values for sputtering
-            turn_on: sputters with previously set values
-            turn_off: turns sputtering off
+            turn_on(): sputters with previously set values
+            turn_off(): turns sputtering off
 
     """
 
@@ -91,7 +91,7 @@ class TruPlasmaDC3000Controller(object):
         try:
             return self.sputter.normal_run(voltage, current, power, bits)
         except Exception as e:
-            self.logger.error("Could not sputter: %s", e)
+            self.logger.exception("Could not sputter")
             raise e
         
     def prepare_sputter(self, voltage, current, power, bits=None):
@@ -123,7 +123,7 @@ class TruPlasmaDC3000Controller(object):
             self.local_control()
             return True
         except Exception as e:
-            self.logger.error("Probably could not turn off sputter: %s", e)
+            self.logger.exception("Probably could not turn off sputter")
             return False
         
     def get_voltage_on_threshold(self):

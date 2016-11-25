@@ -37,7 +37,7 @@ class LoggerFactory(object):
         logger.addHandler(fh)
         return logger
     
-    def get_trumpf_putter_logger(self):
+    def get_trumpf_sputter_logger(self):
         logger = logging.getLogger('Controller: Trumpf Sputter')
         logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
