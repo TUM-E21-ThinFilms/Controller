@@ -99,7 +99,8 @@ class VATController(object):
             self._pressure_range = int(self.valve.get_pressure_range())
             self._sensor_offset  = int(self.valve.get_sensor_offset())
         except Exception as e:
-            self.logger.error("Exception while initializng VAT Controller: %e", str(e))
+#            self.logger.error("Exception while initializng VAT Controller: %e", str(e))
+	    print(e)
             raise ExecutionError("Could not initialize VAT. See log files")
 
     def open(self):

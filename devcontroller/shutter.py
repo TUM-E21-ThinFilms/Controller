@@ -58,7 +58,7 @@ class ShutterController(object):
         return self.logger
 
     def move(self, degree=180):
-        self.shutter.move(180)
+        self.shutter.move(degree)
 
     def automatic_sputter(self, sputter_time):
         try:
