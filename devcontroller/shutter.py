@@ -26,6 +26,7 @@ class ShutterController(object):
         Usage:
             sputter(time [s]): opens the shutter, waits time, closes shutter
             automatic_sputter(time [s]): same as sputter(time), except no user input required.
+	    move(deg=180 [degree]): moves the shutter with deg degree
             get_shutter(): returns the TrinamicPD110Driver (for configuration purposes)
             get_logger(): returns the logger for this controller
     """
@@ -41,14 +42,23 @@ class ShutterController(object):
             self.shutter = factory.create_shutter()
         else:
             self.shutter = shutter
+	
+        self.initialize()
 
         print(self.DOC)
+
+    def initialize(self):
+        self.shutter.acceleration=400
+        self.shutter.speed_max=300
 
     def get_shutter(self):
         return self.shutter
 
     def get_logger(self):
         return self.logger
+
+    def move(self, degree=180):
+        self.shutter.move(180)
 
     def automatic_sputter(self, sputter_time):
         try:
