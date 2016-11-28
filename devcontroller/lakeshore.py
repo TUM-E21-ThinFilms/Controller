@@ -30,7 +30,7 @@ class LakeshoreController(object):
     """
 
     def __init__(self, lakeshore=None):
-        if relais is None:
+        if lakeshore is None:
             self.factory = LakeShore336Factory()
             self.lakeshore = self.factory.create_lakeshore()
         else:
