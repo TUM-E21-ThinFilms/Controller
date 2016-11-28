@@ -23,9 +23,9 @@ class LakeshoreController(object):
         LakeshoreController - Controlls the Lakeshore 336
 
         Usage:
-            heat(degree [K], input=3 [0-4] (3 ^= Channel C), intensity=LakeShore336Driver.HEATER_RANGE_HIGH): turns on the heater.
-            timer(time [minutes > 0], input=3 [0-4]): Turns the heater off after $time minutes on input.
-            turn_off(input [0-4]): Turns the heater off on input.
+            heat(temperatue [K], input=1 [1-4], intensity=LakeShore336Driver.HEATER_RANGE_HIGH): turns on the heater.
+            timer(time [minutes > 0], input=1 [1-4]): Turns the heater off after $time minutes on input.
+            turn_off(input [1-4]): Turns the heater off on input.
 
     """
 
@@ -40,11 +40,11 @@ class LakeshoreController(object):
 
         print(self.DOC)
 
-    def heat(self, heat, input=3, intensity=LakeShore336Driver.HEATER_RANGE_HIGH):
-        self.lakeshore.set_control_setpoint(heat, input)
+    def heat(self, heat, input=1, intensity=LakeShore336Driver.HEATER_RANGE_HIGH):
+        self.lakeshore.set_control_setpoint(input, heat)
         self.lakeshore.set_heater_range(input, intensity)
 
-    def timer(self, sleep_in_minutes, input=3):
+    def timer(self, sleep_in_minutes, input=1):
         if not isinstance(sleep_in_minutes, (int, long)) or sleep_in_minutes <= 0:
             raise ValueError("A positive integer as `sleep_in_minutes` has to be given")
 
