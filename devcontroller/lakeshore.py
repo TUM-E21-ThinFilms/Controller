@@ -26,7 +26,6 @@ class LakeshoreController(object):
             heat(temperatue [K], input=1 [1-4], intensity=LakeShore336Driver.HEATER_RANGE_HIGH): turns on the heater.
             timer(time [minutes > 0], input=1 [1-4]): Turns the heater off after $time minutes on input.
             turn_off(input [1-4]): Turns the heater off on input.
-
     """
 
     def __init__(self, lakeshore=None):
