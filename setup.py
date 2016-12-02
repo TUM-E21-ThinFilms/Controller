@@ -17,7 +17,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590', 'vat_641', 'trinamic_pd110', 'lakeshore336', 'pfg_600']
+requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590', 'vat_641', 'trinamic_pd110', 'lakeshore336', 'pfg_600', 'julabo_fl']
 
 desc = ('Controller')
 
