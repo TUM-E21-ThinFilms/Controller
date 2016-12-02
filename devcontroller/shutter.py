@@ -65,7 +65,7 @@ class ShutterController(object):
         print("waiting %s seconds:" % time)
         while time:
             mins, secs = divmod(time, 60)
-            timeformat = '{:02d}:{02d}'.format(mins, secs)
+            timeformat = '{:02d}:{:02d}'.format(mins, secs)
             sys.stdout.write('\rremaining ' + timeformat)
             sys.stdout.flush()
             time.sleep(1)
