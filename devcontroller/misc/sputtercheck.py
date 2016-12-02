@@ -29,9 +29,8 @@ class SputterChecker(object):
         if self.checked == True:
             return
 
-        x = raw_input("Is the shutter closed and the julabo running? (yes/no) : ")
+        x = raw_input("Is the shutter closed and the flowmeter at maximum? (yes/no) : ")
         if (x != "yes" and x != "y"):
-            self.logger.warning("Aborted sputtering due to a open shutter or julabo not running.")
             print('Command aborted!')
             raise ExecutionError("Command aborted by user input")
 
