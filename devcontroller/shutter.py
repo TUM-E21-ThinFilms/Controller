@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import sys
 
 from trinamic_pd110.factory import TrinamicPD110Factory
 from devcontroller.misc.logger import LoggerFactory
@@ -60,6 +61,17 @@ class ShutterController(object):
     def move(self, degree=180):
         self.shutter.move(degree)
 
+    def countdown(self, time):
+        print("waiting %s seconds:" % time)
+        while time:
+            mins, secs = divmod(time, 60)
+            timeformat = '{:02d}:{02d}'.format(mins, secs)
+            sys.stdout.write('\rremaining ' + timeformat)
+            sys.stdout.flush()
+            time.sleep(1)
+            time -= 1
+        print("\rdone.")
+
     def timer(self, sputter_time):
         try:
             self.shutter.move(180)
@@ -67,7 +79,7 @@ class ShutterController(object):
             self.logger.exception("Received exception while opening")
             raise ExecutionError("Could not open shutter")
 
-        time.sleep(sputter_time)
+        self.countdown(sputter_time)
 
         try:
             self.shutter.move(180)
