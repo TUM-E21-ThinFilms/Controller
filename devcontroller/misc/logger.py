@@ -46,6 +46,16 @@ class LoggerFactory(object):
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         return logger
+
+    def get_trumpf_rf_sputter_logger(self):
+        logger = logging.getLogger('Controller: Trumpf RF Sputter')
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh = logging.FileHandler('controller.log')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger
     
     def get_vat_valve_logger(self):
         logger = logging.getLogger('Controller: VAT Valve')
