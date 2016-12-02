@@ -34,15 +34,19 @@ class ADLController(object):
             sputter_power(power [W]): Sputters in power mode with power in Watt
             sputter_voltage(voltage [V]): Sputters in voltage mode with voltage
             turn_off(): Turns off sputtering immediately
-
     """
 
-    def __init__(self, sputter=None, logger=None):
+    def __init__(self, sputter=None, logger=None, checker=None):
         if logger is None:
             logger = LoggerFactory().get_adl_sputter_logger()
         
         self.logger = logger
-        
+
+        if checker is None:
+            self.checker = SputterChecker()
+        else:
+            self.checker = checker
+
         if sputter is None:
             factory = ADLSputterFactory()
             self.sputter  = factory.create_sputter()
@@ -67,14 +71,15 @@ class ADLController(object):
         self.current_mode = new_mode
 
     def sputter(self, value, mode=ADLSputterDriver.MODE_POWER):
+        self.checker.check()
         self.__check_mode(mode)
         self.sputter.clear()
         self.sputter.set_mode(mode, value)
         self.turn_on()
 
     def sputter_power(self, power):
+        self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_POWER)
-
         power = self.sputter.convert_into_power(power)
         self.sputter.clear()
         self.sputter.set_mode_p(power)
@@ -83,8 +88,8 @@ class ADLController(object):
         self.turn_on()
 
     def sputter_voltage(self, voltage):
+        self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_VOLTAGE)
-
         voltage = self.sputter.convert_into_voltage(voltage)
         self.sputter.clear()
         self.sputter.set_mode_u(voltage)
@@ -93,6 +98,7 @@ class ADLController(object):
         self.turn_on()
         
     def turn_on(self):
+        self.checker.check()
         if self.thread is None or not self.thread.is_running():
             self.thread = TurnOnThread()
             self.thread.daemon = True

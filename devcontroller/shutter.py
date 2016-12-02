@@ -17,6 +17,7 @@ import time
 
 from trinamic_pd110.factory import TrinamicPD110Factory
 from devcontroller.misc.logger import LoggerFactory
+from devcontroller.misc.error import ExecutionError
 
 class ShutterController(object):
 
@@ -24,9 +25,8 @@ class ShutterController(object):
         ShutterController - Controls the Trinamic PD 110 Shutter.
 
         Usage:
-            sputter(time [s]): opens the shutter, waits time, closes shutter
-            automatic_sputter(time [s]): same as sputter(time), except no user input required.
-	    move(deg=180 [degree]): moves the shutter with deg degree
+            timer(time [s]): opens the shutter, waits time, closes shutter
+	        move(deg=180 [degree]): moves the shutter with deg degree
             get_shutter(): returns the TrinamicPD110Driver (for configuration purposes)
             get_logger(): returns the logger for this controller
     """
@@ -60,12 +60,12 @@ class ShutterController(object):
     def move(self, degree=180):
         self.shutter.move(degree)
 
-    def automatic_sputter(self, sputter_time):
+    def timer(self, sputter_time):
         try:
             self.shutter.move(180)
         except Exception as e:
             self.logger.exception("Received exception while opening")
-            print("Error on execution")
+            raise ExecutionError("Could not open shutter")
 
         time.sleep(sputter_time)
 
@@ -73,15 +73,8 @@ class ShutterController(object):
             self.shutter.move(180)
         except:
             self.logger.exception("Received exception while closing")
-            print("Error on execution")
+            raise ExecutionError("Could not close shutter")
 
         self.logger.info("Sputtered for %s seconds.", str(sputter_time))
 
-    def sputter(self, sputter_time):
-        x = raw_input("Is the shutter closed? (yes/no) : ")
-        if x != "yes":
-            self.logger.warning("Aborted sputtering due to a open shutter.")
-            print('Shutter: Command aborted!')
-            return
 
-        self.automatic_sputter(sputter_time)

@@ -49,14 +49,19 @@ class TruPlasmaDC3000Controller(object):
             prepare_sputter(voltage [V], current [mA], power [W], bits = None): sets values for sputtering
             turn_on(): sputters with previously set values
             turn_off(): turns sputtering off
-
     """
 
-    def __init__(self, sputter=None, logger=None):
+    def __init__(self, sputter=None, logger=None, checker=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_sputter_logger()
         
         self.logger = logger
+
+        if checker is None:
+            checker = SputterChecker()
+
+        self.checker = checker
+
         
         if sputter is None:
             factory = TruPlasmaDC3000Factory()
@@ -102,7 +107,9 @@ class TruPlasmaDC3000Controller(object):
         self.set = True
         
     def turn_on(self):
-        
+
+        self.checker.check()
+
         if self.set is False:
             raise RuntimeError("No sputter values set. Set them before turning sputter on!")
         

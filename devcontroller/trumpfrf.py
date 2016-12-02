@@ -26,14 +26,24 @@ class TrumpfPFG600Controller(object):
         TrumpfPFG600Controller - Controller for the Trumpf RF PFG 600 Series
 
         Usage:
+            turn_on(): Turns the sputtering process on
+            turn_off(): Turns the sputtering process off
+            sputter_power(power [W], voltage_limit [V]): Sets the power mode
+            sputter_voltage(voltage [V], power_limit [W]): Sets the volage mode
+            reset(): resets the sputter
 
     """
 
-    def __init__(self, sputter=None, logger=None):
+    def __init__(self, sputter=None, logger=None, checker=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_rf_sputter_logger()
 
         self.logger = logger
+
+        if checker is None:
+            checker = SputterChecker()
+
+        self.checker = checker
 
         if sputter is None:
             factory = PFG600Factory()
@@ -59,6 +69,8 @@ class TrumpfPFG600Controller(object):
             raise ExecutionError('Error while turning sputter off')
 
     def turn_on(self):
+        self.checker.check()
+
         try:
             self.sputter.set_operating_status(PFG600Driver.ON)
         except BaseException:
