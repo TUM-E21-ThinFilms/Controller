@@ -61,15 +61,15 @@ class ShutterController(object):
     def move(self, degree=180):
         self.shutter.move(degree)
 
-    def countdown(self, time):
-        print("waiting %s seconds:" % time)
-        while time:
-            mins, secs = divmod(time, 60)
+    def countdown(self, t):
+        print("waiting %s seconds:" % t)
+        while t:
+            mins, secs = divmod(t, 60)
             timeformat = '{:02d}:{:02d}'.format(mins, secs)
             sys.stdout.write('\rremaining ' + timeformat)
             sys.stdout.flush()
             time.sleep(1)
-            time -= 1
+            t -= 1
         print("\rdone.")
 
     def timer(self, sputter_time):
