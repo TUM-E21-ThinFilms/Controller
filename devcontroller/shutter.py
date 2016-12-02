@@ -70,7 +70,7 @@ class ShutterController(object):
             sys.stdout.flush()
             time.sleep(1)
             t -= 1
-        print("\rdone.")
+        print("\rdone.                  ")
 
     def timer(self, sputter_time):
         try:
