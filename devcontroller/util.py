@@ -13,29 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from error import ExecutionError
+import threading
 
-class SputterChecker(object):
-    def __init__(self, julabo=None):
-        if julabo is None:
-            # TODO
-            self.julabo = None
-        else:
-            self.julabo = julabo
+class StoppableThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self._stop = False
 
-        self.checked = False
+    def run(self):
+        while not self._stop:
+            self.do_execute()
 
-    def check(self):
-        if self.checked == True:
-            return
+    def is_running(self):
+        return not self._stop
 
-        x = raw_input("Is the shutter closed and the flowmeter at maximum? (yes/no) : ")
-        if (x != "yes" and x != "y"):
-            print('Command aborted!')
-            raise ExecutionError("Command aborted by user input")
+    def stop(self):
+        self._stop = True
 
-        self.checked = True
-
-class DisabledSputterChecker(SputterChecker):
-    def check(self):
+    def do_execute(self):
         pass
