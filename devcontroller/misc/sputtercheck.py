@@ -26,7 +26,7 @@ class SputterChecker(object):
         self.checked = False
 
     def check(self):
-        if checked == True:
+        if self.checked == True:
             return
 
         x = raw_input("Is the shutter closed and the julabo running? (yes/no) : ")
