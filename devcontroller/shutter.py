@@ -27,7 +27,7 @@ class ShutterController(object):
 
         Usage:
             timer(time [s]): opens the shutter, waits time, closes shutter
-	        move(deg=180 [degree]): moves the shutter with deg degree
+            move(deg=180 [degree]): moves the shutter with deg degree
             get_shutter(): returns the TrinamicPD110Driver (for configuration purposes)
             get_logger(): returns the logger for this controller
     """
