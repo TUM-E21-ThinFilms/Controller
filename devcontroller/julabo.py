@@ -25,9 +25,9 @@ class JulaboController(object):
             turn_off(): Turns the cooler off
             get_on(): Returns True if the cooler is on
             set_temperature(tmp [C]): sets the desired cooling temperature
-            get_target_temperature(): returns the temperature set by set_temperature
             get_temperature(): gets the actual temperature
             get_version(): returns the version of the cooler
+            get_driver(): returns the julabo driver
     """
 
     def __init__(self, julabo=None):
@@ -40,6 +40,9 @@ class JulaboController(object):
         self.julabo.clear()
 
         print(self.DOC)
+
+    def get_driver(self):
+        return self.julabo
 
     def turn_on(self):
         self.julabo.turn_on()
