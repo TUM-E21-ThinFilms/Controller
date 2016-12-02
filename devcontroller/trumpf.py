@@ -18,7 +18,7 @@ import time
 from truplasmadc_3000.factory import TruPlasmaDC3000Factory
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
-
+from devcontroller.misc.sputtercheck import SputterChecker
 
 class TruPlasmaDC3000Controller(object):
         

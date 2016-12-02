@@ -19,6 +19,7 @@ from pfg_600.factory import PFG600Factory
 from pfg_600.driver import PFG600Driver
 from devcontroller.misc.error import ExecutionError
 from devcontroller.misc.logger import LoggerFactory
+from devcontroller.misc.sputtercheck import SputterChecker
 
 class TrumpfPFG600Controller(object):
 
