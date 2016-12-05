@@ -55,5 +55,5 @@ class CountdownThread(StoppableThread):
             sys.stdout.flush()
             time.sleep(1)
             self.t -= 1
-        print("\rdone.                  ")
+        print("\rdone.                  \n")
         self.stop()

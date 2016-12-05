@@ -30,7 +30,7 @@ class CompressorController(object):
     def __init__(self, compressor=None):
         if compressor is None:
             self.factory = SumitomoF70HFactory()
-            self.julabo = self.factory.create()
+            self.compressor = self.factory.create()
         else:
             self.compressor = compressor
 

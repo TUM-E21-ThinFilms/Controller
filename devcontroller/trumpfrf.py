@@ -29,10 +29,10 @@ class TrumpfPFG600Controller(object):
         Usage:
             turn_on(): Turns the sputtering process on
             turn_off(): Turns the sputtering process off
-            sputter_power(power [W], voltage_limit [V]): Sets the power mode
-            sputter_voltage(voltage [V], power_limit [W]): Sets the volage mode
+            is_on(): Returns True, if the trumpf rf is sputtering
+            sputter_power(power [W], voltage_limit [V]): Sets the power mode - does not turn on sputtering!
+            sputter_voltage(voltage [V], power_limit [W]): Sets the volage mode - does not turn on sputtering!
             reset(): resets the sputter
-
     """
 
     def __init__(self, sputter=None, logger=None, checker=None):
