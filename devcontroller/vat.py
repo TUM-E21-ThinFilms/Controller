@@ -30,8 +30,8 @@ class VATController(object):
             hold(): Holds the current open-status of the valve
             get_pressure() [mbar]: Returns the current pressure of the valve in mbar.
             set_pressure(pressure [mbar]): Sets the pressure for the valve in mbar.
+            calibrate(): Calibrates the pressure with the Pfeiffer Gauge
             get_valve(): Returns the valve driver
-            set_pressure_alignment(pressure [mbar]): Sets the alignment of the pressure (i.e. adjust pressure output)
 
     """
 
@@ -82,7 +82,7 @@ class VATController(object):
         return 6.8 + 0.6 * log10(pressure)
 
     def pressure_to_voltage(self, pressure):
-	return self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
+        return self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
 
     def get_pressure(self):
         return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
@@ -128,5 +128,12 @@ class VATController(object):
         self.valve.hold()
 
     def calibrate(self):
+        config = self.valve.get_sensor_configuration()
+        config[1] = "1" # Enable zero - needed to set pressure alignment (otherwise not allowed)
+
+        self.valve.set_sensor_configuration(config)
         pfeiffer_gauge = PfeifferTPG26xFactory.create_gauge()
         self.set_pressure_alignment(pfeiffer_gauge.get_pressure_measurement()[1])
+
+        config[1] = "0" # Disable Zero
+        self.valve.set_sensor_configuration(config)
