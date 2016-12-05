@@ -51,7 +51,7 @@ class CompressorController(object):
         self.compressor.reset()
 
     def get_status(self):
-        return self.compressor.status()
+        return self.compressor.get_status()
 
     def get_driver(self):
         return self.compressor

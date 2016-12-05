@@ -80,6 +80,9 @@ class VATController(object):
         # p the given pressure in [mbar]
         return 6.8 + 0.6 * log10(pressure)
 
+    def pressure_to_voltage(self, pressure):
+	return self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
+
     def get_pressure(self):
         return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
 
@@ -104,7 +107,7 @@ class VATController(object):
         try:
             self.valve.clear()
             self._pressure_range = int(self.valve.get_pressure_range())
-            self._sensor_offset  = int(self.valve.get_sensor_offset())
+            self._sensor_offset  = int(self.valve.get_sensor_offset()/self._pressure_range/10.0)
         except Exception as e:
             self.logger.exception("Could not initialize VAT Controller")
             raise ExecutionError("Could not initialize VAT. See log files")
