@@ -13,7 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from math import ceil
+
 import threading
+import time
+import sys
 
 class StoppableThread(threading.Thread):
     def __init__(self):
@@ -32,3 +36,23 @@ class StoppableThread(threading.Thread):
 
     def do_execute(self):
         pass
+
+class CountdownThread(StoppableThread):
+
+    def __init__(self):
+        super(CountdownThread, self).__init__()
+        self.t = 0
+
+    def set_time(self, time):
+        self.t = time
+
+    def do_execute(self):
+        print("waiting %s seconds:" % self.t)
+        self.t = ceil(self.t)
+        while self.t:
+            mins, secs = divmod(self.t, 60)
+            sys.stdout.write('\rremaining ' + '{:02d}:{:02d}'.format(mins, secs))
+            sys.stdout.flush()
+            time.sleep(1)
+            self.t -= 1
+        print("\rdone.                  ")
