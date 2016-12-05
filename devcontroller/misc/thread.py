@@ -56,3 +56,4 @@ class CountdownThread(StoppableThread):
             time.sleep(1)
             self.t -= 1
         print("\rdone.                  ")
+        self.stop()
