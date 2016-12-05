@@ -17,6 +17,7 @@ from math import log10
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.error import ExecutionError
 from vat_590.factory import VAT590Factory
+from tpg26x.factory import PfeifferTPG26xFactory
 
 class VATController(object):
 
@@ -122,3 +123,7 @@ class VATController(object):
     def hold(self):
         self.valve.clear()
         self.valve.hold()
+
+    def calibrate(self):
+        pfeiffer_gauge = PfeifferTPG26xFactory.create_gauge()
+        self.set_pressure_alignment(pfeiffer_gauge.get_pressure_measurement()[1])
