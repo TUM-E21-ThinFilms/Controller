@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import time
 from math import log10
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.error import ExecutionError
@@ -100,9 +100,16 @@ class VATController(object):
         self.valve.set_pressure(int(voltage))
 
     def set_pressure_alignment(self, pressure):
+
         self.valve.clear()
+
+        config = self.valve.get_sensor_configuration()
+        config[1] = "1" # Enable zero - needed to set pressure alignment (otherwise not allowed)
+        self.valve.set_sensor_configuration(config)
+
         voltage = self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
         self.valve.set_pressure_alignment(int(voltage))
+	self.initialize()
 
     def initialize(self):
         try:
@@ -128,12 +135,8 @@ class VATController(object):
         self.valve.hold()
 
     def calibrate(self):
-        config = self.valve.get_sensor_configuration()
-        config[1] = "1" # Enable zero - needed to set pressure alignment (otherwise not allowed)
+        pfeiffer_gauge = PfeifferTPG26xFactory().create_gauge()
+	pressure = pfeiffer_gauge.get_pressure_measurement()[1]
+        print("Pfeiffer pressure: %s" % str(pressure))
+	self.set_pressure_alignment(pressure)
 
-        self.valve.set_sensor_configuration(config)
-        pfeiffer_gauge = PfeifferTPG26xFactory.create_gauge()
-        self.set_pressure_alignment(pfeiffer_gauge.get_pressure_measurement()[1])
-
-        config[1] = "0" # Disable Zero
-        self.valve.set_sensor_configuration(config)
