@@ -30,6 +30,7 @@ class VATController(object):
             get_pressure() [mbar]: Returns the current pressure of the valve in mbar.
             set_pressure(pressure [mbar]): Sets the pressure for the valve in mbar.
             get_valve(): Returns the valve driver
+            set_pressure_alignment(pressure [mbar]): Sets the alignment of the pressure (i.e. adjust pressure output)
 
     """
 
@@ -93,6 +94,11 @@ class VATController(object):
 
         voltage = self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset
         self.valve.set_pressure(int(voltage))
+
+    def set_pressure_alignment(self, pressure):
+        self.valve.clear()
+        voltage = self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
+        self.valve.set_pressure_alignment(int(voltage))
 
     def initialize(self):
         try:
