@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-
 from pfg_600.factory import PFG600Factory
 from pfg_600.driver import PFG600Driver
 from devcontroller.misc.error import ExecutionError

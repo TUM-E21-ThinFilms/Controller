@@ -21,7 +21,6 @@ from tpg26x.factory import PfeifferTPG26xFactory
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.relais import RelaisController
 
-
 class TurboController(object):
 
     DOC = """

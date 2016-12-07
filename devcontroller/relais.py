@@ -16,10 +16,11 @@
 from relais_197720.factory import RelaisFactory
 from relais_197720.driver import RelaisDriver
 
+
 class RelaisController(object):
-    
+
     SCROLL_PORT = RelaisDriver.RELAIS_K1
-    LAMP_PORT   = RelaisDriver.RELAIS_K3
+    LAMP_PORT = RelaisDriver.RELAIS_K3
     BYPASS_PORT = RelaisDriver.RELAIS_K4
 
     DOC = """
@@ -38,43 +39,43 @@ class RelaisController(object):
     def __init__(self, relais=None):
         if relais is None:
             self.factory = RelaisFactory()
-            self.relais  = self.factory.create_relais()  
+            self.relais = self.factory.create_relais()
         else:
             self.relais = relais
-            
+
         self.relais.setup()
 
         print(self.DOC)
-    
+
     def scroll_on(self):
         self.relais.set_single(self.SCROLL_PORT)
-        
+
     def scroll_off(self):
         self.relais.del_single(self.SCROLL_PORT)
-        
+
     def lamp_on(self):
         self.relais.set_single(self.LAMP_PORT)
-        
+
     def lamp_off(self):
         self.relais.del_single(self.LAMP_PORT)
-        
+
     def bypass_on(self):
         self.relais.set_single(self.BYPASS_PORT)
-        
+
     def bypass_off(self):
         self.relais.del_single(self.BYPASS_PORT)
-        
+
     def off(self):
         self.relais.set_port(0)
-        
+
     def is_scroll_on(self):
         return self.relais.get_port().get_port() & self.SCROLL_PORT > 0
-    
+
     def is_lamp_on(self):
         return self.relais.get_port().get_port() & self.LAMP_PORT > 0
-    
+
     def is_bypass_on(self):
         return self.relais.get_port().get_port() & self.BYPASS_PORT > 0
-        
+
     def get_relais(self):
         return self.relais

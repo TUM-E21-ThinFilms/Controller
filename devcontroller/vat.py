@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import time
+
 from math import log10
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.error import ExecutionError
@@ -109,7 +109,7 @@ class VATController(object):
 
         voltage = self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
         self.valve.set_pressure_alignment(int(voltage))
-	self.initialize()
+        self.initialize()
 
     def initialize(self):
         try:
@@ -136,7 +136,7 @@ class VATController(object):
 
     def calibrate(self):
         pfeiffer_gauge = PfeifferTPG26xFactory().create_gauge()
-	pressure = pfeiffer_gauge.get_pressure_measurement()[1]
+        pressure = pfeiffer_gauge.get_pressure_measurement()[1]
         print("Pfeiffer pressure: %s" % str(pressure))
-	self.set_pressure_alignment(pressure)
+        self.set_pressure_alignment(pressure)
 

@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 
 from adl_x547.driver import ADLSputterDriver
@@ -32,8 +31,8 @@ class ADLController(object):
         Usage:
             get_sputter(): Returns the ADLDriver
             sputter(value, mode): Sputters with mode and value, i.e. mode=ADLSputterDriver.MODE_POWER, value=50 [Watt]
-            sputter_power(power [W]): Sputters in power mode with power in Watt
-            sputter_voltage(voltage [V]): Sputters in voltage mode with voltage
+            sputter_power(power [W]): Sputters in power mode with power in Watt - immediately starts sputtering
+            sputter_voltage(voltage [V]): Sputters in voltage mode with voltage - immediately starts sputtering
             turn_off(): Turns off sputtering immediately
     """
 

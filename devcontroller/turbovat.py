@@ -13,9 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from math import log10
 from devcontroller.misc.logger import LoggerFactory
-from devcontroller.misc.error import ExecutionError
 from vat_641.factory import VAT641Factory
 
 class TurboVATController(object):
