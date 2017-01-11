@@ -18,6 +18,7 @@ from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.error import ExecutionError
 from vat_590.factory import VAT590Factory
 from tpg26x.factory import PfeifferTPG26xFactory
+from e21_util.error import ErrorResponse
 
 class VATController(object):
 
@@ -32,7 +33,6 @@ class VATController(object):
             set_pressure(pressure [mbar]): Sets the pressure for the valve in mbar.
             calibrate(): Calibrates the pressure with the Pfeiffer Gauge
             get_valve(): Returns the valve driver
-
     """
 
     def __init__(self, valve=None, logger=None):
@@ -49,6 +49,7 @@ class VATController(object):
 
         self._pressure_range = 0
         self._sensor_offset = 0
+        self._retry = True
         self.initialize()
 
         print(self.DOC)
@@ -116,6 +117,12 @@ class VATController(object):
             self.valve.clear()
             self._pressure_range = int(self.valve.get_pressure_range())
             self._sensor_offset  = int(self.valve.get_sensor_offset()/self._pressure_range/10.0)
+            self._retry = True
+        except ErrorResponse as e:
+            self.logger.exception("Error while initializing VAT Controller. Retry: "+str(self._retry))
+            self._retry = False
+            if self._retry:
+                self.initialize()
         except Exception as e:
             self.logger.exception("Could not initialize VAT Controller")
             raise ExecutionError("Could not initialize VAT. See log files")

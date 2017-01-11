@@ -67,7 +67,7 @@ class TurboVATController(object):
         self.valve.close()
         self._to_local()
 
-    def holde(self):
+    def hold(self):
         self._to_remote()
         self.valve.hold()
         self._to_local()
@@ -84,3 +84,6 @@ class TurboVATController(object):
         self._to_remote()
         self.valve.position(position)
         self._to_local()
+
+    def get_position(self):
+        return self.valve.get_valve_position()
