@@ -51,7 +51,7 @@ class JulaboController(object):
         self.julabo.turn_off()
 
     def get_on(self):
-        return self.julabo.get_on() == "1"
+        return self.julabo.get_on() == 1
 
     def set_temperature(self, temperature):
         self.julabo.set_setpoint(temperature)
