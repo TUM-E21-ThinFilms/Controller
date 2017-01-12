@@ -63,6 +63,7 @@ class TrumpfPFG600Controller(object):
 
         try:
             self.sputter.set_operating_status(PFG600Driver.OFF)
+            self.sputter_power(0, 0)
         except BaseException:
             self.logger.exception('Exception while turning sputter off')
             raise ExecutionError('Error while turning sputter off')
