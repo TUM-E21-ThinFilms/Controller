@@ -27,11 +27,14 @@ class HeaterController(object):
 
     def __init__(self, supply=None):
         if supply is None:
-            supply = PS9000Factory.create_powersupply()
+            supply = PS9000Factory().create_powersupply()
 
         self.supply = supply
 
         print(self.DOC)
+
+    def get_driver(self):
+        return self.supply
 
     def turn_on(self, current = 16):
         self.supply.set_voltage(12)
