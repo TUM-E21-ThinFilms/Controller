@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ps9000.factory import PS9000Factory
+import time
 
 class HeaterController(object):
 
@@ -38,6 +39,7 @@ class HeaterController(object):
 
     def turn_on(self, current = 16):
         self.supply.set_voltage(12)
+        time.sleep(0.5)
         self.supply.set_current(current)
         self.supply.set_output(True)
 
