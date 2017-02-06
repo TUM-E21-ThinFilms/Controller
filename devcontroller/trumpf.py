@@ -74,7 +74,7 @@ class TruPlasmaDC3000Controller(object):
         self.thread, self.set, self.last_sputter_response = None, False, None
         print(self.DOC)
 
-    def get_sputter(self):
+    def get_driver(self):
         return self.sputter
         
     def remote_control(self):

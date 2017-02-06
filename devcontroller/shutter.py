@@ -28,8 +28,7 @@ class ShutterController(object):
         Usage:
             timer(time [s]): opens the shutter, waits time, closes shutter
             move(deg=180 [degree]): moves the shutter with deg degree
-            get_shutter(): returns the TrinamicPD110Driver (for configuration purposes)
-            get_logger(): returns the logger for this controller
+
     """
 
     def __init__(self, shutter=None, logger=None):
@@ -52,7 +51,7 @@ class ShutterController(object):
         self.shutter.acceleration=400
         self.shutter.speed_max=300
 
-    def get_shutter(self):
+    def get_driver(self):
         return self.shutter
 
     def get_logger(self):

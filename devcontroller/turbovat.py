@@ -28,7 +28,6 @@ class TurboVATController(object):
             get_open(): Return the percentage of the valve position. 100^= open, 0^= close
             set_speed(speed [0-1000]): Sets the speed for opening and closing the valve
             set_position(pos [0-1000]): Sets the position: 1000 ^= open, 0^= close
-            get_valve(): Returns the valve driver
     """
 
     def __init__(self, valve=None, logger=None):
@@ -51,7 +50,7 @@ class TurboVATController(object):
     def _to_local(self):
         self.valve.switch_to_local_mode()
 
-    def get_valve(self):
+    def get_driver(self):
         return self.valve
 
     def get_logger(self):

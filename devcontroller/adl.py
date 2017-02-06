@@ -57,7 +57,7 @@ class ADLController(object):
         self.current_mode = None
         print(self.DOC)
             
-    def get_sputter(self):
+    def get_driver(self):
         return self.sputter
             
     def get_logger(self):
@@ -85,7 +85,7 @@ class ADLController(object):
         self.sputter.set_mode_p(power)
         #self.sputter.set_ramp(2000) # 2 seconds
         #self.sputter.activate_ramp()
-        self.turn_on()
+        #self.turn_on()
 
     def sputter_voltage(self, voltage):
         self.checker.check()
@@ -95,7 +95,7 @@ class ADLController(object):
         self.sputter.set_mode_u(voltage)
         #self.sputter.set_ramp(2000)
         #self.sputter.activate_ramp()
-        self.turn_on()
+        #self.turn_on()
         
     def turn_on(self):
         self.checker.check()

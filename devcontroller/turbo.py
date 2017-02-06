@@ -30,8 +30,8 @@ class TurboController(object):
 
         Usage:
             get_pump(): Returns the TurboDriver
-            start(): Turns the pump on
-            stop(): Turns the pump off
+            turn_on(): Turns the pump on
+            turn_off(): Turns the pump off
             get_rotation_speed(): Returns the rotation speed in rpm.
 
     """
@@ -50,13 +50,13 @@ class TurboController(object):
 
         print(self.DOC)
             
-    def get_pump(self):
+    def get_driver(self):
         return self.pump
             
     def get_logger(self):
         return self.logger
 
-    def start(self):        
+    def turn_on(self):
         # Always switch back to local operation mode (i.e. the power supply), in case of
         # an error, one can always shut down the pump via the pressing a button on the power supply...
         try:
@@ -68,7 +68,7 @@ class TurboController(object):
         finally:
             self._to_local_operation()
             
-    def stop(self):
+    def turn_off(self):
         try:
             self._to_remote_operation()
             self.pump.stop()

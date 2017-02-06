@@ -45,7 +45,7 @@ class CompressorController(object):
         self.compressor.turn_off()
 
     def get_all_temperatures(self):
-        return self.get_all_temperatures()
+        return self.compressor.get_all_temperatures()
 
     def reset(self):
         self.compressor.reset()

@@ -32,7 +32,6 @@ class RelaisController(object):
             bypass_on(), bypass_off(): Opens/Closes the bypass
             off()                    : Turns all off (scroll, lamp, bypass)
             is_scroll_on(), ....     : Returns True if the scroll(...) is On.
-            get_relais               : Returns the RelaisDriver
 
     """
 
@@ -77,5 +76,5 @@ class RelaisController(object):
     def is_bypass_on(self):
         return self.relais.get_port().get_port() & self.BYPASS_PORT > 0
 
-    def get_relais(self):
+    def get_driver(self):
         return self.relais

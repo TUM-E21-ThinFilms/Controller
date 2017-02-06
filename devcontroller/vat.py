@@ -32,7 +32,6 @@ class VATController(object):
             get_pressure() [mbar]: Returns the current pressure of the valve in mbar.
             set_pressure(pressure [mbar]): Sets the pressure for the valve in mbar.
             calibrate(): Calibrates the pressure with the Pfeiffer Gauge
-            get_valve(): Returns the valve driver
     """
 
     def __init__(self, valve=None, logger=None):
@@ -54,7 +53,7 @@ class VATController(object):
 
         print(self.DOC)
 
-    def get_valve(self):
+    def get_driver(self):
         return self.valve
 
     def get_logger(self):

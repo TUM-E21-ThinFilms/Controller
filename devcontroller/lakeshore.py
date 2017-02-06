@@ -7,7 +7,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERLTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -60,5 +60,5 @@ class LakeshoreController(object):
     def turn_off(self, input):
         self.lakeshore.set_heater_range(input, LakeShore336Driver.HEATER_RANGE_OFF)
 
-    def get_lakeshore(self):
+    def get_driver(self):
         return self.lakeshore
