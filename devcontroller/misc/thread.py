@@ -49,7 +49,7 @@ class CountdownThread(StoppableThread):
     def do_execute(self):
         print("waiting %s seconds:" % self.t)
         self.t = int(ceil(self.t))
-        while self.t:
+        while self.t and not self._stop:
             mins, secs = divmod(self.t, 60)
             sys.stdout.write('\rremaining ' + '{:02d}:{:02d}'.format(mins, secs))
             sys.stdout.flush()
