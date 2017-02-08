@@ -42,7 +42,9 @@ class ShutterController(object):
             self.shutter = factory.create_shutter()
         else:
             self.shutter = shutter
-	
+
+	    self.countdown_thread = None
+
         self.initialize()
 
         print(self.DOC)
@@ -65,18 +67,24 @@ class ShutterController(object):
         thread.set_time(t)
         thread.daemon = True
         thread.start()
+        self.countdown_thread = thread
 
     def timer(self, sputter_time):
-
-        self.countdown(sputter_time)
-
         try:
-            self.shutter.move(180)
-        except Exception as e:
-            self.logger.exception("Received exception while opening")
-            raise ExecutionError("Could not open shutter")
+            self.countdown(sputter_time)
 
-        time.sleep(sputter_time)
+            try:
+                self.shutter.move(180)
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                self.logger.exception("Received exception while opening")
+                raise ExecutionError("Could not open shutter")
+
+            time.sleep(sputter_time)
+        except KeyboardInterrupt:
+            if not self.countdown_thread is None:
+                self.countdown_thread.stop()
 
         try:
             self.shutter.move(180)
