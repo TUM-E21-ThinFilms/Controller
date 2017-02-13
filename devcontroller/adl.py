@@ -54,7 +54,7 @@ class ADLController(object):
             self.sputter = sputter
 
         self._retry = 2
-
+        self.initialize()
             
         self.thread = None
         self.current_mode = None
