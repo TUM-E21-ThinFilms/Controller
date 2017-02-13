@@ -52,7 +52,7 @@ class TrumpfPFG600Controller(object):
 
         print(self.DOC)
 
-    def get_sputter(self):
+    def get_driver(self):
         return self.sputter
 
     def turn_off(self):
