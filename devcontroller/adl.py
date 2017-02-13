@@ -105,7 +105,7 @@ class ADLController(object):
     def sputter_power(self, power):
         self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_POWER)
-        power = self.sputter.convert_into_power(power, self.coeff_power)
+        power = self.sputter.convert_into_power(power, coeff=self.coeff_power)
         self.sputter.clear()
         self.sputter.set_mode_p(power)
         #self.sputter.set_ramp(2000) # 2 seconds
@@ -115,7 +115,7 @@ class ADLController(object):
     def sputter_voltage(self, voltage):
         self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_VOLTAGE)
-        voltage = self.sputter.convert_into_voltage(voltage, self.coeff_volt)
+        voltage = self.sputter.convert_into_voltage(voltage, coeff=self.coeff_volt)
         self.sputter.clear()
         self.sputter.set_mode_u(voltage)
         #self.sputter.set_ramp(2000)
