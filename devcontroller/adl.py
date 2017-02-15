@@ -136,7 +136,7 @@ class ADLController(object):
         if not self.thread is None:
             self.thread.stop()
 
-        self.mode = None
+        self.current_mode = None
         self.sputter.turn_off()
 
 class TurnOnThread(StoppableThread):
