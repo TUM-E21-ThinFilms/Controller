@@ -121,7 +121,7 @@ class ADLController(object):
         #self.sputter.set_ramp(2000)
         #self.sputter.activate_ramp()
         #self.turn_on()
-        
+
     def turn_on(self):
         self.checker.check()
         if self.thread is None or not self.thread.is_running():
@@ -138,6 +138,15 @@ class ADLController(object):
 
         self.current_mode = None
         self.sputter.turn_off()
+
+    def on(self):
+        self.turn_on()
+
+    def off(self):
+        self.turn_off()
+
+    def power(self, sputter_power):
+        self.sputter_power(sputter_power)
 
 class TurnOnThread(StoppableThread):
 

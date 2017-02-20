@@ -60,5 +60,8 @@ class LakeshoreController(object):
     def turn_off(self, input):
         self.lakeshore.set_heater_range(input, LakeShore336Driver.HEATER_RANGE_OFF)
 
+    def off(self):
+        self.turn_off()
+
     def get_driver(self):
         return self.lakeshore

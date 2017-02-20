@@ -65,4 +65,8 @@ class JulaboController(object):
     def get_version(self):
         return self.julabo.get_version()
 
+    def on(self):
+        self.turn_on()
 
+    def off(self):
+        self.turn_off()

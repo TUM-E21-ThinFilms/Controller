@@ -53,3 +53,9 @@ class HeaterController(object):
         current = self.supply.measure_current()
 
         return (str(volt) + 'V', str(current) + 'A')
+
+    def on(self, current):
+        self.turn_on(current)
+
+    def off(self):
+        self.turn_off()

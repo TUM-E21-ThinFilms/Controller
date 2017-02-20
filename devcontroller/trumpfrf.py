@@ -33,6 +33,8 @@ class TrumpfPFG600Controller(object):
             reset(): resets the sputter
     """
 
+    DEFAULT_VOLTAGE_LIMIT = 1000
+
     def __init__(self, sputter=None, logger=None, checker=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_rf_sputter_logger()
@@ -84,7 +86,10 @@ class TrumpfPFG600Controller(object):
             self.logger.exception('Could not determine status of rf sputter')
             raise ExecutionError('Cannot determine status of rf sputter')
 
-    def sputter_power(self, power, voltage_limit):
+    def sputter_power(self, power, voltage_limit=None):
+        if voltage_limit is None:
+            voltage_limit = self.DEFAULT_VOLTAGE_LIMIT
+
         self.sputter.clear()
         self.sputter.set_target_power(power)
         self.sputter.set_target_voltage(voltage_limit)
@@ -99,3 +104,12 @@ class TrumpfPFG600Controller(object):
     def reset(self):
         self.sputter.clear()
         self.sputter.reset()
+
+    def on(self):
+        self.turn_on()
+
+    def off(self):
+        self.turn_off()
+
+    def power(self, sputter_power, voltage_limit=None):
+        self.sputter_power(sputter_power, voltage_limit)

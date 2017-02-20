@@ -56,4 +56,9 @@ class CompressorController(object):
     def get_driver(self):
         return self.compressor
 
+    def on(self):
+        self.turn_on()
+
+    def off(self):
+        self.turn_off()
 
