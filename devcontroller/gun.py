@@ -20,13 +20,13 @@ class GunController(object):
     DOC = """
         GunController - Controller for controller the gun position
 
-        get_position():          Returns the position of the gun (in steps)
-        set_position(position):  Sets the new position of the gun (in steps)
-        move_left/right(steps):  Moves the gun left/right (in steps)
-        get_gun():               Returns the current gun number which is above the target (1,2,3,4). If unknown, then 0
-        set_gun(gun_number):     Moves gun such that gun_number is above the target
-        calibrate(gun_number, tol=None, diff=None): Calibrates the controller. gun_number: current gun, tol: tolerance for
-                                                    accepting a gun (in steps), diff: difference between two guns (in steps)
+            get_position():          Returns the position of the gun (in steps)
+            set_position(position):  Sets the new position of the gun (in steps)
+            move_left/right(steps):  Moves the gun left/right (in steps)
+            get_gun():               Returns the current gun number which is above the target (1,2,3,4). If unknown, then 0
+            set_gun(gun_number):     Moves gun such that gun_number is above the target
+            calibrate(gun_number, tol=None, diff=None): Calibrates the controller. gun_number: current gun, tol: tolerance for
+                                                        accepting a gun (in steps), diff: difference between two guns (in steps)
 
     """
 
@@ -38,6 +38,9 @@ class GunController(object):
 
         print(self.DOC)
 
+    def update_config(self):
+        self._config = self._parser.get_config()
+
     def get_driver(self):
         return self._driver
 
@@ -48,7 +51,7 @@ class GunController(object):
         self._driver.position = position
 
     def move_left(self, steps):
-	pos = self.get_position()
+        pos = self.get_position()
         self.set_position(pos-abs(int(steps)))
 
     def move_right(self, steps):
