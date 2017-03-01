@@ -48,7 +48,8 @@ class GunController(object):
         self._driver.position = position
 
     def move_left(self, steps):
-        self._driver.move_rel(-abs(int(steps)))
+	pos = self.get_position()
+        self.set_position(pos-abs(int(steps)))
 
     def move_right(self, steps):
         self._driver.move_rel(abs(int(steps)))
