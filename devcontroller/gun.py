@@ -36,6 +36,8 @@ class GunController(object):
         self._config = self._parser.get_config()
         self.vend(6)
 
+        print(self.DOC)
+
     def get_driver(self):
         return self._driver
 
