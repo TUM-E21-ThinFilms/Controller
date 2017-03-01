@@ -34,6 +34,7 @@ class GunController(object):
         self._driver = gun_driver
         self._parser = GunConfigParser("/home/sputter/Python/lib/gun.config")
         self._config = self._parser.get_config()
+        self.vend(6)
 
     def get_driver(self):
         return self._driver
@@ -78,6 +79,22 @@ class GunController(object):
             return 4
         else:
             return 0
+
+    def stop(self):
+        self.clear()
+        self._driver.stop()
+
+    def clear(self):
+        self._driver.clear()
+
+    def vend(self, value):
+        self._driver.vend(value)
+
+    def vstart(self, value):
+        self._driver.vstart(value)
+
+    def acc(self, value):
+        self._driver.acc(value)
 
     def set_gun(self, pos):
         steps = self.compute_gun_position(pos)
