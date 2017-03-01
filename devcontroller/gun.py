@@ -48,10 +48,10 @@ class GunController(object):
         self._driver.position = position
 
     def move_left(self, steps):
-        self._driver.move_rel(abs(int(steps)))
+        self._driver.move_rel(-abs(int(steps)))
 
     def move_right(self, steps):
-        self._driver.move_rel(-abs(int(steps)))
+        self._driver.move_rel(abs(int(steps)))
 
     def compute_gun_position(self, gun_pos):
         if not gun_pos in [1,2,3,4]:
