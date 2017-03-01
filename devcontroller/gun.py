@@ -57,7 +57,7 @@ class GunController(object):
         gun_1 = self._config.get_absolute_gun_position()
         diff = self._config.get_difference()
 
-        return gun_1 + (gun_pos - 1)* diff
+        return gun_1 - (gun_pos - 1)* diff
 
     def get_gun(self):
         position = self.get_position()
@@ -94,7 +94,7 @@ class GunController(object):
             new_diff = self._config.get_difference()
 
         gun_pos = self.get_position()
-        gun_1_pos = gun_pos - (actual_position - 1)*new_diff
+        gun_1_pos = gun_pos + (actual_position - 1)*new_diff
 
         self._config.set_tolerance(new_tol)
         self._config.set_difference(new_diff)
