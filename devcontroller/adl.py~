@@ -21,7 +21,8 @@ from adl_x547.factory import ADLSputterFactory
 from devcontroller.misc.error import ExecutionError
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
-from devcontroller.misc.sputtercheck import DisabledSputterChecker
+#from devcontroller.misc.sputtercheck import SputterChecker
+#from devcontroller.misc.sputtercheck import DisabledSputterChecker
 
 class ADLController(object):
 
@@ -43,7 +44,7 @@ class ADLController(object):
         self.logger = logger
 
         if checker is None:
-            self.checker = DisabledSputterChecker()
+            self.checker = SputterChecker()
         else:
             self.checker = checker
 
@@ -123,7 +124,7 @@ class ADLController(object):
         #self.turn_on()
 
     def turn_on(self):
-        self.checker.check()
+        #self.checker.check()
         if self.thread is None or not self.thread.is_running():
             self.thread = TurnOnThread()
             self.thread.daemon = True
