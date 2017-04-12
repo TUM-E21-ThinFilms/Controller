@@ -72,6 +72,7 @@ class TrumpfPFG600Controller(object):
 
     def turn_on(self):
         self.checker.check()
+        self.sputter.reset()
 
         try:
             self.sputter.set_operating_status(PFG600Driver.ON)
