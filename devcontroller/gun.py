@@ -32,7 +32,7 @@ class GunController(object):
 
     def __init__(self, gun_driver):
         self._driver = gun_driver
-        self._parser = GunConfigParser("/home/sputter/Python/lib/gun.config")
+        self._parser = GunConfigParser("/home/sputter/Python/lib/config/gun.config")
         self._config = self._parser.get_config()
         self.vend(6)
 
