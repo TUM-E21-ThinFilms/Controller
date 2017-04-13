@@ -114,3 +114,9 @@ class TrumpfPFG600Controller(object):
 
     def power(self, sputter_power, voltage_limit=None):
         self.sputter_power(sputter_power, voltage_limit)
+
+    def get_power_forward(self):
+        return self.sputter.get_actual_power()
+
+    def get_power_backward(self):
+        return self.sputter.get_actual_power_backward()

@@ -148,6 +148,15 @@ class ADLController(object):
     def power(self, sputter_power):
         self.sputter_power(sputter_power)
 
+    def get_actual_values(self):
+        self.sputter.get_actual_value()
+
+    def get_power(self):
+        return self.get_actual_values().get_power()
+
+    def get_voltage(self):
+        return self.get_actual_values().get_voltage()
+
 class TurnOnThread(StoppableThread):
 
     def set_driver(self, driver):

@@ -140,8 +140,10 @@ class VATController(object):
         self.valve.clear()
         self.valve.hold()
 
-    def calibrate(self):
-        pfeiffer_gauge = PfeifferTPG26xFactory().create_gauge()
+    def calibrate(self, pfeiffer_gauge=None):
+        if pfeiffer_gauge is None:
+            pfeiffer_gauge = PfeifferTPG26xFactory().create_gauge()
+
         pressure = pfeiffer_gauge.get_pressure_measurement()[1]
         print("Pfeiffer pressure: %s" % str(pressure))
         self.set_pressure_alignment(pressure)
