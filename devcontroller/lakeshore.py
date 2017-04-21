@@ -65,3 +65,6 @@ class LakeshoreController(object):
 
     def get_driver(self):
         return self.lakeshore
+
+    def get_temperature(self, position):
+        return self.lakeshore.get_temperature(position)
