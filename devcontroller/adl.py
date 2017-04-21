@@ -150,7 +150,7 @@ class ADLController(object):
         self.sputter_power(sputter_power)
 
     def get_actual_values(self):
-        self.sputter.get_actual_value()
+        return self.sputter.get_actual_value()
 
     def get_power(self):
         return self.get_actual_values().get_power()
