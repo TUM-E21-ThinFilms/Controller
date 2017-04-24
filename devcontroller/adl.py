@@ -164,5 +164,9 @@ class TurnOnThread(StoppableThread):
         self.driver = driver
 
     def do_execute(self):
-        self.driver.turn_on()
+        try:
+            self.driver.turn_on()
+        except BaseException as e:
+            self.driver.get_logger().warning("Exception in sputter keep-alive thread. May result in plasma defect if this happens three times in a row.")
+
         time.sleep(1)
