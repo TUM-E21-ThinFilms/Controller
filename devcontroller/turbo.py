@@ -56,6 +56,12 @@ class TurboController(object):
     def get_logger(self):
         return self.logger
 
+    def on(self):
+        self.turn_on()
+
+    def off(self):
+        self.turn_off()
+
     def turn_on(self):
         # Always switch back to local operation mode (i.e. the power supply), in case of
         # an error, one can always shut down the pump via the pressing a button on the power supply...
