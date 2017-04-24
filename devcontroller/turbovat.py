@@ -15,6 +15,7 @@
 
 from devcontroller.misc.logger import LoggerFactory
 from vat_641.factory import VAT641Factory
+from vat_641.driver import VAT641Driver
 
 class TurboVATController(object):
 
@@ -73,6 +74,9 @@ class TurboVATController(object):
 
     def get_open(self):
         return self.valve.get_open()
+
+    def is_open(self):
+        return self.valve.is_open() == VAT641Driver.VALVE_OPEN
 
     def set_speed(self, speed):
         self._to_remote()
