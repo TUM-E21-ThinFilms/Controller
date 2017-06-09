@@ -153,10 +153,10 @@ class ADLController(object):
         return self.sputter.get_actual_value()
 
     def get_power(self):
-        return self.get_actual_values().get_power()
+        return self.sputter.convert_from_power(self.get_actual_values().get_power(), coeff=self.coeff_power)
 
     def get_voltage(self):
-        return self.get_actual_values().get_voltage()
+        return self.sputter.convert_from_voltage(self.get_actual_values().get_voltage(), coeff=self.coeff_volt)
 
 class TurnOnThread(StoppableThread):
 

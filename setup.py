@@ -17,7 +17,8 @@ import sys
 
 from setuptools import setup, find_packages
 
-requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590', 'vat_641', 'trinamic_pd110', 'lakeshore336', 'pfg_600', 'julabo_fl', 'ps9000']
+requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590', 'vat_641',
+            'trinamic_pd110', 'lakeshore336', 'pfg_600', 'julabo_fl', 'ps9000', 'phytron_phymotion']
 
 desc = ('Controller')
 
@@ -26,7 +27,7 @@ setup(
     version=__import__('devcontroller').__version__,
     author='Alexander Book',
     author_email='alexander.book@frm2.tum.de',
-    license = 'GNU General Public License (GPL), Version 3',
+    license='GNU General Public License (GPL), Version 3',
     url='https://github.com/TUM-E21-ThinFilms/Controller',
     description=desc,
     long_description=open('README.md').read(),
