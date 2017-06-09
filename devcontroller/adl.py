@@ -76,6 +76,8 @@ class ADLController(object):
             print("Could not read ADL Coefficients. Retry...")
             if self._retry >= 0:
                 self.initialize()
+            else:
+                raise RuntimeError("Could not initialize ADL")
             
     def get_logger(self):
         return self.logger
