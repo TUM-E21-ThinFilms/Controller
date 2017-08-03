@@ -15,11 +15,11 @@
 
 import heidenhain
 
-class SampleController(object):
+class HeidenhainThetaController(object):
     DOC = """ TODO """
 
     def __init__(self):
-
+        self._encoder = None
         print(self.DOC)
 
     def __del__(self):
