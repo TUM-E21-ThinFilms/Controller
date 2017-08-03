@@ -54,6 +54,8 @@ class HeidenhainThetaController(object):
         if self._encoder is None:
             return None
 
+        self._encoder.clearFifo()
+
         if self._encoder.getNext():
             return self._encoder.getPosition()
         else:
