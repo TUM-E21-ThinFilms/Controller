@@ -14,18 +14,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from phytron_phymotion.factory import PhytronFactory
-from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP
+from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP, PARAMETER_START_STOP_FREQUENCY, \
+    PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST
+
 
 class SampleController(object):
-
     DOC = """ TODO """
 
     AXIS_THETA = 1
 
-    def __init__(self, module = 1):
+    def __init__(self, module=1):
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
-
 
         print(self.DOC)
 
@@ -33,9 +33,12 @@ class SampleController(object):
         self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
 
     def _set_speed_theta(self, rotations_per_minute):
-        self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11) # 1/128 pulse per step
-        self._driver_theta.set_parameter(PARAMETER_CURRENT, 35) # 3.5 A
-        self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128/60.0))
+        self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11)  # 1/128 pulse per step
+        self._driver_theta.set_parameter(PARAMETER_CURRENT, 100)  # 1.0 A
+        self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
+        self._driver_theta.set_parameter(PARAMETER_START_STOP_FREQUENCY, 1)  # 1 Hz start-stop freq.
+        self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
+        self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
 
     def move_degree(self, degree):
         # TODO
