@@ -37,6 +37,9 @@ class HeidenhainThetaController(object):
 
         return True
 
+    def get_encoder(self):
+        return self._encoder
+
     def _connect(self):
         self._encoder = heidenhain.GetEncoder()
 
