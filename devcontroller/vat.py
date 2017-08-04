@@ -99,6 +99,18 @@ class VATController(object):
         if pressure >= 1:
             raise ValueError("Will not set pressure higher than 1 mbar.")
 
+        try:
+            p_ref = self._gauge.get_pressure()
+            p_vat = self.get_pressure()
+        except Exception as e:
+            self.logger.exception(e)
+            raise ExecutionError("Could not check for correct pressure reading. See log files")
+
+        relative_tolerance = 0.05
+
+        if abs(p_vat / p_ref - 1.0) > relative_tolerance:
+            raise ExecutionError("Reference pressure (%s) and VAT pressure (%s) differ more than 5%%!" % (str(p_ref), str(p_vat)))
+
         self.valve.clear()
 
         voltage = self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset
@@ -130,18 +142,6 @@ class VATController(object):
         except Exception as e:
             self.logger.exception(e)
             raise ExecutionError("Could not initialize VAT. See log files")
-
-        try:
-            p_ref = self._gauge.get_pressure()
-            p_vat = self.get_pressure()
-        except Exception as e:
-            self.logger.exception(e)
-            raise ExecutionError("Could not check for correct pressure reading. See log files")
-
-        relative_tolerance = 0.05
-
-        if abs(p_vat / p_ref - 1.0) > relative_tolerance:
-            raise ExecutionError("Reference pressure (%s) and VAT pressure (%s) differ more than 5%!" % (str(p_ref), str(p_vat)))
 
     def open(self):
         self.logger.info('Opening valve...')
