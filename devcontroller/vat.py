@@ -34,11 +34,16 @@ class VATController(object):
             calibrate(): Calibrates the pressure with the Pfeiffer Gauge
     """
 
-    def __init__(self, valve=None, logger=None):
+    def __init__(self, valve=None, logger=None, reference_gauge=None):
         if logger is None:
             logger = LoggerFactory().get_vat_valve_logger()
 
         self.logger = logger
+
+        if not reference_gauge is None:
+            self._gauge = reference_gauge
+        else:
+            self._gauge = PfeifferTPG26xFactory().create_gauge()
 
         if valve is None:
             factory = VAT590Factory()
@@ -126,6 +131,18 @@ class VATController(object):
             self.logger.exception(e)
             raise ExecutionError("Could not initialize VAT. See log files")
 
+        try:
+            p_ref = self._gauge.get_pressure()
+            p_vat = self.get_pressure()
+        except Exception as e:
+            self.logger.exception(e)
+            raise ExecutionError("Could not check for correct pressure reading. See log files")
+
+        relative_tolerance = 0.05
+
+        if abs(p_vat / p_ref - 1.0) > relative_tolerance:
+            raise ExecutionError("Reference pressure (%s) and VAT pressure (%s) differ more than 5%!" % (str(p_ref), str(p_vat)))
+
     def open(self):
         self.logger.info('Opening valve...')
         self.valve.clear()
@@ -140,11 +157,8 @@ class VATController(object):
         self.valve.clear()
         self.valve.hold()
 
-    def calibrate(self, pfeiffer_gauge=None):
-        if pfeiffer_gauge is None:
-            pfeiffer_gauge = PfeifferTPG26xFactory().create_gauge()
-
-        pressure = pfeiffer_gauge.get_pressure_measurement()[1]
+    def calibrate(self):
+        pressure = self._gauge.get_pressure()
         print("Pfeiffer pressure: %s" % str(pressure))
         self.set_pressure_alignment(pressure)
 
