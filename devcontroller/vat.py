@@ -106,7 +106,7 @@ class VATController(object):
             self.logger.exception(e)
             raise ExecutionError("Could not check for correct pressure reading. See log files")
 
-        relative_tolerance = 0.05
+        relative_tolerance = 1.0
 
         if abs(p_vat / p_ref - 1.0) > relative_tolerance:
             raise ExecutionError("Reference pressure (%s) and VAT pressure (%s) differ more than 5%%!" % (str(p_ref), str(p_vat)))
