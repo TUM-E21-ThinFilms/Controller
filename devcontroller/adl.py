@@ -129,7 +129,7 @@ class ADLController(object):
         if self.thread is None or not self.thread.is_running():
             self.thread = TurnOnThread()
             self.thread.daemon = True
-            self.thread.set_driver(self.sputter)
+            self.thread.set_driver(self.sputter, self.logger)
             self.thread.start()
         else:
             self.logger.info('ADL-Sputter thread already running. Will continue...')
@@ -162,13 +162,14 @@ class ADLController(object):
 
 class TurnOnThread(StoppableThread):
 
-    def set_driver(self, driver):
+    def set_driver(self, driver, logger):
+        self.logger = logger
         self.driver = driver
 
     def do_execute(self):
         try:
             self.driver.turn_on()
         except BaseException as e:
-            self.driver.get_logger().warning("Exception in sputter keep-alive thread. May result in plasma defect if this happens three times in a row.")
+            self.logger.warning("Exception in sputter keep-alive thread. May result in plasma defect if this happens three times in a row.")
 
         time.sleep(1)
