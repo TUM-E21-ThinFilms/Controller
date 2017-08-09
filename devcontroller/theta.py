@@ -51,7 +51,7 @@ class HeidenhainThetaController(object):
         if not success:
             return False
 
-        if self._encoder.hasRefrence():
+        if self._encoder.hasReference():
             self._encoder.computeAbsoluteReference()
 
         return True
