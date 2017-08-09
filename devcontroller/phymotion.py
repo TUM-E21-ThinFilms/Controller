@@ -26,6 +26,7 @@ class SampleController(object):
     def __init__(self, module=1):
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
+        self._driver_theta.set_axis(1, 1)
 
         print(self.DOC)
 
