@@ -23,8 +23,7 @@ class HeidenhainThetaController(object):
         print(self.DOC)
 
     def __del__(self):
-        if not self._encoder is None:
-            self._encoder.disconnect()
+        self.disconnect()
 
     def connect(self):
         if not self._encoder is None:
@@ -37,19 +36,23 @@ class HeidenhainThetaController(object):
 
         return True
 
+    def disconnect(self):
+        if not self._encoder is None:
+            self._encoder.disconnect()
+
     def get_encoder(self):
         return self._encoder
 
     def _connect(self):
-        self._encoder = heidenhain.GetEncoder()
+        self._encoder = heidenhain.get_theta_encoder()
 
         success = self._encoder.connect() and not self._encoder.hasError()
 
         if not success:
             return False
 
-        if self._encoder.ReferenceMarkReceived():
-            self._encoder.computeAbsoluteReferenceMark()
+        if self._encoder.hasRefrence():
+            self._encoder.computeAbsoluteReference()
 
         return True
 
@@ -57,9 +60,9 @@ class HeidenhainThetaController(object):
         if self._encoder is None:
             return None
 
-        self._encoder.clearFifo()
+        self._encoder.clearBuffer()
 
-        if self._encoder.getNext():
+        if self._encoder.read():
             return self._encoder.getPosition()
         else:
             return None
