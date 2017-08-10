@@ -15,7 +15,7 @@
 
 from phytron_phymotion.factory import PhytronFactory
 from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP, PARAMETER_START_STOP_FREQUENCY, \
-    PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST
+    PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT
 
 
 class SampleController(object):
@@ -38,6 +38,7 @@ class SampleController(object):
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 100)  # 1.0 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
         self._driver_theta.set_parameter(PARAMETER_START_STOP_FREQUENCY, 1)  # 1 Hz start-stop freq.
+        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 30)  # 0.3 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
 

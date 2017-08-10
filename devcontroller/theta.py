@@ -21,6 +21,7 @@ class HeidenhainThetaController(object):
     def __init__(self):
         self._encoder = None
         self._reference_computed = False
+        self._calibration = 0
         print(self.DOC)
 
     def __del__(self):
@@ -120,4 +121,10 @@ class HeidenhainThetaController(object):
         self._assert_connected()
         self._assert_reference()
 
-        return self._encoder.getAbsoluteDegree(True)
+        return self._encoder.getAbsoluteDegree(True) + self._calibration
+
+    def calibrate(self, new_angle):
+        self._calibration = 0
+        current_angle = self.get_angle()
+        diff = new_angle - current_angle
+        self._calibration = diff
