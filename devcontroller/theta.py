@@ -14,14 +14,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import heidenhain
+from e21_util.lock import HEIDENHAIN_LOCK
 
 class HeidenhainThetaController(object):
     DOC = """ TODO """
 
     def __init__(self):
+        self._lock = HEIDENHAIN_LOCK
         self._encoder = None
         self._reference_computed = False
-        self._calibration = 0
+        self._calibration = 214.0
         print(self.DOC)
 
     def __del__(self):
@@ -34,9 +36,12 @@ class HeidenhainThetaController(object):
         if not self._encoder is None:
             return True
 
+        self._lock.acquire()
+
         success = self._connect()
 
         if not success:
+            self._lock.release()
             self._encoder = None
 
         return True
@@ -50,6 +55,7 @@ class HeidenhainThetaController(object):
 
     def disconnect(self):
         if not self._encoder is None:
+            self._lock.release()
             self._encoder.disconnect()
 
     def start_reference(self):
@@ -122,9 +128,3 @@ class HeidenhainThetaController(object):
         self._assert_reference()
 
         return self._encoder.getAbsoluteDegree(True) + self._calibration
-
-    def calibrate(self, new_angle):
-        self._calibration = 0
-        current_angle = self.get_angle()
-        diff = new_angle - current_angle
-        self._calibration = diff
