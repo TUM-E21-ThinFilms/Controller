@@ -23,7 +23,7 @@ class ThetaHeidenhainController(object):
         self._lock = HEIDENHAIN_LOCK
         self._encoder = None
         self._reference_computed = False
-        self._calibration = 214.0
+        self._calibration = 214.37
         print(self.DOC)
 
     def __del__(self):
@@ -135,3 +135,11 @@ class ThetaHeidenhainController(object):
         self._assert_reference()
 
         return (self._encoder.getAbsoluteDegree(True) - self._calibration) % 360.0
+
+    def calibrate(self, angle):
+        print("Warning: This does no calibration. Infact it will only tell you the new calibration value ...")
+        old_calib = self._calibration
+        self._calibration = 0
+        new_calib = self.get_angle() - angle
+        self._calibration = old_calib
+        return new_calib
