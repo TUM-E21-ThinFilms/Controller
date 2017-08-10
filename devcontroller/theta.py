@@ -20,7 +20,7 @@ class ThetaHeidenhainController(object):
     DOC = """ TODO """
 
     def __init__(self):
-        self._lock = HEIDENHAIN_LOCK
+        self._lock = HEIDENHAIN_LOCK()
         self._encoder = None
         self._reference_computed = False
         self._calibration = 214.37
