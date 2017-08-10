@@ -26,8 +26,8 @@ class ThetaHeidenhainController(object):
         self._calibration = 214.37
         print(self.DOC)
 
-    def __del__(self):
-        self.disconnect()
+    #def __del__(self):
+    #    self.disconnect()
 
     def is_connected(self):
         return not self._encoder is None
@@ -58,8 +58,8 @@ class ThetaHeidenhainController(object):
     def disconnect(self):
         if not self._encoder is None:
             print ("Disconnecting heidenhain controller")
-            self._lock.release()
             self._encoder.disconnect()
+            self._lock.release()
 
     def start_reference(self):
         self._assert_connected()
