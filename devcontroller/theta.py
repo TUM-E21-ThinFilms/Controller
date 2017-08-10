@@ -20,10 +20,14 @@ class HeidenhainThetaController(object):
 
     def __init__(self):
         self._encoder = None
+        self._reference_computed = False
         print(self.DOC)
 
     def __del__(self):
         self.disconnect()
+
+    def is_connected(self):
+        return not self._encoder is None
 
     def connect(self):
         if not self._encoder is None:
@@ -36,9 +40,65 @@ class HeidenhainThetaController(object):
 
         return True
 
+    def _assert_connected(self):
+        if not self.is_connected():
+            raise RuntimeError("Encoder is not connected")
+
+    def _assert_reference(self):
+        return self._reference_computed
+
     def disconnect(self):
         if not self._encoder is None:
             self._encoder.disconnect()
+
+    def start_reference(self):
+        self._assert_connected()
+
+        self.clear_reference()
+        success = self._encoder.startReference()
+
+        if not success:
+            raise RuntimeError("Could not start the reference search")
+
+    def received_reference(self):
+        self._assert_connected()
+        return self._encoder.receivedReference()
+
+    def clear_reference(self):
+        self._assert_connected()
+        return self._encoder.clearReference()
+
+    def stop_reference(self):
+        self._assert_connected()
+
+        received = self.received_reference()
+
+        success = self._encoder.stopReference()
+        if not success:
+            raise RuntimeError("Could not stop the reference search")
+
+        if received is True:
+            self.compute_reference()
+            return True
+
+        return False
+
+    def compute_reference(self):
+        self._assert_connected()
+
+        if not self._encoder.hasReference():
+            raise RuntimeError("No reference available")
+
+        success = self._encoder.computeAbsoluteReference()
+        if not success:
+            raise RuntimeError("Could not calculate absolute reference position")
+
+        self._reference_computed = True
+
+    def has_reference(self):
+        self._assert_connected()
+
+        return self._encoder.hasReference()
 
     def get_encoder(self):
         return self._encoder
@@ -52,17 +112,12 @@ class HeidenhainThetaController(object):
             return False
 
         if self._encoder.hasReference():
-            self._encoder.computeAbsoluteReference()
+            self.compute_reference()
 
         return True
 
-    def get_position(self):
-        if self._encoder is None:
-            return None
+    def get_angle(self):
+        self._assert_connected()
+        self._assert_reference()
 
-        self._encoder.clearBuffer()
-
-        if self._encoder.read():
-            return self._encoder.getPosition()
-        else:
-            return None
+        return self._encoder.getAbsoluteDegree(True)
