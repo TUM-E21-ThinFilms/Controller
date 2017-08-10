@@ -134,7 +134,7 @@ class ThetaHeidenhainController(object):
         self._assert_connected()
         self._assert_reference()
 
-        return (self._encoder.getAbsoluteDegree(True) - self._calibration) % 360.0
+        return self._encoder.getAbsoluteDegree(True) - self._calibration
 
     def calibrate(self, angle):
         print("Warning: This does no calibration. Infact it will only tell you the new calibration value ...")
