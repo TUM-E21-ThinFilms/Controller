@@ -134,4 +134,4 @@ class ThetaHeidenhainController(object):
         self._assert_connected()
         self._assert_reference()
 
-        return self._encoder.getAbsoluteDegree(True) + self._calibration
+        return (self._encoder.getAbsoluteDegree(True) - self._calibration) % 360.0
