@@ -7,7 +7,7 @@ class SampleThetaController(object):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
-    ANGLE_TOL = 0.001
+    ANGLE_TOL = 0.003
     WAITING_TIME = 100
 
     def __init__(self):
@@ -52,23 +52,29 @@ class SampleThetaController(object):
             i += 1
             if not self._motor.is_moving() or i >= self.WAITING_TIME:
                 break
+            cur_angle = self._encoder.get_angle()
+                
+            diff_new = abs(cur_angle - angle)
+            if diff_new > diff:
+                self._motor.stop()
 
+            print("current angle %s" % cur_angle)
             time.sleep(1)
 
         self._motor.stop()
-        time.sleep(5)
+#        time.sleep(5)
         new_angle = self._encoder.get_angle()
         print("Current angle: %s" % new_angle)
 
 
         new_diff = abs(angle - new_angle)
 
-        if diff < new_diff:
-            raise RuntimeError("Wrong proposal steps...")
+#        if diff < new_diff:
+#            raise RuntimeError("Wrong proposal steps...")
 
         if new_diff > self.ANGLE_TOL:
             print("... move again")
             self._move_angle(angle)
 
     def _proposal_steps(self, angle_diff):
-        return int(angle_diff * 3000)
+        return -1 * int(angle_diff * 1250)

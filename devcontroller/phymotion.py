@@ -27,7 +27,7 @@ class ThetaMotorController(object):
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
         self._driver_theta.set_axis(1, 1)
-        self._set_speed_theta(0.5)
+        self._set_speed_theta(0.3)
 
         print(self.DOC)
 
@@ -35,7 +35,7 @@ class ThetaMotorController(object):
         self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
 
     def _set_speed_theta(self, rotations_per_minute):
-        self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11)  # 1/128 pulse per step
+        self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 10)  # 1/64 pulse per step
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
         self._driver_theta.set_parameter(PARAMETER_START_STOP_FREQUENCY, 1)  # 1 Hz start-stop freq.
