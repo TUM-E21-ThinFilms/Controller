@@ -43,6 +43,7 @@ class HeidenhainThetaController(object):
         if not success:
             self._lock.release()
             self._encoder = None
+            return False
 
         return True
 
