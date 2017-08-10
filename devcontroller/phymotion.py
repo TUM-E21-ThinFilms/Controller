@@ -18,7 +18,7 @@ from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FR
     PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT
 
 
-class SampleController(object):
+class ThetaMotorController(object):
     DOC = """ TODO """
 
     AXIS_THETA = 1
@@ -27,6 +27,7 @@ class SampleController(object):
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
         self._driver_theta.set_axis(1, 1)
+        self._set_speed_theta(0.5)
 
         print(self.DOC)
 
@@ -35,24 +36,25 @@ class SampleController(object):
 
     def _set_speed_theta(self, rotations_per_minute):
         self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11)  # 1/128 pulse per step
-        self._driver_theta.set_parameter(PARAMETER_CURRENT, 100)  # 1.0 A
+        self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
         self._driver_theta.set_parameter(PARAMETER_START_STOP_FREQUENCY, 1)  # 1 Hz start-stop freq.
-        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 30)  # 0.3 A stopping current
+        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 20)  # 0.2 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
 
-    def move_degree(self, degree):
-        # TODO
-        steps = 128 * degree * 200.0
+    def stop(self):
+        self._driver_theta.stop()
+
+    def is_moving(self):
+        return not self._driver_theta.stopped()
+
+    def move(self, steps):
+
+        if steps > 30000:
+            raise RuntimeError("Will not move more than 30000 steps!")
 
         self._driver_theta.move_relative(steps)
-
-    def get_degree(self):
-        pass
-
-    def set_degree(self, degree):
-        pass
 
     def get_driver_theta(self):
         return self._driver_theta

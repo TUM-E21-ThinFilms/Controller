@@ -16,7 +16,7 @@
 import heidenhain
 from e21_util.lock import HEIDENHAIN_LOCK
 
-class HeidenhainThetaController(object):
+class ThetaHeidenhainController(object):
     DOC = """ TODO """
 
     def __init__(self):
@@ -27,6 +27,12 @@ class HeidenhainThetaController(object):
         print(self.DOC)
 
     def __del__(self):
+        self.disconnect()
+
+    def __enter__(self):
+        self.connect()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.disconnect()
 
     def is_connected(self):
