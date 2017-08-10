@@ -15,15 +15,21 @@ class SampleThetaController(object):
         self._encoder = ThetaHeidenhainController()
 
     def get_angle(self):
-        with self._encoder:
+        try:
+            self._encoder.connect()
             return self._encoder.get_angle()
+        finally:
+            self._encoder.disconnect()
 
     def set_angle(self, angle):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
             raise RuntimeError("New angle is not in the allowed angle range [%s, %s]", self.ANGLE_MIN, self.ANGLE_MAX)
 
-        with self._encoder:
+        try:
+            self._encoder.connect()
             self._move_angle(angle)
+        finally:
+            self._encoder.disconnect()
 
     def move_cw(self, angle):
         self.set_angle(abs(angle))

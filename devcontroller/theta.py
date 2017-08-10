@@ -29,14 +29,6 @@ class ThetaHeidenhainController(object):
     def __del__(self):
         self.disconnect()
 
-    def __enter__(self):
-        print ("Connecting heidenhain controller")
-        self.connect()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        print ("Disconnecting heidenhain controller")
-        self.disconnect()
-
     def is_connected(self):
         return not self._encoder is None
 
@@ -44,6 +36,7 @@ class ThetaHeidenhainController(object):
         if not self._encoder is None:
             return True
 
+        print ("Connecting heidenhain controller")
         self._lock.acquire()
 
         success = self._connect()
@@ -64,6 +57,7 @@ class ThetaHeidenhainController(object):
 
     def disconnect(self):
         if not self._encoder is None:
+            print ("Disconnecting heidenhain controller")
             self._lock.release()
             self._encoder.disconnect()
 
