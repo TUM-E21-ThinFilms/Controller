@@ -30,9 +30,11 @@ class ThetaHeidenhainController(object):
         self.disconnect()
 
     def __enter__(self):
+        print ("Connecting heidenhain controller")
         self.connect()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        print ("Disconnecting heidenhain controller")
         self.disconnect()
 
     def is_connected(self):
@@ -134,7 +136,14 @@ class ThetaHeidenhainController(object):
         self._assert_connected()
         self._assert_reference()
 
-        return self._encoder.getAbsoluteDegree(True) - self._calibration
+        self._encoder.clearBuffer()
+        success = self._encoder.read()
+
+        if not success:
+            raise RuntimeError("Could not read next value from encoder")
+
+        angle = self._encoder.getAbsoluteDegree(False)
+        return angle - self._calibration
 
     def calibrate(self, angle):
         print("Warning: This does no calibration. Infact it will only tell you the new calibration value ...")
