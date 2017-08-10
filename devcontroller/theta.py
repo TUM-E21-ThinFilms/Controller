@@ -59,6 +59,7 @@ class ThetaHeidenhainController(object):
         if not self._encoder is None:
             print ("Disconnecting heidenhain controller")
             self._encoder.disconnect()
+            self._encoder = None
             self._lock.release()
 
     def start_reference(self):
