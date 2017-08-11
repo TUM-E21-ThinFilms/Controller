@@ -49,7 +49,7 @@ class SampleThetaController(object):
         finally:
             self._encoder.disconnect()
             self._motor.get_driver().activate_endphase()
-            
+
     def _move_angle(self, angle):
         cur_angle = self._encoder.get_angle()
         diff = angle - cur_angle
