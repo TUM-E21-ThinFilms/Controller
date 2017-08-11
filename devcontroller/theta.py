@@ -27,10 +27,10 @@ class ThetaHeidenhainController(object):
         print(self.DOC)
 
     def __enter__(self):
-        self._encoder.connect()
+        self.connect()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._encoder.disconnect()
+        self.disconnect()
 
     def is_connected(self):
         return not self._encoder is None
