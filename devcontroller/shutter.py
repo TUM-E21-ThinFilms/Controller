@@ -43,21 +43,36 @@ class ShutterController(object):
         else:
             self.shutter = shutter
 
-	    self.countdown_thread = None
+        self.countdown_thread = None
 
         self.initialize()
 
         print(self.DOC)
 
     def initialize(self):
-        self.shutter.acceleration=400
-        self.shutter.speed_max=300
+        self.shutter.acceleration=40
+        self.shutter.speed_max=40
 
     def get_driver(self):
         return self.shutter
 
     def get_logger(self):
         return self.logger
+
+    def stop(self):
+        self.shutter.stop()
+
+    def reset(self):
+        self.shutter.move(45)
+
+    def initialize(self):
+        print("moving shutter to the leftmost position ...")
+        self.shutter.move(-23)
+        time.sleep(5)
+        self.shutter.move(-23)
+        time.sleep(5)
+        self.shutter.move(45)
+        print("done.")
 
     def move(self, degree=180):
         self.shutter.move(degree)
@@ -74,7 +89,7 @@ class ShutterController(object):
             self.countdown(sputter_time)
 
             try:
-                self.shutter.move(180)
+                self.shutter.move(-23)
             except KeyboardInterrupt:
                 raise
             except Exception as e:
@@ -87,7 +102,7 @@ class ShutterController(object):
                 self.countdown_thread.stop()
 
         try:
-            self.shutter.move(180)
+            self.shutter.move(-23)
         except:
             self.logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")
