@@ -49,9 +49,9 @@ class ShutterController(object):
 
         print(self.DOC)
 
-    def initialize(self):
-        self.shutter.acceleration=40
-        self.shutter.speed_max=40
+    def initialize(self, accel=40, speed=40):
+        self.shutter.acceleration=accel
+        self.shutter.speed_max=speed
 
     def get_driver(self):
         return self.shutter
@@ -63,6 +63,8 @@ class ShutterController(object):
         self.shutter.stop()
 
     def reset(self):
+        self.stop()
+        self.initialize(20, 20)
         self.shutter.move(45)
 
     def initialize(self):
@@ -71,7 +73,7 @@ class ShutterController(object):
         time.sleep(5)
         self.shutter.move(-23)
         time.sleep(5)
-        self.shutter.move(45)
+        self.shutter.move(46)
         print("done.")
 
     def move(self, degree=180):
@@ -85,6 +87,7 @@ class ShutterController(object):
         self.countdown_thread = thread
 
     def timer(self, sputter_time):
+        self.initialize()
         try:
             self.countdown(sputter_time)
 
