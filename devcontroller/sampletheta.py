@@ -16,8 +16,8 @@ class SampleThetaController(object):
         self._encoder = ThetaHeidenhainController()
 
     def get_angle(self):
-        with self._encoder as enc:
-            return enc.get_angle()
+        with self._encoder:
+            return self._encoder.get_angle()
 
     def set_angle(self, angle):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
