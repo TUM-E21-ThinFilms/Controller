@@ -39,7 +39,7 @@ class ThetaMotorController(object):
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
         self._driver_theta.set_parameter(PARAMETER_START_STOP_FREQUENCY, 1)  # 1 Hz start-stop freq.
-        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 20)  # 0.2 A stopping current
+        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 0)  # 0.0 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
 
@@ -50,11 +50,13 @@ class ThetaMotorController(object):
         return not self._driver_theta.stopped()
 
     def move(self, steps):
-
-        if steps > 30000:
-            raise RuntimeError("Will not move more than 30000 steps!")
+        if steps > 15000:
+            raise RuntimeError("Will not move more than 15000 steps!")
 
         self._driver_theta.move_relative(steps)
 
     def get_driver_theta(self):
+        return self._driver_theta
+
+    def get_driver(self):
         return self._driver_theta

@@ -26,8 +26,11 @@ class ThetaHeidenhainController(object):
         self._calibration = 214.37
         print(self.DOC)
 
-    #def __del__(self):
-    #    self.disconnect()
+    def __enter__(self):
+        self._encoder.connect()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._encoder.disconnect()
 
     def is_connected(self):
         return not self._encoder is None
@@ -36,8 +39,10 @@ class ThetaHeidenhainController(object):
         if not self._encoder is None:
             return True
 
-        print ("Connecting heidenhain controller")
-        self._lock.acquire()
+        success = self._lock.acquire(blocking=False)
+
+        if not success:
+            raise RuntimeError("Heidenhain controller already opened in another process")
 
         success = self._connect()
 
@@ -57,7 +62,6 @@ class ThetaHeidenhainController(object):
 
     def disconnect(self):
         if not self._encoder is None:
-            print ("Disconnecting heidenhain controller")
             self._encoder.disconnect()
             self._encoder = None
             self._lock.release()
