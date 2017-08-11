@@ -67,7 +67,7 @@ class ShutterController(object):
         self.initialize(20, 20)
         self.shutter.move(45)
 
-    def initialize(self):
+    def init(self):
         print("moving shutter to the leftmost position ...")
         self.shutter.move(-23)
         time.sleep(5)
