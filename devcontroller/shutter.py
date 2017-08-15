@@ -117,6 +117,7 @@ class ShutterController(object):
     def close(self):
         if self._status == self.STATUS_OPEN:
             self.move(23)
+            self._status = self.STATUS_CLOSED_RESET_REQUIRED
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
             return
