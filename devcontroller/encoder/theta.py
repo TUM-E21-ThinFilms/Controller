@@ -50,6 +50,12 @@ class ThetaEncoder(object):
 
         return True
 
+    def info(self):
+        self._assert_connected()
+        self._encoder.clearBuffer()
+        self._encoder.read()
+        return [self._encoder.getPosition(), self._encoder.getReference1(), self._encoder.getReference2()]
+
     def _assert_connected(self):
         if not self.is_connected():
             raise RuntimeError("Encoder is not connected")
