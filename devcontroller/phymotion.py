@@ -25,7 +25,7 @@ class ThetaMotorController(object):
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
         self._driver_theta.set_axis(1, 1)
-        self._set_speed_theta(0.3)
+        self._set_speed_theta(0.1)
 
     def _init_driver_theta(self):
         self._driver_theta.set_axis(self._mod, self.AXIS_THETA)

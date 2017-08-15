@@ -13,6 +13,7 @@ class SampleZController(object):
 
     def __init__(self):
         self._motor = BaurFactory().create_z_stage()
+        self._motor.initialize(4000, 20, 100, 100)
         self._encoder = ZEncoder()
 
     def get_encoder(self):
