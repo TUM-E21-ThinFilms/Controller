@@ -17,14 +17,11 @@ import heidenhain
 from e21_util.lock import HEIDENHAIN_LOCK
 
 class ThetaEncoder(object):
-    DOC = """ TODO """
-
     def __init__(self):
         self._lock = HEIDENHAIN_LOCK()
         self._encoder = None
         self._reference_computed = False
         self._calibration = 214.37
-        print(self.DOC)
 
     def __enter__(self):
         self.connect()

@@ -7,7 +7,7 @@ class SampleZController(object):
     MAX_ANGLE_MOVE = 10
     Z_MIN = -10.0
     Z_MAX = 10.0
-    Z_TOL = 5.0e-3
+    Z_TOL = 2.5e-3
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.5
 

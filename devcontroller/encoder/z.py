@@ -17,14 +17,11 @@ import heidenhain
 from e21_util.lock import HEIDENHAIN_LOCK
 
 class ZEncoder(object):
-    DOC = """ TODO """
-
     def __init__(self):
         self._lock = HEIDENHAIN_LOCK()
         self._encoder = None
         self._reference_computed = False
         self._calibration = -30.00
-        print(self.DOC)
 
     def __enter__(self):
         self.connect()

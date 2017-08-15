@@ -19,8 +19,6 @@ from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FR
 
 
 class ThetaMotorController(object):
-    DOC = """ TODO """
-
     AXIS_THETA = 1
 
     def __init__(self, module=1):
@@ -28,8 +26,6 @@ class ThetaMotorController(object):
         self._driver_theta = PhytronFactory().create_driver()
         self._driver_theta.set_axis(1, 1)
         self._set_speed_theta(0.3)
-
-        print(self.DOC)
 
     def _init_driver_theta(self):
         self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
