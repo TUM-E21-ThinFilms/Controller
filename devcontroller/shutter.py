@@ -28,10 +28,21 @@ class ShutterController(object):
         Usage:
             timer(time [s]): opens the shutter, waits time, closes shutter
             move(deg=180 [degree]): moves the shutter with deg degree
-
+            stop(): stoppes current movement
+            open(), close(): opens/closes the shutter
+            init(): Initializes the shutter to find the correct starting position
+            reset(): Resets the shutter to the starting position (open() is then possible)
     """
 
+    STATUS_UNKNOWN = 0
+    STATUS_OPEN = 1
+    STATUS_CLOSED = 2
+    STATUS_CLOSED_RESET_REQUIRED = 3
+
     def __init__(self, shutter=None, logger=None):
+        self._status = self.STATUS_UNKNOWN
+
+
         if logger is None:
             logger = LoggerFactory().get_shutter_logger()
 
@@ -65,7 +76,8 @@ class ShutterController(object):
     def reset(self):
         self.stop()
         self.initialize(20, 20)
-        self.shutter.move(45)
+        self.shutter.move(46)
+        self._status = self.STATUS_CLOSED
 
     def init(self):
         print("moving shutter to the leftmost position ...")
@@ -75,6 +87,7 @@ class ShutterController(object):
         time.sleep(5)
         self.shutter.move(46)
         print("done.")
+        self._status = self.STATUS_CLOSED
 
     def move(self, degree=180):
         self.shutter.move(degree)
@@ -86,13 +99,45 @@ class ShutterController(object):
         thread.start()
         self.countdown_thread = thread
 
+    def open(self):
+        if self._status == self.STATUS_OPEN:
+            return
+
+        if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
+            self.move(23)
+
+        if self._status == self.STATUS_CLOSED:
+            self.move(-23)
+
+        if self._status == self.STATUS_UNKNOWN:
+            raise RuntimeError("Cannot opend shutter. Shutter is in unknown position. Do a init()")
+
+        self._status = self.STATUS_OPEN
+
+    def close(self):
+        if self._status == self.STATUS_OPEN:
+            self.move(23)
+
+        if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
+            return
+
+        if self._status == self.STATUS_CLOSED:
+            return
+
+        raise RuntimeError("Cannot close shutter. Shutter is in unknown position. Do a init()")
+
     def timer(self, sputter_time):
+
+        if not self._status == self.STATUS_CLOSED:
+            raise RuntimeError("Shutter is currently not closed!")
+
         self.initialize()
         try:
             self.countdown(sputter_time)
 
             try:
                 self.shutter.move(-23)
+                self._status = self.STATUS_OPEN
             except KeyboardInterrupt:
                 raise
             except Exception as e:
@@ -106,6 +151,7 @@ class ShutterController(object):
 
         try:
             self.shutter.move(-23)
+            self._status = self.STATUS_CLOSED_RESET_REQUIRED
         except:
             self.logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")
