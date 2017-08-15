@@ -23,7 +23,7 @@ class ZEncoder(object):
         self._lock = HEIDENHAIN_LOCK()
         self._encoder = None
         self._reference_computed = False
-        self._calibration = 0
+        self._calibration = -30.00
         print(self.DOC)
 
     def __enter__(self):

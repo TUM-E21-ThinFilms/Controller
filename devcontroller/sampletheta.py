@@ -17,6 +17,15 @@ class SampleThetaController(object):
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
 
+    def get_motor(self):
+        return self._motor
+
+    def get_encoder(self):
+        return self._encoder
+
+    def stop(self):
+        self._motor.stop()
+
     def get_angle(self):
         with self._encoder:
             return self._encoder.get_angle()

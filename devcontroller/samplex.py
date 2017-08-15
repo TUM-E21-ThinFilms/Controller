@@ -5,6 +5,12 @@ class SampleThetaController(object):
     def __init__(self):
         self._motor = BaurFactory().create_x_stage()
 
+    def get_motor(self):
+        return self._motor
+
+    def stop(self):
+        self._motor.stop()
+
     def move_left(self, diff_in_mm):
         diff = abs(diff_in_mm)
         if abs(diff_in_mm) > 5:
