@@ -58,7 +58,8 @@ class ThetaEncoder(object):
             raise RuntimeError("Encoder is not connected")
 
     def _assert_reference(self):
-        return self._reference_computed
+        if not self._reference_computed:
+            raise RuntimeError("Encoder has no reference")
 
     def disconnect(self):
         if not self._encoder is None:
