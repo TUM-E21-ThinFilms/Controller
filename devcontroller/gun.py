@@ -84,7 +84,16 @@ class GunController(object):
         elif abs(position - gun_4_pos) <= tol:
             return 4
         else:
+            extract_pos = position - 300
+            if abs(extract_pos - gun_1_pos) <= tol or abs(extract_pos - gun_2_pos) <= tol or abs(extract_pos - gun_3_pos) <= tol or abs(extract_pos - gun_4_pos) <= tol:
+                return 'Extract'
             return 0
+
+    def extract(self):
+        position = self.get_position()
+        extract_position = position + 300
+
+        self.set_position(extract_position)
 
     def stop(self):
         self.clear()
