@@ -2,7 +2,7 @@ import time
 from devcontroller.encoder.z import ZEncoder
 from controllers.baur.factory import *
 
-class SampleThetaController(object):
+class SampleZController(object):
 
     MAX_ANGLE_MOVE = 10
     Z_MIN = -10.0
