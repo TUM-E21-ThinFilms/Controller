@@ -142,8 +142,8 @@ class ZEncoder(object):
         if not success:
             raise RuntimeError("Could not read next value from encoder")
 
-        position = self._encoder.getAbsolutePosition(False)
-        return position - self._calibration
+        position = (-1) * self._encoder.getAbsolutePosition(False)
+        return (position) / 1000 - self._calibration# in mm
 
     def calibrate(self, position):
         print("Warning: This does no calibration. Infact it will only tell you the new calibration value ...")
