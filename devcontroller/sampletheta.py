@@ -1,6 +1,8 @@
 import time
+
+from devcontroller.encoder.theta import ThetaEncoder
 from phymotion import ThetaMotorController
-from theta import ThetaHeidenhainController
+
 
 class SampleThetaController(object):
 
@@ -13,7 +15,7 @@ class SampleThetaController(object):
 
     def __init__(self):
         self._motor = ThetaMotorController()
-        self._encoder = ThetaHeidenhainController()
+        self._encoder = ThetaEncoder()
 
     def get_angle(self):
         with self._encoder:
@@ -59,31 +61,39 @@ class SampleThetaController(object):
         if steps == 0:
             return
 
-        self._motor.move(steps)
-        i = 0
-        while True:
-            i += self.WAITING_TIME
-            if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
-                break
+        try:
+            self._motor.move(steps)
+            i = 0
+            while True:
+                i += self.WAITING_TIME
+                if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
+                    break
 
-            cur_angle = self._encoder.get_angle()
-                
-            diff_new = abs(cur_angle - angle)
-            if diff_new > diff:
-                self._motor.stop()
+                cur_angle = self._encoder.get_angle()
 
-            print("current angle %s" % cur_angle)
-            time.sleep(self.WAITING_TIME)
+                if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
+                    raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
-        self._motor.stop()
-        new_angle = self._encoder.get_angle()
-        print("Current angle: %s" % new_angle)
+                diff_new = abs(cur_angle - angle)
+                if diff_new > diff:
+                    self._motor.stop()
 
-        new_diff = abs(angle - new_angle)
+                print("current angle %s" % cur_angle)
+                time.sleep(self.WAITING_TIME)
+
+            self._motor.stop()
+            new_angle = self._encoder.get_angle()
+            print("Current angle: %s" % new_angle)
+
+            new_diff = abs(angle - new_angle)
+        except BaseException as e:
+            self._motor.stop()
+            raise e
 
         if new_diff > self.ANGLE_TOL:
             print("... move again")
             self._move_angle(angle)
+
 
     def _proposal_steps(self, angle_diff):
         return -1 * int(angle_diff * 1250)

@@ -16,14 +16,14 @@
 import heidenhain
 from e21_util.lock import HEIDENHAIN_LOCK
 
-class ThetaHeidenhainController(object):
+class ZEncoder(object):
     DOC = """ TODO """
 
     def __init__(self):
         self._lock = HEIDENHAIN_LOCK()
         self._encoder = None
         self._reference_computed = False
-        self._calibration = 214.37
+        self._calibration = 0
         print(self.DOC)
 
     def __enter__(self):
@@ -119,7 +119,7 @@ class ThetaHeidenhainController(object):
         return self._encoder
 
     def _connect(self):
-        self._encoder = heidenhain.get_theta_encoder()
+        self._encoder = heidenhain.get_z_encoder()
 
         success = self._encoder.connect() and not self._encoder.hasError()
 
@@ -131,7 +131,7 @@ class ThetaHeidenhainController(object):
 
         return True
 
-    def get_angle(self):
+    def get_position(self):
         self._assert_connected()
         self._assert_reference()
 
@@ -141,13 +141,13 @@ class ThetaHeidenhainController(object):
         if not success:
             raise RuntimeError("Could not read next value from encoder")
 
-        angle = self._encoder.getAbsoluteDegree(False)
-        return angle - self._calibration
+        position = self._encoder.getAbsolutePosition(False)
+        return position - self._calibration
 
-    def calibrate(self, angle):
+    def calibrate(self, position):
         print("Warning: This does no calibration. Infact it will only tell you the new calibration value ...")
         old_calib = self._calibration
         self._calibration = 0
-        new_calib = self.get_angle() - angle
+        new_calib = self.get_position() - position
         self._calibration = old_calib
         return new_calib
