@@ -60,7 +60,7 @@ class ShutterController(object):
 
         print(self.DOC)
 
-    def initialize(self, accel=40, speed=40):
+    def initialize(self, accel=100, speed=100):
         self.shutter.acceleration=accel
         self.shutter.speed_max=speed
 
@@ -75,12 +75,15 @@ class ShutterController(object):
 
     def reset(self):
         self.stop()
-        self.initialize(20, 20)
+        self.initialize(5, 10)
+        time.sleep(0.5)
         self.shutter.move(46)
         self._status = self.STATUS_CLOSED
 
     def init(self):
         print("moving shutter to the leftmost position ...")
+        self.initialize(10, 10)
+        time.sleep(1)
         self.shutter.move(-23)
         time.sleep(5)
         self.shutter.move(-23)
@@ -117,7 +120,7 @@ class ShutterController(object):
     def close(self):
         if self._status == self.STATUS_OPEN:
             self.move(23)
-            self._status = self.STATUS_CLOSED_RESET_REQUIRED
+            self._status = self.STATUS_CLOSED
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
             return
@@ -133,6 +136,8 @@ class ShutterController(object):
             raise RuntimeError("Shutter is currently not closed!")
 
         self.initialize()
+        time.sleep(0.5)
+        sputter_time = sputter_time - 0.4
         try:
             self.countdown(sputter_time)
 
