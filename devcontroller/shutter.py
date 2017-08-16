@@ -75,22 +75,26 @@ class ShutterController(object):
 
     def reset(self):
         self.stop()
-        self.initialize(5, 10)
-        time.sleep(0.5)
+        time.sleep(0.3)
+        self.initialize(10, 10)
+        time.sleep(0.3)
         self.shutter.move(46)
         self._status = self.STATUS_CLOSED
+        time.sleep(5)
+        self.initialize()
 
     def init(self):
         print("moving shutter to the leftmost position ...")
         self.initialize(10, 10)
         time.sleep(1)
-        self.shutter.move(-23)
-        time.sleep(5)
-        self.shutter.move(-23)
+        self.shutter.move(-75)
         time.sleep(5)
         self.shutter.move(46)
+        time.sleep(5)
+        self.initialize()
         print("done.")
         self._status = self.STATUS_CLOSED
+
 
     def move(self, degree=180):
         self.shutter.move(degree)
@@ -113,7 +117,7 @@ class ShutterController(object):
             self.move(-23)
 
         if self._status == self.STATUS_UNKNOWN:
-            raise RuntimeError("Cannot opend shutter. Shutter is in unknown position. Do a init()")
+            raise RuntimeError("Cannot open shutter. Shutter is in unknown position")
 
         self._status = self.STATUS_OPEN
 
@@ -121,6 +125,7 @@ class ShutterController(object):
         if self._status == self.STATUS_OPEN:
             self.move(23)
             self._status = self.STATUS_CLOSED
+            time.sleep(3)
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
             return
@@ -128,7 +133,7 @@ class ShutterController(object):
         if self._status == self.STATUS_CLOSED:
             return
 
-        raise RuntimeError("Cannot close shutter. Shutter is in unknown position. Do a init()")
+        raise RuntimeError("Cannot close shutter. Shutter is in unknown position")
 
     def timer(self, sputter_time):
 
@@ -138,8 +143,6 @@ class ShutterController(object):
         if sputter_time < 0.5:
             raise RuntimeError("Cannot sputter for less than 0.5 seconds")
 
-        self.initialize()
-        time.sleep(0.5)
         self.logger.info("Timer set for %s seconds", str(sputter_time))
         # 0.4 seconds, since this is the time the shutter needs to open and close.
         sputter_time = sputter_time - 0.4
