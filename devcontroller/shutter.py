@@ -80,7 +80,7 @@ class ShutterController(object):
         time.sleep(0.3)
         self.shutter.move(46)
         self._status = self.STATUS_CLOSED
-        time.sleep(5)
+        time.sleep(7)
         self.initialize()
 
     def init(self):
@@ -125,7 +125,7 @@ class ShutterController(object):
         if self._status == self.STATUS_OPEN:
             self.move(-23)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
-            time.sleep(3)
+            time.sleep(0.3)
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
             return
@@ -143,7 +143,6 @@ class ShutterController(object):
         if sputter_time < 0.5:
             raise RuntimeError("Cannot sputter for less than 0.5 seconds")
 
-        self.logger.info("Timer set for %s seconds", str(sputter_time))
         # 0.4 seconds, since this is the time the shutter needs to open and close.
         sputter_time = sputter_time - 0.4
 
