@@ -135,9 +135,15 @@ class ShutterController(object):
         if not self._status == self.STATUS_CLOSED:
             raise RuntimeError("Shutter is currently not closed!")
 
+        if sputter_time < 0.5:
+            raise RuntimeError("Cannot sputter for less than 0.5 seconds")
+
         self.initialize()
         time.sleep(0.5)
+        self.logger.info("Timer set for %s seconds", str(sputter_time))
+        # 0.4 seconds, since this is the time the shutter needs to open and close.
         sputter_time = sputter_time - 0.4
+
         try:
             self.countdown(sputter_time)
 

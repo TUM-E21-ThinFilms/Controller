@@ -47,7 +47,7 @@ class CountdownThread(StoppableThread):
         self.t = time
 
     def do_execute(self):
-        print("waiting %s seconds:" % self.t)
+        #print("waiting %s seconds:" % self.t)
         self.t = int(ceil(self.t))
         while self.t and not self._stop:
             mins, secs = divmod(self.t, 60)
