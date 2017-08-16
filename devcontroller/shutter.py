@@ -80,16 +80,16 @@ class ShutterController(object):
         time.sleep(0.3)
         self.shutter.move(46)
         self._status = self.STATUS_CLOSED
-        time.sleep(5)
+        time.sleep(7)
         self.initialize()
 
     def init(self):
         print("moving shutter to the leftmost position ...")
         self.initialize(10, 10)
-        time.sleep(1)
+        time.sleep(0.3)
         self.shutter.move(-75)
-        time.sleep(7)
-        self.shutter.move(46)
+        time.sleep(10)
+        self.shutter.move(49)
         time.sleep(7)
         self.initialize()
         print("done.")
