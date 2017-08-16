@@ -88,9 +88,9 @@ class ShutterController(object):
         self.initialize(10, 10)
         time.sleep(1)
         self.shutter.move(-75)
-        time.sleep(5)
+        time.sleep(7)
         self.shutter.move(46)
-        time.sleep(5)
+        time.sleep(7)
         self.initialize()
         print("done.")
         self._status = self.STATUS_CLOSED
@@ -123,8 +123,8 @@ class ShutterController(object):
 
     def close(self):
         if self._status == self.STATUS_OPEN:
-            self.move(23)
-            self._status = self.STATUS_CLOSED
+            self.move(-23)
+            self._status = self.STATUS_CLOSED_RESET_REQUIRED
             time.sleep(3)
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
