@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-
 from trinamic_pd110.factory import TrinamicPD110Factory
 from devcontroller.misc.thread import CountdownThread
 from devcontroller.misc.logger import LoggerFactory
@@ -26,7 +25,7 @@ class ShutterController(object):
         ShutterController - Controls the Trinamic PD 110 Shutter.
 
         Usage:
-            timer(time [s]): opens the shutter, waits time, closes shutter
+            timer(self._timer [s]): opens the shutter, waits self._timer, closes shutter
             move(deg=180 [degree]): moves the shutter with deg degree
             stop(): stoppes current movement
             open(), close(): opens/closes the shutter
@@ -39,9 +38,12 @@ class ShutterController(object):
     STATUS_CLOSED = 2
     STATUS_CLOSED_RESET_REQUIRED = 3
 
-    def __init__(self, shutter=None, logger=None):
+    def __init__(self, shutter=None, logger=None, timer=None):
         self._status = self.STATUS_UNKNOWN
-
+        if timer is None:
+            timer = time
+            
+        self._timer = timer
 
         if logger is None:
             logger = LoggerFactory().get_shutter_logger()
@@ -75,22 +77,22 @@ class ShutterController(object):
 
     def reset(self):
         self.stop()
-        time.sleep(0.3)
+        self._timer.sleep(0.3)
         self.initialize(10, 10)
-        time.sleep(0.3)
+        self._timer.sleep(0.3)
         self.shutter.move(46)
         self._status = self.STATUS_CLOSED
-        time.sleep(7)
+        self._timer.sleep(7)
         self.initialize()
 
     def init(self):
         print("moving shutter to the leftmost position ...")
         self.initialize(10, 10)
-        time.sleep(0.3)
+        self._timer.sleep(0.3)
         self.shutter.move(-75)
-        time.sleep(10)
-        self.shutter.move(49)
-        time.sleep(7)
+        self._timer.sleep(10)
+        self.shutter.move(46)
+        self._timer.sleep(7)
         self.initialize()
         print("done.")
         self._status = self.STATUS_CLOSED
@@ -125,7 +127,7 @@ class ShutterController(object):
         if self._status == self.STATUS_OPEN:
             self.move(-23)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
-            time.sleep(3)
+            self._timer.sleep(0.3)
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
             return
@@ -135,20 +137,19 @@ class ShutterController(object):
 
         raise RuntimeError("Cannot close shutter. Shutter is in unknown position")
 
-    def timer(self, sputter_time):
+    def timer(self, time_sec):
 
         if not self._status == self.STATUS_CLOSED:
             raise RuntimeError("Shutter is currently not closed!")
 
-        if sputter_time < 0.5:
+        if time_sec < 0.5:
             raise RuntimeError("Cannot sputter for less than 0.5 seconds")
 
-        self.logger.info("Timer set for %s seconds", str(sputter_time))
-        # 0.4 seconds, since this is the time the shutter needs to open and close.
-        sputter_time = sputter_time - 0.4
+        # 0.4 seconds, since this is the self._timer the shutter needs to open and close.
+        time_sec = time_sec - 0.4
 
         try:
-            self.countdown(sputter_time)
+            self.countdown(time_sec)
 
             try:
                 self.shutter.move(-23)
@@ -159,7 +160,7 @@ class ShutterController(object):
                 self.logger.exception("Received exception while opening")
                 raise ExecutionError("Could not open shutter")
 
-            time.sleep(sputter_time)
+            self._timer.sleep(time_sec)
         except KeyboardInterrupt:
             if not self.countdown_thread is None:
                 self.countdown_thread.stop()
@@ -171,4 +172,4 @@ class ShutterController(object):
             self.logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")
 
-        self.logger.info("Sputtered for %s seconds.", str(sputter_time))
+        self.logger.info("Sputtered for %s seconds.", str(time_sec))
