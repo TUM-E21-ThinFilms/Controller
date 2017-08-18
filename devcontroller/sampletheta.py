@@ -1,5 +1,6 @@
 import time
 
+from e21_util.interruptor import Interruptor, InterruptableTimer
 from devcontroller.encoder.theta import ThetaEncoder
 from phymotion import ThetaMotorController
 
@@ -13,12 +14,25 @@ class SampleThetaController(object):
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.5
 
-    def __init__(self):
+    def __init__(self, interruptor=None, timer=None):
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
+        if interruptor is None:
+            interruptor = Interruptor()
+
+        self._interruptor = interruptor
+
+        if timer is None:
+            timer = InterruptableTimer(self._interruptor)
+
+        self._timer = timer
+
 
     def get_motor(self):
         return self._motor
+
+    def interrupt(self):
+        self._interruptor.stop()
 
     def get_encoder(self):
         return self._encoder
@@ -52,6 +66,7 @@ class SampleThetaController(object):
             raw_encoder = self._encoder.get_encoder()
             raw_encoder.clearBuffer()
             while not raw_encoder.receivedReference():
+                self._interruptor.stoppable()
                 raw_encoder.read()
                 print("At position %s. Reference 1: %s, Reference 2: %s" % (raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2()))
 
@@ -74,6 +89,7 @@ class SampleThetaController(object):
             self._motor.move(steps)
             i = 0
             while True:
+                self._interruptor.stoppable()
                 i += self.WAITING_TIME
                 if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
                     break
@@ -86,9 +102,10 @@ class SampleThetaController(object):
                 diff_new = abs(cur_angle - angle)
                 if diff_new > diff:
                     self._motor.stop()
+                    break
 
                 print("current angle %s" % cur_angle)
-                time.sleep(self.WAITING_TIME)
+                self._timer.sleep(self.WAITING_TIME)
 
             self._motor.stop()
             new_angle = self._encoder.get_angle()

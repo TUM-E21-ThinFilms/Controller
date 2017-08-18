@@ -1,5 +1,6 @@
 import time
 from devcontroller.encoder.z import ZEncoder
+from e21_util.interruptor import Interruptor, InterruptableTimer
 from controllers.baur.factory import *
 
 class SampleZController(object):
@@ -11,10 +12,23 @@ class SampleZController(object):
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.5
 
-    def __init__(self):
+    def __init__(self, timer=None, interruptor=None):
         self._motor = BaurFactory().create_z_stage()
         self._motor.initialize(4000, 20, 100, 100)
         self._encoder = ZEncoder()
+
+        if interruptor is None:
+            interruptor = Interruptor()
+
+        self._interruptor = interruptor
+
+        if timer is None:
+            timer = InterruptableTimer(self._interruptor)
+
+        self._timer = timer
+
+    def interrupt(self):
+        self._interruptor.stop()
 
     def get_encoder(self):
         return self._encoder
@@ -50,6 +64,7 @@ class SampleZController(object):
             raw_encoder = self._encoder.get_encoder()
             raw_encoder.clearBuffer()
             while not raw_encoder.receivedReference():
+                self._interruptor.stoppable()
                 raw_encoder.read()
                 print("At position %s. Reference 1: %s, Reference 2: %s" % (raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2()))
 
@@ -68,6 +83,7 @@ class SampleZController(object):
             return
 
         try:
+            self._interruptor.stoppable()
             self._move_motor(steps)
             self._motor.stop()
             new_position = self._encoder.get_position()
@@ -89,6 +105,7 @@ class SampleZController(object):
         self._motor.move_abs(desired_position)
         i = 0
         while True:
+            self._interruptor.stoppable()
             i += self.WAITING_TIME
             if self._motor.getPosition() == desired_position or i >= self.TOTAL_WAITING_TIME:
                 break
@@ -99,7 +116,7 @@ class SampleZController(object):
                 raise RuntimeError("z-position not in allowed range anymore. STOP.")
 
             print("current position %s" % current_position)
-            time.sleep(self.WAITING_TIME)
+            self._timer.sleep(self.WAITING_TIME)
 
 
     def _proposal_steps(self, angle_diff):
