@@ -15,6 +15,10 @@ class SampleXController(object):
 
         self._motor = BaurFactory().create_x_stage()
 
+    def set_interrupt(self, interrupt):
+        assert isinstance(interrupt, Interruptor)
+        self._interrupt = interrupt
+
     def get_motor(self):
         return self._motor
 

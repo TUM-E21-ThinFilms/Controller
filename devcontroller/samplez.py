@@ -27,6 +27,10 @@ class SampleZController(object):
 
         self._timer = timer
 
+    def set_interrupt(self, interrupt):
+        assert isinstance(interrupt, Interruptor)
+        self._interruptor = interrupt
+
     def interrupt(self):
         self._interruptor.stop()
 
