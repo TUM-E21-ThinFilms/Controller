@@ -17,6 +17,8 @@ class SampleThetaController(object):
     def __init__(self, interruptor=None, timer=None):
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
+        self._moving = False
+
         if interruptor is None:
             interruptor = Interruptor()
 
@@ -44,15 +46,21 @@ class SampleThetaController(object):
         self._motor.stop()
 
     def get_angle(self):
+        if not self._moving is False:
+            return self._moving
+
         with self._encoder:
             return self._encoder.get_angle()
 
     def set_angle(self, angle):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
             raise RuntimeError("New angle is not in the allowed angle range [%s, %s]", self.ANGLE_MIN, self.ANGLE_MAX)
-
-        with self._encoder:
-            self._move_angle(angle)
+        try:
+            self._moving = 0
+            with self._encoder:
+                self._move_angle(angle)
+        finally:
+            self._moving = False
 
     def move_cw(self, angle):
         self.set_angle(abs(angle))
@@ -81,6 +89,7 @@ class SampleThetaController(object):
 
     def _move_angle(self, angle):
         cur_angle = self._encoder.get_angle()
+        self._moving = cur_angle
         diff = angle - cur_angle
 
         steps = self._proposal_steps(diff)
@@ -99,7 +108,7 @@ class SampleThetaController(object):
                     break
 
                 cur_angle = self._encoder.get_angle()
-
+                self._moving = cur_angle
                 if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
                     raise RuntimeError("Angle not in allowed position anymore. STOP.")
 

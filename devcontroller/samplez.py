@@ -5,17 +5,17 @@ from controllers.baur.factory import *
 
 class SampleZController(object):
 
-    MAX_ANGLE_MOVE = 10
-    Z_MIN = -10.0
-    Z_MAX = 10.0
+    Z_MIN = -15.0
+    Z_MAX = 5.0
     Z_TOL = 2.5e-3
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.5
 
     def __init__(self, interruptor=None, timer=None):
         self._motor = BaurFactory().create_z_stage()
-        self._motor.initialize(4000, 20, 100, 100)
+        self._motor.initialize(4000, 20, 150, 150)
         self._encoder = ZEncoder()
+        self._moving = False
 
         if interruptor is None:
             interruptor = Interruptor()
@@ -44,16 +44,21 @@ class SampleZController(object):
         self._motor.stop()
 
     def get_position(self):
+        if not self._moving is False:
+            return self._moving
+
         with self._encoder:
             return self._encoder.get_position()
 
     def set_position(self, pos):
         if not (self.Z_MIN <= pos <= self.Z_MAX):
             raise RuntimeError("New position is not in the allowed angle range [%s, %s]", self.Z_MIN, self.Z_MAX)
-
-        with self._encoder:
-            self._move_position(pos)
-
+        try:
+            self._moving = 0
+            with self._encoder:
+                self._move_position(pos)
+        finally:
+            self._moving = False
     def move_up(self, position):
         self.set_position(self.get_position() + abs(position))
 
@@ -91,6 +96,7 @@ class SampleZController(object):
             self._move_motor(steps)
             self._motor.stop()
             new_position = self._encoder.get_position()
+            self._moving = new_position
             print("Current position: %s" % new_position)
 
             new_diff = abs(position - new_position)
