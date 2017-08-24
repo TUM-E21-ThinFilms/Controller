@@ -113,10 +113,10 @@ class ShutterController(object):
             return
 
         if self._status == self.STATUS_CLOSED_RESET_REQUIRED:
-            self.move(23)
+            self.move(27)
 
         if self._status == self.STATUS_CLOSED:
-            self.move(-23)
+            self.move(-21)
 
         if self._status == self.STATUS_UNKNOWN:
             raise RuntimeError("Cannot open shutter. Shutter is in unknown position")
@@ -125,7 +125,7 @@ class ShutterController(object):
 
     def close(self):
         if self._status == self.STATUS_OPEN:
-            self.move(-23)
+            self.move(-25)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
             self._timer.sleep(0.3)
 
@@ -152,7 +152,7 @@ class ShutterController(object):
             self.countdown(time_sec)
 
             try:
-                self.shutter.move(-23)
+                self.shutter.move(-21)
                 self._status = self.STATUS_OPEN
             except KeyboardInterrupt:
                 raise
@@ -166,7 +166,7 @@ class ShutterController(object):
                 self.countdown_thread.stop()
 
         try:
-            self.shutter.move(-23)
+            self.shutter.move(-25)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
         except:
             self.logger.exception("Received exception while closing")
