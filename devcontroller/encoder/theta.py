@@ -21,7 +21,7 @@ class ThetaEncoder(object):
         self._lock = HEIDENHAIN_LOCK()
         self._encoder = None
         self._reference_computed = False
-        self._calibration = 214.37
+        self._calibration = 214.0678
 
     def __enter__(self):
         self.connect()
