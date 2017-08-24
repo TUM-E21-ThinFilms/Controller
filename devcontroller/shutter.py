@@ -80,7 +80,7 @@ class ShutterController(object):
         self._timer.sleep(0.3)
         self.initialize(10, 10)
         self._timer.sleep(0.3)
-        self.shutter.move(46)
+        self.shutter.move(48)
         self._status = self.STATUS_CLOSED
         self._timer.sleep(7)
         self.initialize()
