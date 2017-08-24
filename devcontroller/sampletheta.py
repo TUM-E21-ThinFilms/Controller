@@ -27,6 +27,9 @@ class SampleThetaController(object):
 
         self._timer = timer
 
+    def set_interrupt(self, interruptor):
+        assert isinstance(interruptor, Interruptor)
+        self._interruptor = interruptor
 
     def get_motor(self):
         return self._motor
