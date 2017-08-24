@@ -12,7 +12,7 @@ class SampleZController(object):
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.5
 
-    def __init__(self, timer=None, interruptor=None):
+    def __init__(self, interruptor=None, timer=None):
         self._motor = BaurFactory().create_z_stage()
         self._motor.initialize(4000, 20, 100, 100)
         self._encoder = ZEncoder()
