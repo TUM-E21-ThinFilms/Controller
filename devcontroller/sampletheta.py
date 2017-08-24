@@ -92,6 +92,7 @@ class SampleThetaController(object):
                 self._interruptor.stoppable()
                 i += self.WAITING_TIME
                 if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
+                    print("Motor not moving or waiting time exceeded")
                     break
 
                 cur_angle = self._encoder.get_angle()
@@ -100,7 +101,8 @@ class SampleThetaController(object):
                     raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
                 diff_new = abs(cur_angle - angle)
-                if diff_new > diff:
+                if diff_new > abs(diff):
+                    print("moving in the wrong direction ...")
                     self._motor.stop()
                     break
 
