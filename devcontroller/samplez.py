@@ -84,6 +84,7 @@ class SampleZController(object):
 
     def _move_position(self, position):
         current_position = self._encoder.get_position()
+        self._moving = current_position
         diff = position - current_position
 
         steps = self._proposal_steps(diff)
