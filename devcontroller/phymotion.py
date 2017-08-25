@@ -25,7 +25,7 @@ class ThetaMotorController(object):
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
         self._driver_theta.set_axis(1, 1)
-        self._set_speed_theta(0.4)
+        self._set_speed_theta(0.8)
 
     def _init_driver_theta(self):
         self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
@@ -38,7 +38,6 @@ class ThetaMotorController(object):
         self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 0)  # 0.0 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
-        self._driver_theta.set_parameter(30, 1) # automatic frequency-band adjustment (recommended)
         self._driver_theta.set_parameter(32, 1) # linear ramp form
 
     def stop(self):
