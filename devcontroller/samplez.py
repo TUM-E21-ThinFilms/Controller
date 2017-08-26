@@ -1,21 +1,27 @@
 import time
 from devcontroller.encoder.z import ZEncoder
 from e21_util.interruptor import Interruptor, InterruptableTimer
+from devcontroller.misc.logger import LoggerFactory
 from controllers.baur.factory import *
 
-class SampleZController(object):
 
+class SampleZController(object):
     Z_MIN = -15.0
     Z_MAX = 10.0
     Z_TOL = 2.5e-3
     TOTAL_WAITING_TIME = 100
-    WAITING_TIME = 0.5
+    WAITING_TIME = 0.25
 
-    def __init__(self, interruptor=None, timer=None):
+    def __init__(self, interruptor=None, timer=None, logger=None):
         self._motor = BaurFactory().create_z_stage()
-        self._motor.initialize(4000, 20, 300, 200)
+        self._motor.initialize(4000, 20, 400, 300)
         self._encoder = ZEncoder()
         self._moving = False
+
+        if logger is None:
+            logger = LoggerFactory().get_sample_z_logger()
+
+        self._logger = logger
 
         if interruptor is None:
             interruptor = Interruptor()
@@ -59,6 +65,7 @@ class SampleZController(object):
                 self._move_position(pos)
         finally:
             self._moving = False
+
     def move_up(self, position):
         self.set_position(self.get_position() + abs(position))
 
@@ -75,7 +82,7 @@ class SampleZController(object):
             while not raw_encoder.receivedReference():
                 self._interruptor.stoppable()
                 raw_encoder.read()
-                print("At position %s. Reference 1: %s, Reference 2: %s" % (raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2()))
+                self._logger.info("Position: %s, Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2())
 
             self._encoder.stop_reference()
 
@@ -86,9 +93,9 @@ class SampleZController(object):
         current_position = self._encoder.get_position()
         self._moving = current_position
         diff = position - current_position
-
         steps = self._proposal_steps(diff)
-        print("Proposal steps: %s" % steps)
+        self._logger.info("Goal: %s, current: %s, estimated steps: %s", position, current_position, steps)
+
         if steps == 0:
             return
 
@@ -98,7 +105,7 @@ class SampleZController(object):
             self._motor.stop()
             new_position = self._encoder.get_position()
             self._moving = new_position
-            print("Current position: %s" % new_position)
+            self._logger.info("Current position: %s", new_position)
 
             new_diff = abs(position - new_position)
         except BaseException as e:
@@ -106,7 +113,7 @@ class SampleZController(object):
             raise e
 
         if new_diff > self.Z_TOL:
-            print("... move again")
+            self._logger.info("Goal: %s, current: %s, difference: %s", position, new_position, new_diff)
             self._move_position(position)
 
     def _move_motor(self, diff_steps):
@@ -122,13 +129,14 @@ class SampleZController(object):
                 break
 
             current_position = self._encoder.get_position()
-
+            self._moving = current_position
             if not (self.Z_MIN <= current_position <= self.Z_MAX):
+                self._logger.error("Position not in allowed range. STOP")
                 raise RuntimeError("z-position not in allowed range anymore. STOP.")
 
-            print("current position %s" % current_position)
-            self._timer.sleep(self.WAITING_TIME)
+            self._logger.info("---> Current position %s", current_position)
 
+            self._timer.sleep(self.WAITING_TIME)
 
     def _proposal_steps(self, angle_diff):
         return -1 * int(angle_diff * 5000)

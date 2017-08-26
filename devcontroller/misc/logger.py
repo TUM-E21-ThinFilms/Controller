@@ -76,3 +76,23 @@ class LoggerFactory(object):
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         return logger
+
+    def get_sample_theta_logger(self):
+        logger = logging.getLogger('Sample Theta')
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh = logging.FileHandler('sample_theta.log')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger
+
+    def get_sample_z_logger(self):
+        logger = logging.getLogger('Sample Z')
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh = logging.FileHandler('sample_z.log')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger

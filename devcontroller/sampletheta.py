@@ -3,6 +3,7 @@ import time
 from e21_util.interruptor import Interruptor, InterruptableTimer
 from devcontroller.encoder.theta import ThetaEncoder
 from phymotion import ThetaMotorController
+from devcontroller.misc.logger import LoggerFactory
 
 
 class SampleThetaController(object):
@@ -12,12 +13,17 @@ class SampleThetaController(object):
     ANGLE_MAX = 10.0
     ANGLE_TOL = 0.003
     TOTAL_WAITING_TIME = 100
-    WAITING_TIME = 0.5
+    WAITING_TIME = 0.25
 
-    def __init__(self, interruptor=None, timer=None):
+    def __init__(self, interruptor=None, timer=None, logger=None):
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
         self._moving = False
+
+        if logger is None:
+            logger = LoggerFactory().get_sample_theta_logger()
+
+        self._logger = logger
 
         if interruptor is None:
             interruptor = Interruptor()
@@ -79,7 +85,7 @@ class SampleThetaController(object):
             while not raw_encoder.receivedReference():
                 self._interruptor.stoppable()
                 raw_encoder.read()
-                print("At position %s. Reference 1: %s, Reference 2: %s" % (raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2()))
+                self._logger.info("At position %s. Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2())
 
             self._encoder.stop_reference()
 
@@ -93,7 +99,8 @@ class SampleThetaController(object):
         diff = angle - cur_angle
 
         steps = self._proposal_steps(diff)
-        print("Proposal steps: %s" % steps)
+        self._logger.info("Moving to angle %s", angle)
+        self._logger.info("--> Proposal steps: %s" % steps)
         if steps == 0:
             return
 
@@ -104,26 +111,29 @@ class SampleThetaController(object):
                 self._interruptor.stoppable()
                 i += self.WAITING_TIME
                 if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
-                    print("Motor not moving or waiting time exceeded")
+                    self._logger.info("---> Motor stopped or waiting time exceeded")
                     break
 
                 cur_angle = self._encoder.get_angle()
                 self._moving = cur_angle
                 if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
+                    self._logger.error("---> Motor not in allowed range. STOP")
                     raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
                 diff_new = abs(cur_angle - angle)
+
                 #if diff_new > abs(diff):
-                #    print("moving in the wrong direction ...")
                 #    self._motor.stop()
+                #    self._logger.warning("---> Motor stopped, probably moved in the wrong direction")
                 #    break
 
-                print("current angle %s" % cur_angle)
+                self._logger.info("--> Current angle %s",  cur_angle)
                 self._timer.sleep(self.WAITING_TIME)
 
             self._motor.stop()
             new_angle = self._encoder.get_angle()
-            print("Current angle: %s" % new_angle)
+            self._moving = new_angle
+            self._logger.info("---> Current angle %s", new_angle)
 
             new_diff = abs(angle - new_angle)
         except BaseException as e:
@@ -131,7 +141,7 @@ class SampleThetaController(object):
             raise e
 
         if new_diff > self.ANGLE_TOL:
-            print("... move again")
+            self._logger.info("Goal: %s, current: %s, difference: %s", angle, new_angle, new_diff)
             self._move_angle(angle)
 
 
