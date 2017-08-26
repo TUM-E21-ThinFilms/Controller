@@ -113,10 +113,10 @@ class SampleThetaController(object):
                     raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
                 diff_new = abs(cur_angle - angle)
-                if diff_new > abs(diff):
-                    print("moving in the wrong direction ...")
-                    self._motor.stop()
-                    break
+                #if diff_new > abs(diff):
+                #    print("moving in the wrong direction ...")
+                #    self._motor.stop()
+                #    break
 
                 print("current angle %s" % cur_angle)
                 self._timer.sleep(self.WAITING_TIME)
