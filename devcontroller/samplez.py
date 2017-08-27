@@ -1,4 +1,3 @@
-import time
 from devcontroller.encoder.z import ZEncoder
 from e21_util.interruptor import Interruptor, InterruptableTimer
 from devcontroller.misc.logger import LoggerFactory

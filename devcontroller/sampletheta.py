@@ -1,10 +1,7 @@
-import time
-
 from e21_util.interruptor import Interruptor, InterruptableTimer
 from devcontroller.encoder.theta import ThetaEncoder
 from phymotion import ThetaMotorController
 from devcontroller.misc.logger import LoggerFactory
-
 
 class SampleThetaController(object):
 
@@ -12,13 +9,15 @@ class SampleThetaController(object):
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
     ANGLE_TOL = 0.003
-    TOTAL_WAITING_TIME = 100
+    TOTAL_WAITING_TIME = 60
     WAITING_TIME = 0.25
+    HYSTERESIS_OFFSET = 160
 
     def __init__(self, interruptor=None, timer=None, logger=None):
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
         self._moving = False
+        self._last_steps = 0
 
         if logger is None:
             logger = LoggerFactory().get_sample_theta_logger()
@@ -120,11 +119,11 @@ class SampleThetaController(object):
                     self._logger.error("---> Motor not in allowed range. STOP")
                     raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
-                diff_new = abs(cur_angle - angle)
-                if diff_new > abs(diff):
-                    self._motor.stop()
-                    self._logger.warning("---> Motor stopped, probably moved in the wrong direction")
-                    break
+                #diff_new = abs(cur_angle - angle)
+                #if diff_new > abs(diff):
+                #    self._motor.stop()
+                #    self._logger.warning("---> Motor stopped, probably moved in the wrong direction")
+                #    break
 
                 self._logger.info("--> Current angle %s",  cur_angle)
                 self._timer.sleep(self.WAITING_TIME)
@@ -145,4 +144,23 @@ class SampleThetaController(object):
 
 
     def _proposal_steps(self, angle_diff):
-        return -1 * int(angle_diff * 1250)
+
+        new_proposal = -1 * int(angle_diff * 1200)
+
+        hysteresis_correction = 0
+        if not self._last_steps == 0:
+            sig_new = self.signum(new_proposal)
+            sig_old = self.signum(self._last_steps)
+            if not sig_new == sig_old:
+                hysteresis_correction = sig_new * self.HYSTERESIS_OFFSET
+
+        self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset %s", self._last_steps, new_proposal, hysteresis_correction)
+        self._last_steps = new_proposal + hysteresis_correction
+        return new_proposal
+
+    def signum(self, value):
+        if value > 0:
+            return +1
+        if value < 0:
+            return -1
+        return 0

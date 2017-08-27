@@ -96,3 +96,13 @@ class LoggerFactory(object):
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         return logger
+
+    def get_sample_x_logger(self):
+        logger = logging.getLogger('Sample X')
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh = logging.FileHandler('sample_x.log')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger
