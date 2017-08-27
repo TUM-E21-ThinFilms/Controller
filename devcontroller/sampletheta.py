@@ -11,7 +11,7 @@ class SampleThetaController(object):
     ANGLE_TOL = 0.003
     TOTAL_WAITING_TIME = 60
     WAITING_TIME = 0.25
-    HYSTERESIS_OFFSET = 300
+    HYSTERESIS_OFFSET = 400
 
     def __init__(self, interruptor=None, timer=None, logger=None):
         self._motor = ThetaMotorController()
