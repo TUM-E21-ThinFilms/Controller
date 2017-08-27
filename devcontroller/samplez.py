@@ -13,7 +13,7 @@ class SampleZController(object):
 
     def __init__(self, interruptor=None, timer=None, logger=None):
         self._motor = BaurFactory().create_z_stage()
-        self._motor.initialize(4000, 20, 400, 300)
+        self._motor.initialize(4000, 20, 500, 300)
         self._encoder = ZEncoder()
         self._moving = False
 
