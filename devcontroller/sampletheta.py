@@ -93,54 +93,58 @@ class SampleThetaController(object):
             self._motor.get_driver().activate_endphase()
 
     def _move_angle(self, angle):
-        cur_angle = self._encoder.get_angle()
-        self._moving = cur_angle
-        diff = angle - cur_angle
+        continue_movement = True
+        while continue_movement:
+            cur_angle = self._encoder.get_angle()
+            self._moving = cur_angle
+            diff = angle - cur_angle
 
-        steps = self._proposal_steps(diff)
-        self._logger.info("Moving to angle %s", angle)
-        self._logger.info("--> Proposal steps: %s" % steps)
-        if steps == 0:
-            return
+            steps = self._proposal_steps(diff)
+            self._logger.info("Moving to angle %s", angle)
+            self._logger.info("--> Proposal steps: %s" % steps)
+            if steps == 0:
+                return
 
-        try:
-            self._motor.move(steps)
-            i = 0
-            while True:
-                self._interruptor.stoppable()
-                i += self.WAITING_TIME
-                if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
-                    self._logger.info("---> Motor stopped or waiting time exceeded")
-                    break
+            try:
+                self._motor.move(steps)
+                i = 0
+                while True:
+                    self._interruptor.stoppable()
+                    i += self.WAITING_TIME
+                    if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
+                        self._logger.info("---> Motor stopped or waiting time exceeded")
+                        break
 
-                cur_angle = self._encoder.get_angle()
-                self._moving = cur_angle
-                if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
-                    self._logger.error("---> Motor not in allowed range. STOP")
-                    raise RuntimeError("Angle not in allowed position anymore. STOP.")
+                    cur_angle = self._encoder.get_angle()
+                    self._moving = cur_angle
+                    if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
+                        self._logger.error("---> Motor not in allowed range. STOP")
+                        raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
-                #diff_new = abs(cur_angle - angle)
-                #if diff_new > abs(diff):
-                #    self._motor.stop()
-                #    self._logger.warning("---> Motor stopped, probably moved in the wrong direction")
-                #    break
+                    #diff_new = abs(cur_angle - angle)
+                    #if diff_new > abs(diff):
+                    #    self._motor.stop()
+                    #    self._logger.warning("---> Motor stopped, probably moved in the wrong direction")
+                    #    break
 
-                self._logger.info("--> Current angle %s",  cur_angle)
-                self._timer.sleep(self.WAITING_TIME)
+                    self._logger.info("--> Current angle %s",  cur_angle)
+                    self._timer.sleep(self.WAITING_TIME)
 
-            self._motor.stop()
-            new_angle = self._encoder.get_angle()
-            self._moving = new_angle
-            self._logger.info("---> Current angle %s", new_angle)
+                self._motor.stop()
+                new_angle = self._encoder.get_angle()
+                self._moving = new_angle
+                self._logger.info("---> Current angle %s", new_angle)
 
-            new_diff = abs(angle - new_angle)
-        except BaseException as e:
-            self._motor.stop()
-            raise e
+                new_diff = abs(angle - new_angle)
+            except BaseException as e:
+                self._motor.stop()
+                raise e
 
-        if new_diff > self.ANGLE_TOL:
-            self._logger.info("Goal: %s, current: %s, difference: %s", angle, new_angle, new_diff)
-            self._move_angle(angle)
+            if new_diff > self.ANGLE_TOL:
+                self._logger.info("Goal: %s, current: %s, difference: %s", angle, new_angle, new_diff)
+                #self._move_angle(angle)
+            else:
+                continue_movement = False
 
 
     def _proposal_steps(self, angle_diff):
