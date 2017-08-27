@@ -112,26 +112,23 @@ class SampleThetaController(object):
                 while True:
                     self._interruptor.stoppable()
                     i += self.WAITING_TIME
-                    if not self._motor.is_moving() or i >= self.TOTAL_WAITING_TIME:
-                        self._logger.info("---> Motor stopped or waiting time exceeded")
+                    if i >= self.TOTAL_WAITING_TIME:
+                        self._logger.info("---> Motor movement exceeded waiting time")
+                        self._motor.stop()
+
+                    if not self._motor.is_moving():
                         break
 
                     cur_angle = self._encoder.get_angle()
                     self._moving = cur_angle
+                    self._logger.info("--> Current angle %s", cur_angle)
+
                     if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
                         self._logger.error("---> Motor not in allowed range. STOP")
                         raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
-                    #diff_new = abs(cur_angle - angle)
-                    #if diff_new > abs(diff):
-                    #    self._motor.stop()
-                    #    self._logger.warning("---> Motor stopped, probably moved in the wrong direction")
-                    #    break
-
-                    self._logger.info("--> Current angle %s",  cur_angle)
                     self._timer.sleep(self.WAITING_TIME)
 
-                self._motor.stop()
                 new_angle = self._encoder.get_angle()
                 self._moving = new_angle
                 self._logger.info("---> Current angle %s", new_angle)
