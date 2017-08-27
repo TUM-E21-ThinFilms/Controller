@@ -11,7 +11,7 @@ class SampleThetaController(object):
     ANGLE_TOL = 0.003
     TOTAL_WAITING_TIME = 60
     WAITING_TIME = 0.25
-    HYSTERESIS_OFFSET = 160
+    HYSTERESIS_OFFSET = 200
 
     def __init__(self, interruptor=None, timer=None, logger=None):
         self._motor = ThetaMotorController()
@@ -95,6 +95,7 @@ class SampleThetaController(object):
     def _move_angle(self, angle):
         continue_movement = True
         while continue_movement:
+            self._interruptor.stoppable()
             cur_angle = self._encoder.get_angle()
             self._moving = cur_angle
             diff = angle - cur_angle
@@ -158,7 +159,7 @@ class SampleThetaController(object):
             if not sig_new == sig_old:
                 hysteresis_correction = sig_new * self.HYSTERESIS_OFFSET
 
-        self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset %s", self._last_steps, new_proposal, hysteresis_correction)
+        self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset: %s", self._last_steps, new_proposal, hysteresis_correction)
         self._last_steps = new_proposal + hysteresis_correction
         return new_proposal
 
