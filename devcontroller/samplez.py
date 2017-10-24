@@ -5,7 +5,7 @@ from controllers.baur.factory import *
 
 
 class SampleZController(object):
-    Z_MIN = -15.0
+    Z_MIN = -18.0
     Z_MAX = 10.0
     Z_TOL = 2.5e-3
     TOTAL_WAITING_TIME = 100

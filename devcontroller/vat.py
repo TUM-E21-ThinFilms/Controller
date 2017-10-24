@@ -141,6 +141,7 @@ class VATController(object):
                 self.initialize()
         except Exception as e:
             self.logger.exception(e)
+            print(e)
             raise ExecutionError("Could not initialize VAT. See log files")
 
     def open(self):

@@ -144,7 +144,9 @@ class ThetaEncoder(object):
 
         if not success:
             raise RuntimeError("Could not read next value from encoder")
-
+        
+        #return self._encoder.getPosition() / 4096.0 / 28000 * 360 + 3.85286
+        
         angle = self._encoder.getAbsoluteDegree(False)
         return angle - self._calibration
 
