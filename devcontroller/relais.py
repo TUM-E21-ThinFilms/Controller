@@ -15,10 +15,12 @@
 
 from relais_197720.factory import RelaisFactory
 from relais_197720.driver import RelaisDriver
+from devcontroller.misc.logger import LoggerFactory
+from e21_util.retry import retry
+from e21_util.interface import Loggable
 
 
-class RelaisController(object):
-
+class RelaisController(Loggable):
     SCROLL_PORT = RelaisDriver.RELAIS_K1
     LAMP_PORT = RelaisDriver.RELAIS_K3
     BYPASS_PORT = RelaisDriver.RELAIS_K4
@@ -35,7 +37,11 @@ class RelaisController(object):
 
     """
 
-    def __init__(self, relais=None):
+    def __init__(self, relais=None, logger=None):
+        if logger is None:
+            logger = LoggerFactory().get_relais_logger()
+        super(RelaisController, self).__init__(logger)
+
         if relais is None:
             self.factory = RelaisFactory()
             self.relais = self.factory.create_relais()
@@ -46,33 +52,43 @@ class RelaisController(object):
 
         print(self.DOC)
 
+    @retry()
     def scroll_on(self):
         self.relais.set_single(self.SCROLL_PORT)
 
+    @retry()
     def scroll_off(self):
         self.relais.del_single(self.SCROLL_PORT)
 
+    @retry()
     def lamp_on(self):
         self.relais.set_single(self.LAMP_PORT)
 
+    @retry()
     def lamp_off(self):
         self.relais.del_single(self.LAMP_PORT)
 
+    @retry()
     def bypass_on(self):
         self.relais.set_single(self.BYPASS_PORT)
 
+    @retry()
     def bypass_off(self):
         self.relais.del_single(self.BYPASS_PORT)
 
+    @retry()
     def off(self):
         self.relais.set_port(0)
 
+    @retry()
     def is_scroll_on(self):
         return self.relais.get_port().get_port() & self.SCROLL_PORT > 0
 
+    @retry()
     def is_lamp_on(self):
         return self.relais.get_port().get_port() & self.LAMP_PORT > 0
 
+    @retry()
     def is_bypass_on(self):
         return self.relais.get_port().get_port() & self.BYPASS_PORT > 0
 

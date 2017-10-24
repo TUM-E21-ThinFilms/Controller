@@ -19,8 +19,10 @@ from devcontroller.misc.error import ExecutionError
 from vat_590.factory import VAT590Factory
 from tpg26x.factory import PfeifferTPG26xFactory
 from e21_util.error import ErrorResponse
+from e21_util.retry import retry
+from e21_util.interface import Loggable
 
-class VATController(object):
+class VATController(Loggable):
 
     DOC = """
         VATController - Controller for the VAT valve
@@ -38,7 +40,7 @@ class VATController(object):
         if logger is None:
             logger = LoggerFactory().get_vat_valve_logger()
 
-        self.logger = logger
+        super(VATController, self).__init__(logger)
 
         if not reference_gauge is None:
             self._gauge = reference_gauge
@@ -53,16 +55,12 @@ class VATController(object):
 
         self._pressure_range = 0
         self._sensor_offset = 0
-        self._retry = True
         self.initialize()
 
         print(self.DOC)
 
     def get_driver(self):
         return self.valve
-
-    def get_logger(self):
-        return self.logger
 
     """
         Converts a voltage (FullRange Gauge PKR 261) to a pressure in mbar.
@@ -89,13 +87,13 @@ class VATController(object):
     def pressure_to_voltage(self, pressure):
         return self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
 
+    @retry()
     def get_pressure(self):
         return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
 
-    """
-        Sets the pressure in mbar
-    """
+    @retry()
     def set_pressure(self, pressure):
+        # pressure in mbar
         if pressure >= 1:
             raise ValueError("Will not set pressure higher than 1 mbar.")
 
@@ -103,7 +101,7 @@ class VATController(object):
             p_ref = self._gauge.get_pressure()
             p_vat = self.get_pressure()
         except Exception as e:
-            self.logger.exception(e)
+            self._logger.exception(e)
             raise ExecutionError("Could not check for correct pressure reading. See log files")
 
         relative_tolerance = 1.0
@@ -116,6 +114,7 @@ class VATController(object):
         voltage = self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset
         self.valve.set_pressure(int(voltage))
 
+    @retry()
     def set_pressure_alignment(self, pressure):
 
         self.valve.clear()
@@ -128,31 +127,31 @@ class VATController(object):
         self.valve.set_pressure_alignment(int(voltage))
         self.initialize()
 
+    @retry()
     def initialize(self):
         try:
             self.valve.clear()
             self._pressure_range = int(self.valve.get_pressure_range())
             self._sensor_offset  = int(self.valve.get_sensor_offset()/self._pressure_range/10.0)
-            self._retry = True
         except ErrorResponse as e:
-            self.logger.exception("Error while initializing VAT Controller. Retry: "+str(self._retry))
-            self._retry = False
-            if self._retry:
-                self.initialize()
+            raise e
         except Exception as e:
-            self.logger.exception(e)
+            self._logger.exception(e)
             raise ExecutionError("Could not initialize VAT. See log files")
 
+    @retry()
     def open(self):
-        self.logger.info('Opening valve...')
+        self._logger.info('Opening valve...')
         self.valve.clear()
         self.valve.open()
 
+    @retry()
     def close(self):
-        self.logger.info('Closing valve...')
+        self._logger.info('Closing valve...')
         self.valve.clear()
         self.valve.close()
 
+    @retry()
     def hold(self):
         self.valve.clear()
         self.valve.hold()

@@ -17,7 +17,10 @@ from devcontroller.misc.logger import LoggerFactory
 from vat_641.factory import VAT641Factory
 from vat_641.driver import VAT641Driver
 
-class TurboVATController(object):
+from e21_util.retry import retry
+from e21_util.interface import Loggable
+
+class TurboVATController(Loggable):
 
     DOC = """
         TurboVATController - Controller for the Turbo VAT valve
@@ -35,7 +38,7 @@ class TurboVATController(object):
         if logger is None:
             logger = LoggerFactory().get_vat_valve_logger()
 
-        self.logger = logger
+        super(TurboVATController, self).__init__(logger)
 
         if valve is None:
             factory = VAT641Factory()
@@ -45,48 +48,55 @@ class TurboVATController(object):
 
         print(self.DOC)
 
+    @retry()
     def _to_remote(self):
         self.valve.switch_to_remote_mode()
 
+    @retry()
     def _to_local(self):
         self.valve.switch_to_local_mode()
 
     def get_driver(self):
         return self.valve
 
-    def get_logger(self):
-        return self.logger
-
+    @retry()
     def open(self):
         self._to_remote()
         self.valve.open()
         self._to_local()
 
+    @retry()
     def close(self):
         self._to_remote()
         self.valve.close()
         self._to_local()
 
+    @retry()
     def hold(self):
         self._to_remote()
         self.valve.hold()
         self._to_local()
 
+    @retry()
     def get_open(self):
         return self.valve.get_open()
 
+    @retry()
     def is_open(self):
         return self.valve.is_open() == VAT641Driver.VALVE_OPEN
 
+    @retry()
     def set_speed(self, speed):
         self._to_remote()
         self.valve.set_speed(speed)
         self._to_local()
 
+    @retry()
     def set_position(self, position):
         self._to_remote()
         self.valve.position(position)
         self._to_local()
 
+    @retry()
     def get_position(self):
         return self.valve.get_valve_position()
