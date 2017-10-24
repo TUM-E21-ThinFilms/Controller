@@ -18,9 +18,11 @@ from pfg_600.driver import PFG600Driver
 from devcontroller.misc.error import ExecutionError
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.sputtercheck import DisabledSputterChecker
+from e21_util.interface import Loggable
+from e21_util.retry import retry
 
-class TrumpfPFG600Controller(object):
 
+class TrumpfPFG600Controller(Loggable):
     DOC = """
         TrumpfPFG600Controller - Controller for the Trumpf RF PFG 600 Series
 
@@ -38,8 +40,7 @@ class TrumpfPFG600Controller(object):
     def __init__(self, sputter=None, logger=None, checker=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_rf_sputter_logger()
-
-        self.logger = logger
+        super(TrumpfPFG600Controller, self).__init__(logger)
 
         if checker is None:
             checker = DisabledSputterChecker()
@@ -47,8 +48,7 @@ class TrumpfPFG600Controller(object):
         self.checker = checker
 
         if sputter is None:
-            factory = PFG600Factory()
-            self.sputter = factory.create_pfg600()
+            self.sputter = PFG600Factory().create_pfg600()
         else:
             self.sputter = sputter
 
@@ -57,19 +57,21 @@ class TrumpfPFG600Controller(object):
     def get_driver(self):
         return self.sputter
 
+    @retry()
     def turn_off(self):
         try:
             self.sputter.clear()
         except:
-            self.logger.exception('Exception while clearing message pipe')
+            self._logger.exception('Exception while clearing message pipe')
 
         try:
             self.sputter.set_operating_status(PFG600Driver.OFF)
             self.sputter_power(0, 0)
         except BaseException:
-            self.logger.exception('Exception while turning sputter off')
+            self._logger.exception('Exception while turning sputter off')
             raise ExecutionError('Error while turning sputter off')
 
+    @retry()
     def turn_on(self):
         self.checker.check()
         self.sputter.reset()
@@ -77,16 +79,18 @@ class TrumpfPFG600Controller(object):
         try:
             self.sputter.set_operating_status(PFG600Driver.ON)
         except BaseException:
-            self.logger.exception('Exception while turning sputter on')
+            self._logger.exception('Exception while turning sputter on')
             raise ExecutionError('Error while turning sputter on')
 
+    @retry()
     def is_on(self):
         try:
             return self.sputter.get_operating_status() == PFG600Driver.ON
         except:
-            self.logger.exception('Could not determine status of rf sputter')
+            self._logger.exception('Could not determine status of rf sputter')
             raise ExecutionError('Cannot determine status of rf sputter')
 
+    @retry()
     def sputter_power(self, power, voltage_limit=None):
         if voltage_limit is None:
             voltage_limit = self.DEFAULT_VOLTAGE_LIMIT
@@ -96,12 +100,14 @@ class TrumpfPFG600Controller(object):
         self.sputter.set_target_voltage(voltage_limit)
         self.sputter.set_regulate(PFG600Driver.REGULATE_POWER)
 
+    @retry()
     def sputter_voltage(self, voltage, power_limit):
         self.sputter.clear()
         self.sputter.set_target_voltage(voltage)
         self.sputter.set_target_power(power_limit)
         self.sputter.set_regulate(PFG600Driver.REGULATE_VOLTAGE)
 
+    @retry()
     def reset(self):
         self.sputter.clear()
         self.sputter.reset()
@@ -115,11 +121,14 @@ class TrumpfPFG600Controller(object):
     def power(self, sputter_power, voltage_limit=None):
         self.sputter_power(sputter_power, voltage_limit)
 
+    @retry()
     def get_power_forward(self):
         return self.sputter.get_actual_power()
 
+    @retry()
     def get_power_backward(self):
         return self.sputter.get_actual_power_backward()
 
+    @retry()
     def get_voltage(self):
         return self.sputter.get_actual_voltage()

@@ -17,92 +17,62 @@ import logging
 
 class LoggerFactory(object):
 
+    LOG_FILE_CONTROLLER = 'controller.log'
+
+    def _get_logger(self, name, file):
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh = logging.FileHandler(file)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger
+
     def get_turbo_logger(self):
-        logger = logging.getLogger('Controller: Turbo')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('controller.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
-    
+        return self._get_logger('Controller: Turbo', self.LOG_FILE_CONTROLLER)
+
     def get_adl_sputter_logger(self):
-        logger = logging.getLogger('Controller: ADL Sputter')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('controller.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: ADL Sputter', self.LOG_FILE_CONTROLLER)
     
     def get_trumpf_sputter_logger(self):
-        logger = logging.getLogger('Controller: Trumpf Sputter')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('controller.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: Trumpf DC', self.LOG_FILE_CONTROLLER)
 
     def get_trumpf_rf_sputter_logger(self):
-        logger = logging.getLogger('Controller: Trumpf RF Sputter')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('controller.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
-    
+        return self._get_logger('Controller: Trumpf RF Sputter', self.LOG_FILE_CONTROLLER)
+
     def get_vat_valve_logger(self):
-        logger = logging.getLogger('Controller: VAT Valve')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('controller.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: VAT Valve', self.LOG_FILE_CONTROLLER)
 
     def get_shutter_logger(self):
-        logger = logging.getLogger('Controller: Shutter')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('controller.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: Shutter', self.LOG_FILE_CONTROLLER)
 
     def get_sample_theta_logger(self):
-        logger = logging.getLogger('Sample Theta')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('sample_theta.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: Sample: Theta', self.LOG_FILE_CONTROLLER)
 
     def get_sample_z_logger(self):
-        logger = logging.getLogger('Sample Z')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('sample_z.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: Sample: Z', self.LOG_FILE_CONTROLLER)
 
     def get_sample_x_logger(self):
-        logger = logging.getLogger('Sample X')
-        logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh = logging.FileHandler('sample_x.log')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-        return logger
+        return self._get_logger('Controller: Sample: X', self.LOG_FILE_CONTROLLER)
+
+    def get_lakeshore_logger(self):
+        return self._get_logger('Controller: Lakeshore', self.LOG_FILE_CONTROLLER)
+
+    def get_gun_logger(self):
+        return self._get_logger('Controller: Gun', self.LOG_FILE_CONTROLLER)
+
+    def get_julabo_logger(self):
+        return self._get_logger('Controller: Julabo', self.LOG_FILE_CONTROLLER)
+
+    def get_theta_logger(self):
+        return self._get_logger('Controller: Theta', self.LOG_FILE_CONTROLLER)
+
+    def get_relais_logger(self):
+        return self._get_logger('Controller: Relais', self.LOG_FILE_CONTROLLER)
+
+    def get_compressor_logger(self):
+        return self._get_logger('Controller: Compressor', self.LOG_FILE_CONTROLLER)
+
+    def get_gauge_logger(self):
+        return self._get_logger('Controller: Gauge', self.LOG_FILE_CONTROLLER)

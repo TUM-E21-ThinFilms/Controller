@@ -18,9 +18,10 @@ from trinamic_pd110.factory import TrinamicPD110Factory
 from devcontroller.misc.thread import CountdownThread
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.error import ExecutionError
+from e21_util.interface import Loggable
 
-class ShutterController(object):
 
+class ShutterController(Loggable):
     DOC = """
         ShutterController - Controls the Trinamic PD 110 Shutter.
 
@@ -39,21 +40,19 @@ class ShutterController(object):
     STATUS_CLOSED_RESET_REQUIRED = 3
 
     def __init__(self, shutter=None, logger=None, timer=None):
-        self._status = self.STATUS_CLOSED
-        #self._status = self.STATUS_UNKNOWN
-        if timer is None:
-            timer = time
-            
-        self._timer = timer
-
         if logger is None:
             logger = LoggerFactory().get_shutter_logger()
+        super(ShutterController, self).__init__(logger)
 
-        self.logger = logger
+        self._status = self.STATUS_UNKNOWN
+
+        if timer is None:
+            timer = time
+
+        self._timer = timer
 
         if shutter is None:
-            factory = TrinamicPD110Factory()
-            self.shutter = factory.create_shutter()
+            self.shutter = TrinamicPD110Factory().create_shutter()
         else:
             self.shutter = shutter
 
@@ -64,14 +63,11 @@ class ShutterController(object):
         print(self.DOC)
 
     def initialize(self, accel=100, speed=100):
-        self.shutter.acceleration=accel
-        self.shutter.speed_max=speed
+        self.shutter.acceleration = accel
+        self.shutter.speed_max = speed
 
     def get_driver(self):
         return self.shutter
-
-    def get_logger(self):
-        return self.logger
 
     def stop(self):
         self.shutter.stop()
@@ -97,7 +93,6 @@ class ShutterController(object):
         self.initialize()
         print("done.")
         self._status = self.STATUS_CLOSED
-
 
     def move(self, degree=180):
         self.shutter.move(degree)
@@ -158,7 +153,7 @@ class ShutterController(object):
             except KeyboardInterrupt:
                 raise
             except Exception as e:
-                self.logger.exception("Received exception while opening")
+                self._logger.exception("Received exception while opening")
                 raise ExecutionError("Could not open shutter")
 
             self._timer.sleep(time_sec)
@@ -170,7 +165,7 @@ class ShutterController(object):
             self.shutter.move(-25)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
         except:
-            self.logger.exception("Received exception while closing")
+            self._logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")
 
-        self.logger.info("Sputtered for %s seconds.", str(time_sec))
+        self._logger.info("Sputtered for %s seconds.", str(time_sec))

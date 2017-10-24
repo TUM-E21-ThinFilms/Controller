@@ -14,8 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from sumitomo_f70h.factory import SumitomoF70HFactory
+from e21_util.retry import retry
+from e21_util.interface import Loggable
+from devcontroller.misc.logger import LoggerFactory
 
-class CompressorController(object):
+class CompressorController(Loggable):
 
     DOC = """
         CompressorController - Controlls the compressor (Sumitomo F70H)
@@ -27,10 +30,15 @@ class CompressorController(object):
             get_status(): returns the status
     """
 
-    def __init__(self, compressor=None):
+    def __init__(self, compressor=None, logger=None):
+
+        if logger is None:
+            logger = LoggerFactory().get_compressor_logger()
+
+        super(CompressorController, self).__init__(logger)
+
         if compressor is None:
-            self.factory = SumitomoF70HFactory()
-            self.compressor = self.factory.create()
+            self.compressor = SumitomoF70HFactory().create()
         else:
             self.compressor = compressor
 
@@ -38,18 +46,22 @@ class CompressorController(object):
 
         print(self.DOC)
 
+    @retry()
     def turn_on(self):
         self.compressor.turn_on()
 
+    @retry()
     def turn_off(self):
         self.compressor.turn_off()
 
+    @retry()
     def get_all_temperatures(self):
         return self.compressor.get_all_temperatures()
 
     def reset(self):
         self.compressor.reset()
 
+    @retry()
     def get_status(self):
         return self.compressor.get_status()
 

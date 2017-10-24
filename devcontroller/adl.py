@@ -22,9 +22,11 @@ from devcontroller.misc.error import ExecutionError
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
 from devcontroller.misc.sputtercheck import DisabledSputterChecker
+from e21_util.retry import retry
+from e21_util.interface import Loggable
 
-class ADLController(object):
 
+class ADLController(Loggable):
     DOC = """
         ADLController - Controls the ADL Sputter power supply
 
@@ -39,8 +41,8 @@ class ADLController(object):
     def __init__(self, sputter=None, logger=None, checker=None):
         if logger is None:
             logger = LoggerFactory().get_adl_sputter_logger()
-        
-        self.logger = logger
+
+        super(ADLController, self).__init__(logger)
 
         if checker is None:
             self.checker = DisabledSputterChecker()
@@ -49,46 +51,39 @@ class ADLController(object):
 
         if sputter is None:
             factory = ADLSputterFactory()
-            self.sputter  = factory.create_sputter()
+            self.sputter = factory.create_sputter()
         else:
             self.sputter = sputter
 
-        self._retry = 2
         self.initialize()
-            
+
         self.thread = None
         self.current_mode = None
+        self.coeff_volt = None
+        self.coeff_power = None
+        self.coeff_current = None
+
         print(self.DOC)
-            
+
     def get_driver(self):
         return self.sputter
 
+    @retry(retry_count=2)
     def initialize(self):
-        self._retry = self._retry - 1
+        coeff = self.sputter.get_coefficients()
 
-        try:
-            coeff = self.sputter.get_coefficients()
-
-            self.coeff_volt = coeff.get_voltage()
-            self.coeff_power = coeff.get_power()
-            self.coeff_current = coeff.get_current()
-        except:
-            print("Could not read ADL Coefficients. Retry...")
-            if self._retry >= 0:
-                self.initialize()
-            else:
-                raise RuntimeError("Could not initialize ADL")
-            
-    def get_logger(self):
-        return self.logger
+        self.coeff_volt = coeff.get_voltage()
+        self.coeff_power = coeff.get_power()
+        self.coeff_current = coeff.get_current()
 
     def __check_mode(self, new_mode):
         if self.current_mode is not None and not self.current_mode == new_mode:
-            self.logger.error("Already sputtering in mode %s. Cannot sputter in new mode %s" % self.mode % new_mode)
+            self._logger.error("Already sputtering in mode %s. Cannot sputter in new mode %s" % self.mode % new_mode)
             raise ExecutionError("Already sputting in different mode.")
 
         self.current_mode = new_mode
 
+    @retry()
     def sputter(self, value, mode=ADLSputterDriver.MODE_POWER):
         self.checker.check()
         self.__check_mode(mode)
@@ -104,36 +99,34 @@ class ADLController(object):
         self.sputter.set_mode(mode, value, True, coeff=coeff)
         self.turn_on()
 
+    @retry()
     def sputter_power(self, power):
         self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_POWER)
         power = self.sputter.convert_into_power(power, coeff=self.coeff_power)
         self.sputter.clear()
         self.sputter.set_mode_p(power)
-        #self.sputter.set_ramp(2000) # 2 seconds
-        #self.sputter.activate_ramp()
-        #self.turn_on()
 
+    @retry()
     def sputter_voltage(self, voltage):
         self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_VOLTAGE)
         voltage = self.sputter.convert_into_voltage(voltage, coeff=self.coeff_volt)
         self.sputter.clear()
         self.sputter.set_mode_u(voltage)
-        #self.sputter.set_ramp(2000)
-        #self.sputter.activate_ramp()
-        #self.turn_on()
 
+    @retry()
     def turn_on(self):
         self.checker.check()
         if self.thread is None or not self.thread.is_running():
             self.thread = TurnOnThread()
             self.thread.daemon = True
-            self.thread.set_driver(self.sputter, self.logger)
+            self.thread.set_driver(self.sputter, self._logger)
             self.thread.start()
         else:
-            self.logger.info('ADL-Sputter thread already running. Will continue...')
+            self._logger.info('ADL-Sputter thread already running. Will continue...')
 
+    @retry()
     def turn_off(self):
         if not self.thread is None:
             self.thread.stop()
@@ -151,6 +144,7 @@ class ADLController(object):
     def power(self, sputter_power):
         self.sputter_power(sputter_power)
 
+    @retry()
     def get_actual_values(self):
         return self.sputter.get_actual_value()
 
@@ -160,16 +154,21 @@ class ADLController(object):
     def get_voltage(self):
         return self.sputter.convert_from_voltage(self.get_actual_values().get_voltage(), coeff=self.coeff_volt)
 
+
 class TurnOnThread(StoppableThread):
+    def __init__(self):
+        super(TurnOnThread, self).__init__()
+        self._logger = None
+        self.driver = None
 
     def set_driver(self, driver, logger):
-        self.logger = logger
+        self._logger = logger
         self.driver = driver
 
     def do_execute(self):
         try:
             self.driver.turn_on()
         except BaseException as e:
-            self.logger.warning("Exception in sputter keep-alive thread. May result in plasma defect if this happens three times in a row.")
+            self._logger.warning("Exception in sputter keep-alive thread. May result in plasma defect if this happens three times in a row.")
 
         time.sleep(1)

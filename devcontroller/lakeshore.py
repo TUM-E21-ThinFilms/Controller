@@ -16,9 +16,12 @@
 import time
 from lakeshore336.factory import LakeShore336Factory
 from lakeshore336.driver import LakeShore336Driver
+from e21_util.retry import retry
+from e21_util.interface import Loggable
+from devcontroller.misc.logger import LoggerFactory
 
-class LakeshoreController(object):
 
+class LakeshoreController(Loggable):
     DOC = """
         LakeshoreController - Controlls the Lakeshore 336
 
@@ -28,10 +31,14 @@ class LakeshoreController(object):
             turn_off(input [1-4]): Turns the heater off on input.
     """
 
-    def __init__(self, lakeshore=None):
+    def __init__(self, lakeshore=None, logger=None):
+        if logger is None:
+            logger = LoggerFactory().get_lakeshore_logger()
+
+        super(LakeshoreController, self).__init__(logger)
+
         if lakeshore is None:
-            self.factory = LakeShore336Factory()
-            self.lakeshore = self.factory.create_lakeshore()
+            self.lakeshore = LakeShore336Factory().create_lakeshore()
         else:
             self.lakeshore = lakeshore
 
@@ -39,6 +46,10 @@ class LakeshoreController(object):
 
         print(self.DOC)
 
+    def get_logger(self):
+        return self._logger
+
+    @retry()
     def heat(self, heat, input=1, intensity=LakeShore336Driver.HEATER_RANGE_HIGH):
         self.lakeshore.set_control_setpoint(input, heat)
         self.lakeshore.set_heater_range(input, intensity)
@@ -47,24 +58,27 @@ class LakeshoreController(object):
         if not isinstance(sleep_in_minutes, (int, long)) or sleep_in_minutes <= 0:
             raise ValueError("A positive integer as `sleep_in_minutes` has to be given")
 
-        print("Turn off heater in %s minutes:" % str(sleep_in_minutes))
+        self._logger.info("Turn off heater in %s minutes:" % str(sleep_in_minutes))
 
         i = 1
         while i <= sleep_in_minutes:
-            print("%s minute(s) remaining..." % str(sleep_in_minutes - i + 1))
+            self._logger.info("%s minute(s) remaining..." % str(sleep_in_minutes - i + 1))
             time.sleep(60)
-            i = i+1
+            i = i + 1
 
         self.turn_off(input)
 
+    @retry()
     def turn_off(self, input):
         self.lakeshore.set_heater_range(input, LakeShore336Driver.HEATER_RANGE_OFF)
 
+    @retry()
     def off(self):
         self.turn_off()
 
     def get_driver(self):
         return self.lakeshore
 
+    @retry()
     def get_temperature(self, position):
         return self.lakeshore.get_temperature(position)

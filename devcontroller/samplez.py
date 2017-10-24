@@ -1,43 +1,53 @@
-from devcontroller.encoder.z import ZEncoder
+# Copyright (C) 2017, see AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from e21_util.interruptor import Interruptor, InterruptableTimer
+from e21_util.retry import retry
+from e21_util.interface import Loggable, Interruptable
+from devcontroller.encoder.z import ZEncoder
 from devcontroller.misc.logger import LoggerFactory
-from controllers.baur.factory import *
+from baur_pdcx85.factory import BaurFactory
 
 
-class SampleZController(object):
-    Z_MIN = -18.0
+class SampleZController(Loggable, Interruptable):
+    Z_MIN = -15.0
     Z_MAX = 10.0
     Z_TOL = 2.5e-3
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.25
 
     def __init__(self, interruptor=None, timer=None, logger=None):
-        self._motor = BaurFactory().create_z_stage()
-        self._motor.initialize(4000, 20, 500, 300)
-        self._encoder = ZEncoder()
-        self._moving = False
 
         if logger is None:
-            logger = LoggerFactory().get_sample_z_logger()
-
-        self._logger = logger
+            logger = LoggerFactory().get_sample_theta_logger()
 
         if interruptor is None:
             interruptor = Interruptor()
 
-        self._interruptor = interruptor
+        Loggable.__init__(self, logger)
+        Interruptable.__init__(self, interruptor)
+
+        self._motor = BaurFactory().create_z()
+        self._motor.initialize(4000, 20, 500, 300)
+        self._encoder = ZEncoder()
+        self._moving = False
 
         if timer is None:
             timer = InterruptableTimer(self._interruptor)
 
         self._timer = timer
-
-    def set_interrupt(self, interrupt):
-        assert isinstance(interrupt, Interruptor)
-        self._interruptor = interrupt
-
-    def interrupt(self):
-        self._interruptor.stop()
 
     def get_encoder(self):
         return self._encoder
@@ -45,9 +55,11 @@ class SampleZController(object):
     def get_motor(self):
         return self._motor
 
+    @retry()
     def stop(self):
         self._motor.stop()
 
+    @retry()
     def get_position(self):
         if not self._moving is False:
             return self._moving
@@ -55,6 +67,7 @@ class SampleZController(object):
         with self._encoder:
             return self._encoder.get_position()
 
+    @retry()
     def set_position(self, pos):
         if not (self.Z_MIN <= pos <= self.Z_MAX):
             raise RuntimeError("New position is not in the allowed angle range [%s, %s]", self.Z_MIN, self.Z_MAX)
@@ -81,7 +94,8 @@ class SampleZController(object):
             while not raw_encoder.receivedReference():
                 self._interruptor.stoppable()
                 raw_encoder.read()
-                self._logger.info("Position: %s, Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2())
+                self._logger.info("Position: %s, Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(),
+                                  raw_encoder.getReference2())
 
             self._encoder.stop_reference()
 

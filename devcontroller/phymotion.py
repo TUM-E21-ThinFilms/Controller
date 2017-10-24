@@ -16,12 +16,20 @@
 from phytron_phymotion.factory import PhytronFactory
 from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP, PARAMETER_START_STOP_FREQUENCY, \
     PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT
+from devcontroller.misc.logger import LoggerFactory
+from e21_util.retry import retry
+from e21_util.interface import Loggable
 
 
-class ThetaMotorController(object):
+class ThetaMotorController(Loggable):
     AXIS_THETA = 1
 
-    def __init__(self, module=1):
+    def __init__(self, module=1, logger=None):
+        if logger is None:
+            logger = LoggerFactory().get_theta_logger()
+
+        super(ThetaMotorController, self).__init__(logger)
+
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
         self._driver_theta.set_axis(1, 1)
@@ -30,6 +38,7 @@ class ThetaMotorController(object):
     def _init_driver_theta(self):
         self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
 
+    @retry()
     def _set_speed_theta(self, rotations_per_minute):
         self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11)  # 1/128 pulse per step
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
@@ -38,14 +47,17 @@ class ThetaMotorController(object):
         self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 5)  # 0.0 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
-        self._driver_theta.set_parameter(32, 1) # linear ramp form
+        self._driver_theta.set_parameter(32, 1)  # linear ramp form
 
+    @retry()
     def stop(self):
         self._driver_theta.stop()
 
+    @retry()
     def is_moving(self):
         return not self._driver_theta.stopped()
 
+    @retry()
     def move(self, steps):
         if steps > 15000:
             raise RuntimeError("Will not move more than 15000 steps!")

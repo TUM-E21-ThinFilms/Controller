@@ -1,10 +1,27 @@
+# Copyright (C) 2017, see AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from e21_util.interruptor import Interruptor, InterruptableTimer
+from e21_util.retry import retry
+from e21_util.interface import Loggable, Interruptable
+from devcontroller.misc.logger import LoggerFactory
 from devcontroller.encoder.theta import ThetaEncoder
 from phymotion import ThetaMotorController
-from devcontroller.misc.logger import LoggerFactory
 
-class SampleThetaController(object):
 
+class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
@@ -14,42 +31,37 @@ class SampleThetaController(object):
     HYSTERESIS_OFFSET = 800
 
     def __init__(self, interruptor=None, timer=None, logger=None):
+
+        if logger is None:
+            logger = LoggerFactory().get_sample_theta_logger()
+
+        if interruptor is None:
+            interruptor = Interruptor()
+
+        Loggable.__init__(self, logger)
+        Interruptable.__init__(self, interruptor)
+
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
         self._moving = False
         self._last_steps = 0
 
-        if logger is None:
-            logger = LoggerFactory().get_sample_theta_logger()
-
-        self._logger = logger
-
-        if interruptor is None:
-            interruptor = Interruptor()
-
-        self._interruptor = interruptor
-
         if timer is None:
-            timer = InterruptableTimer(self._interruptor)
+            timer = InterruptableTimer(self._interrupt)
 
         self._timer = timer
-
-    def set_interrupt(self, interruptor):
-        assert isinstance(interruptor, Interruptor)
-        self._interruptor = interruptor
 
     def get_motor(self):
         return self._motor
 
-    def interrupt(self):
-        self._interruptor.stop()
-
     def get_encoder(self):
         return self._encoder
 
+    @retry()
     def stop(self):
         self._motor.stop()
 
+    @retry()
     def get_angle(self):
         if not self._moving is False:
             return self._moving
@@ -57,6 +69,7 @@ class SampleThetaController(object):
         with self._encoder:
             return self._encoder.get_angle()
 
+    @retry()
     def set_angle(self, angle):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
             raise RuntimeError("New angle is not in the allowed angle range [%s, %s]", self.ANGLE_MIN, self.ANGLE_MAX)
@@ -67,9 +80,11 @@ class SampleThetaController(object):
         finally:
             self._moving = False
 
+    @retry()
     def move_cw(self, angle):
         self.set_angle(abs(angle))
 
+    @retry()
     def move_acw(self, angle):
         self.set_angle(-1.0 * abs(angle))
 
@@ -82,9 +97,10 @@ class SampleThetaController(object):
             raw_encoder = self._encoder.get_encoder()
             raw_encoder.clearBuffer()
             while not raw_encoder.receivedReference():
-                self._interruptor.stoppable()
+                self._interrupt.stoppable()
                 raw_encoder.read()
-                self._logger.info("At position %s. Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(), raw_encoder.getReference2())
+                self._logger.info("At position %s. Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(),
+                                  raw_encoder.getReference2())
 
             self._encoder.stop_reference()
 
@@ -95,12 +111,20 @@ class SampleThetaController(object):
     def _move_angle(self, angle):
         continue_movement = True
         while continue_movement:
-            self._interruptor.stoppable()
+            self._interrupt.stoppable()
             cur_angle = self._encoder.get_angle()
             self._moving = cur_angle
             diff = angle - cur_angle
 
-            steps = self._proposal_steps(diff)
+            if 0.03 < abs(diff) < 0.1:
+                self._logger.info("---> Angle difference %s very low. Read angle again just be sure ...")
+                self._timer.sleep(1)
+                cur_angle = self._encoder.get_angle()
+                diff = angle - cur_angle
+                steps = self._proposal_steps(diff) / 2
+            else:
+                steps = self._proposal_steps(diff)
+
             self._logger.info("Moving to angle %s", angle)
             self._logger.info("--> Proposal steps: %s" % steps)
             if steps == 0:
@@ -110,7 +134,7 @@ class SampleThetaController(object):
                 self._motor.move(steps)
                 i = 0
                 while True:
-                    self._interruptor.stoppable()
+                    self._interrupt.stoppable()
                     i += self.WAITING_TIME
                     if i >= self.TOTAL_WAITING_TIME:
                         self._logger.info("---> Motor movement exceeded waiting time")
@@ -140,10 +164,9 @@ class SampleThetaController(object):
 
             if new_diff > self.ANGLE_TOL:
                 self._logger.info("Goal: %s, current: %s, difference: %s", angle, new_angle, new_diff)
-                #self._move_angle(angle)
+                # self._move_angle(angle)
             else:
                 continue_movement = False
-
 
     def _proposal_steps(self, angle_diff):
 

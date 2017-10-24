@@ -14,9 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from e21_util.gunparameter import *
+from devcontroller.misc.logger import LoggerFactory
+from e21_util.retry import retry
+from e21_util.interface import Loggable
 
-class GunController(object):
 
+class GunController(Loggable):
     DOC = """
         GunController - Controller for controller the gun position
 
@@ -30,10 +33,15 @@ class GunController(object):
 
     """
 
-    def __init__(self, gun_driver):
+    def __init__(self, gun_driver, logger=None):
+        if logger is None:
+            logger = LoggerFactory().get_gun_logger()
+
+        super(GunController, self).__init__(logger)
         self._driver = gun_driver
         self._parser = GunConfigParser("/home/sputter/Python/lib/config/gun.config")
         self._config = self._parser.get_config()
+
         self.vend(6)
 
         print(self.DOC)
@@ -44,28 +52,33 @@ class GunController(object):
     def get_driver(self):
         return self._driver
 
+    @retry()
     def get_position(self):
         return self._driver.getPosition()
 
+    @retry()
     def set_position(self, position):
         self._driver.position = position
 
+    @retry()
     def move_left(self, steps):
         pos = self.get_position()
-        self.set_position(pos-abs(int(steps)))
+        self.set_position(pos - abs(int(steps)))
 
+    @retry()
     def move_right(self, steps):
         self._driver.move_rel(abs(int(steps)))
 
     def compute_gun_position(self, gun_pos):
-        if not gun_pos in [1,2,3,4]:
+        if not gun_pos in [1, 2, 3, 4]:
             raise ValueError("Only position 1,2,3,4 are allowed")
 
         gun_1 = self._config.get_absolute_gun_position()
         diff = self._config.get_difference()
 
-        return gun_1 - (gun_pos - 1)* diff
+        return gun_1 - (gun_pos - 1) * diff
 
+    @retry()
     def get_gun(self):
         position = self.get_position()
         tol = self._config.get_tolerance()
@@ -86,6 +99,7 @@ class GunController(object):
         else:
             return 0
 
+    @retry()
     def stop(self):
         self.clear()
         self._driver.stop()
@@ -102,12 +116,13 @@ class GunController(object):
     def acc(self, value):
         self._driver.acc(value)
 
+    @retry()
     def set_gun(self, pos):
         steps = self.compute_gun_position(pos)
         self.set_position(steps)
 
-    def calibrate(self, actual_position, new_tol = None, new_diff = None):
-        if not actual_position in [1,2,3,4]:
+    def calibrate(self, actual_position, new_tol=None, new_diff=None):
+        if not actual_position in [1, 2, 3, 4]:
             raise ValueError("Cannot re-calibrate with wrong gun number...")
 
         if new_tol is None or new_tol < 0:
@@ -117,7 +132,7 @@ class GunController(object):
             new_diff = self._config.get_difference()
 
         gun_pos = self.get_position()
-        gun_1_pos = gun_pos + (actual_position - 1)*new_diff
+        gun_1_pos = gun_pos + (actual_position - 1) * new_diff
 
         self._config.set_tolerance(new_tol)
         self._config.set_difference(new_diff)

@@ -1,45 +1,55 @@
+# Copyright (C) 2017, see AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from e21_util.interruptor import InterruptableTimer, Interruptor, StopException
-from controllers.baur.factory import *
+from e21_util.retry import retry
+from e21_util.interface import Loggable, Interruptable
 from devcontroller.misc.logger import LoggerFactory
+from baur_pdcx85.factory import BaurFactory
 
-
-class SampleXController(object):
-
+class SampleXController(Loggable, Interruptable):
     def __init__(self, timer=None, interruptor=None, logger=None):
-        if interruptor is None:
-            interruptor = Interruptor()
-        self._interrupt = interruptor
-
         if logger is None:
             logger = LoggerFactory().get_sample_x_logger()
-        self._logger = logger
+
+        if interruptor is None:
+            interruptor = Interruptor()
+
+        Loggable.__init__(self, logger)
+        Interruptable.__init__(self, interruptor)
 
         if timer is None:
             timer = InterruptableTimer(self._interrupt)
+
         self._timer = timer
 
-        self._motor = BaurFactory().create_x_stage()
+        self._motor = BaurFactory().create_x()
         self._motor.initialize(4000, 20, 400, 300)
-
-    def set_interrupt(self, interrupt):
-        assert isinstance(interrupt, Interruptor)
-        self._interrupt = interrupt
 
     def get_motor(self):
         return self._motor
 
-    def get_interruptor(self):
-        return self._interrupt
-
-    def interrupt(self):
-        self._interrupt.stop()
-
+    @retry()
     def stop(self):
         self._motor.stop()
 
+    @retry()
     def get_position(self):
         return self._motor.getPosition()
 
+    @retry()
     def set_position(self, pos):
         self._motor.move_abs(pos)
         self._timer.sleep(0.5)
@@ -80,14 +90,16 @@ class SampleXController(object):
         else:
             self.move_left(diff)
 
+    @retry()
     def move_left(self, diff_in_mm):
         diff = abs(diff_in_mm)
         if abs(diff_in_mm) > 5:
             raise RuntimeError("Will not move more than 5 mm in total")
         steps = self._mm_to_steps(diff)
-        self._logger.info("Moving %s mm to the left. This corresponds to %s steps" , diff, steps)
+        self._logger.info("Moving %s mm to the left. This corresponds to %s steps", diff, steps)
         self._move(steps)
 
+    @retry()
     def move_right(self, diff_in_mm):
         diff = abs(diff_in_mm)
         if abs(diff_in_mm) > 5:
@@ -96,6 +108,7 @@ class SampleXController(object):
         self._logger.info("Moving %s mm to the right. This corresponds to %s steps", diff, steps)
         self._move(steps)
 
+    @retry()
     def move_left_steps(self, steps):
         abs_stps = abs(steps)
         if abs_stps > 30000:
@@ -103,6 +116,7 @@ class SampleXController(object):
         self._logger.info("Moving %s steps to the left. This corresponds to %s mm", steps, self._steps_to_mm(steps))
         self._move(steps)
 
+    @retry()
     def move_right_steps(self, steps):
         abs_stps = abs(steps)
         if abs_stps > 30000:
