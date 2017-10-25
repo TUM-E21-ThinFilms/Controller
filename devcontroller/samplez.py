@@ -20,7 +20,6 @@ from devcontroller.encoder.z import ZEncoder
 from devcontroller.misc.logger import LoggerFactory
 from baur_pdcx85.factory import BaurFactory
 
-
 class SampleZController(Loggable, Interruptable):
     Z_MIN = -15.0
     Z_MAX = 10.0

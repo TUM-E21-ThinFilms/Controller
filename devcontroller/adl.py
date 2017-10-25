@@ -55,13 +55,13 @@ class ADLController(Loggable):
         else:
             self.sputter = sputter
 
-        self.initialize()
-
         self.thread = None
         self.current_mode = None
         self.coeff_volt = None
         self.coeff_power = None
         self.coeff_current = None
+
+        self.initialize()
 
         print(self.DOC)
 
