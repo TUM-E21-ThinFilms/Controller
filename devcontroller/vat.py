@@ -136,6 +136,7 @@ class VATController(Loggable):
         except ErrorResponse as e:
             raise e
         except Exception as e:
+            print(e)
             self._logger.exception(e)
             raise ExecutionError("Could not initialize VAT. See log files")
 

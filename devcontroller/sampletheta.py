@@ -25,10 +25,10 @@ class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
-    ANGLE_TOL = 0.004
+    ANGLE_TOL = 0.001
     TOTAL_WAITING_TIME = 60
     WAITING_TIME = 0.1
-    HYSTERESIS_OFFSET = 400
+    HYSTERESIS_OFFSET = 800
 
     def __init__(self, interruptor=None, timer=None, logger=None):
 
@@ -170,7 +170,7 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _proposal_steps(self, angle_diff):
 
-        new_proposal = -1 * int(angle_diff * 1100)
+        new_proposal = -1 * int(angle_diff * 2000) # 2000 for 1/128 microsteps, 100 for 1/64
 
         hysteresis_correction = 0
         if not self._last_steps == 0:
