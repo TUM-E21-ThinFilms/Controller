@@ -54,7 +54,7 @@ class GunController(Loggable):
 
     @retry()
     def get_position(self):
-        return self._driver.getPosition()
+        return self._driver.get_position()
 
     @retry()
     def set_position(self, position):
