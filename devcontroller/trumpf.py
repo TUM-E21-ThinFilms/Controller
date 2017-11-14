@@ -65,9 +65,9 @@ class TruPlasmaDC3000Controller(object):
         
         if sputter is None:
             factory = TruPlasmaDC3000Factory()
-            self.sputter  = factory.create_sputter()
+            self.driver  = factory.create_sputter()
         else:
-            self.sputter = sputter
+            self.driver = sputter
             
         self.voltage, self.current, self.power, self.bits = None, None, None, None
             
@@ -75,13 +75,13 @@ class TruPlasmaDC3000Controller(object):
         print(self.DOC)
 
     def get_driver(self):
-        return self.sputter
+        return self.driver
         
     def remote_control(self):
-        self.sputter.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_RS232)
+        self.driver.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_RS232)
         
     def local_control(self):
-        self.sputter.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_DISPLAY)
+        self.driver.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_DISPLAY)
 
     def sputter_with_set_values(self):
         self.last_sputter_response = self.sputter(self.voltage, self.current, self.power, self.bits)
@@ -94,7 +94,7 @@ class TruPlasmaDC3000Controller(object):
             bits = self.NORMAL_RUN_BIT_MAINS_RELAY | self.NORMAL_RUN_BIT_POWER_ON | self.NORMAL_RUN_BIT_PC_CONTROL | self.NORMAL_RUN_BIT_DISPLAY_CONTROL
         
         try:
-            return self.sputter.normal_run(voltage, current, power, bits)
+            return self.driver.normal_run(voltage, current, power, bits)
         except Exception as e:
             self.logger.exception("Could not sputter")
             raise e
@@ -134,31 +134,31 @@ class TruPlasmaDC3000Controller(object):
             return False
         
     def get_voltage_on_threshold(self):
-        return self.sputter.read_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD)
+        return self.driver.read_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD)
     
     def set_voltage_on_threshold(self, threshold):
-        return self.sputter.set_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD, threshold)
+        return self.driver.set_float(self.FLOAT_CHANNEL_VOLTAGE_ON_THRESHOLD, threshold)
     
     def get_voltage_off_threshold(self):
-        return self.sputter.read_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD)
+        return self.driver.read_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD)
     
     def set_voltage_off_threshold(self, threshold):
-        return self.sputter.set_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD, threshold)
+        return self.driver.set_float(self.FLOAT_CHANNEL_VOLTAGE_OFF_THRESHOLD, threshold)
     
     def get_voltage_arc_threshold(self):
-        return self.sputter.read_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD)
+        return self.driver.read_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD)
     
     def set_voltage_arc_threshold(self, threshold):
-        return self.sputter.set_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD, threshold)
+        return self.driver.set_float(self.FLOAT_CHANNEL_VOLTAGE_ARC_THRESHOLD, threshold)
     
     def get_long_ramp(self):
-        return self.sputter.read_byte(self.BYTE_CHANNEL_LONG_RAMP)
+        return self.driver.read_byte(self.BYTE_CHANNEL_LONG_RAMP)
     
     def set_long_ramp(self, ramp_type):
         if ramp_type not in [self.LONG_RAMP_POWER, self.LONG_RAMP_CURRENT]:
             raise ValueError("type of ramp must be either POWER or CURRENT")
             
-        return self.sputter.set_byte(self.BYTE_CHANNEL_LONG_RAMP, ramp_type)
+        return self.driver.set_byte(self.BYTE_CHANNEL_LONG_RAMP, ramp_type)
 
 class SputterThread(StoppableThread):
 
