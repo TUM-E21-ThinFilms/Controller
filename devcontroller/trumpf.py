@@ -122,13 +122,17 @@ class TruPlasmaDC3000Controller(object):
         if self.set is False:
             raise RuntimeError("No sputter values set. Set them before turning sputter on!")
 
-        self.driver.remote_control()
+        try:
+            self.driver.remote_control()
+        except:
+            raise RuntimeError("Could not switch to remote control")
+
+        time.sleep(0.3)
 
         self.thread = SputterThread()
         self.thread.daemon = True
         self.thread.set_driver(self)
         self.thread.start()
-        self.sputter_with_set_values()
 
     def turn_off(self):
         self.set = False
