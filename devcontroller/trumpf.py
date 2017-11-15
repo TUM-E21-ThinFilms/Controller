@@ -22,6 +22,7 @@ from devcontroller.misc.sputtercheck import SputterChecker
 
 from e21_util.retry import retry
 
+
 class TruPlasmaDC3000Controller(object):
     INT_CHANNEL_CONTROL = 1
     CONTROL_RS232 = 1
@@ -64,8 +65,7 @@ class TruPlasmaDC3000Controller(object):
         self.checker = checker
 
         if sputter is None:
-            factory = TruPlasmaDC3000Factory()
-            self.driver = factory.create_sputter()
+            self.driver = TruPlasmaDC3000Factory().create_sputter()
         else:
             self.driver = sputter
 
@@ -76,13 +76,14 @@ class TruPlasmaDC3000Controller(object):
     def get_driver(self):
         return self.driver
 
+    @retry()
     def remote_control(self):
         self.driver.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_RS232)
 
+    @retry()
     def local_control(self):
         self.driver.set_int(self.INT_CHANNEL_CONTROL, self.CONTROL_DISPLAY)
 
-    @retry()
     def sputter_with_set_values(self):
         if self.set is True:
             self.last_sputter_response = self.sputter(self.voltage, self.current, self.power, self.bits)
@@ -92,6 +93,7 @@ class TruPlasmaDC3000Controller(object):
     def get_last_sputter_response(self):
         return self.last_sputter_response
 
+    @retry()
     def sputter(self, voltage, current, power, bits):
         if bits is None:
             bits = self.NORMAL_RUN_BIT_MAINS_RELAY | self.NORMAL_RUN_BIT_POWER_ON | self.NORMAL_RUN_BIT_PC_CONTROL | self.NORMAL_RUN_BIT_DISPLAY_CONTROL
@@ -122,10 +124,9 @@ class TruPlasmaDC3000Controller(object):
         if self.set is False:
             raise RuntimeError("No sputter values set. Set them before turning sputter on!")
 
-        try:
-            self.driver.remote_control()
-        except:
-            raise RuntimeError("Could not switch to remote control")
+        time.sleep(0.3)
+
+        self.driver.remote_control()
 
         time.sleep(0.3)
 
@@ -176,11 +177,11 @@ class TruPlasmaDC3000Controller(object):
 
         return self.driver.set_byte(self.BYTE_CHANNEL_LONG_RAMP, ramp_type)
 
+
 class SputterThread(StoppableThread):
     def set_driver(self, driver):
         self.driver = driver
 
     def do_execute(self):
         self.driver.sputter_with_set_values()
-        # self.driver.remote_control()
         time.sleep(1)
