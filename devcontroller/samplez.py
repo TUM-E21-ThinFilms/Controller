@@ -44,7 +44,7 @@ class SampleZController(Loggable, Interruptable):
         self._moving = False
 
         if timer is None:
-            timer = InterruptableTimer(self._interruptor)
+            timer = InterruptableTimer(self._interrupt)
 
         self._timer = timer
 

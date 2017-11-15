@@ -47,13 +47,13 @@ class SampleXController(Loggable, Interruptable):
 
     @retry()
     def get_position(self):
-        return self._motor.getPosition()
+        return self._motor.get_position()
 
     @retry()
     def set_position(self, pos):
         self._motor.move_abs(pos)
         self._timer.sleep(0.5)
-        cur_pos = self._motor.getPosition()
+        cur_pos = self._motor.get_position()
         try:
             while True:
                 self._interrupt.stoppable()
@@ -71,7 +71,7 @@ class SampleXController(Loggable, Interruptable):
             raise e
 
     def _move(self, steps):
-        current_steps = self._motor.getPosition()
+        current_steps = self._motor.get_position()
         final_steps = current_steps + steps
         try:
             while True:
@@ -79,7 +79,7 @@ class SampleXController(Loggable, Interruptable):
                 if current_steps == final_steps:
                     return True
                 self._timer.sleep(1)
-                current_steps = self._motor.getPosition()
+                current_steps = self._motor.get_position()
         except StopException as e:
             self._motor.stop()
             raise e
