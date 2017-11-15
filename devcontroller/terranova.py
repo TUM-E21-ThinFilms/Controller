@@ -31,7 +31,7 @@ class TerranovaController(Loggable):
             is_on(): Returns True if the pump is turned on
             is_connected(): Returns True if the pump is connected and can be controlled
             get_voltage(): Returns the current voltage in V
-            get_current(): Returns the current current in mA
+            get_current(): Returns the current current in A
             get_pressure(): Returns the current pressure in the desired units (mBar typically), only if the pump is on
     """
 
