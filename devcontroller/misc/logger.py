@@ -76,3 +76,6 @@ class LoggerFactory(object):
 
     def get_gauge_logger(self):
         return self._get_logger('Controller: Gauge', self.LOG_FILE_CONTROLLER)
+
+    def get_edwards_nxds_logger(self):
+        return self._get_logger('Controller: Edwards nXDS', self.LOG_FILE_CONTROLLER)

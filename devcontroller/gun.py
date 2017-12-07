@@ -17,7 +17,7 @@ from e21_util.gunparameter import *
 from devcontroller.misc.logger import LoggerFactory
 from e21_util.retry import retry
 from e21_util.interface import Loggable
-
+from e21_util.paths import Paths
 
 class GunController(Loggable):
     DOC = """
@@ -39,7 +39,7 @@ class GunController(Loggable):
 
         super(GunController, self).__init__(logger)
         self._driver = gun_driver
-        self._parser = GunConfigParser("/home/sputter/Python/lib/config/gun.config")
+        self._parser = GunConfigParser(Paths.GUN_CONFIG_PATH)
         self._config = self._parser.get_config()
 
         self.vend(6)
