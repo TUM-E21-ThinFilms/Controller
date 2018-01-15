@@ -19,11 +19,13 @@ from truplasmadc_3000.factory import TruPlasmaDC3000Factory
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
 from devcontroller.misc.sputtercheck import SputterChecker
-
 from e21_util.retry import retry
+from e21_util.cache import CACHE_TRUMPFDC, CACHE_TRUMPFDC_NAMESPACE, CACHE
 
 
 class TruPlasmaDC3000Controller(object):
+    cache = CACHE_TRUMPFDC
+
     INT_CHANNEL_CONTROL = 1
     CONTROL_RS232 = 1
     CONTROL_DISPLAY = 2
@@ -49,6 +51,7 @@ class TruPlasmaDC3000Controller(object):
 
         Usage:
             prepare_sputter(voltage [V], current [mA], power [W], bits = None): sets values for sputtering
+            get_last_sputter_response(): returns the last response from the sputter device (contains power, current and voltage)
             turn_on(): sputters with previously set values
             turn_off(): turns sputtering off
     """
@@ -87,11 +90,15 @@ class TruPlasmaDC3000Controller(object):
     def sputter_with_set_values(self):
         if self.set is True:
             self.last_sputter_response = self.sputter(self.voltage, self.current, self.power, self.bits)
+            self.cache.put('last_sputter_response', self.last_sputter_response)
         else:
             raise RuntimeError("No predefined values set. Cannot sputter")
 
     def get_last_sputter_response(self):
-        return self.last_sputter_response
+        if 'last_sputter_response' in self.cache:
+            return self.cache.get('last_sputter_response')
+        else:
+            return None
 
     @retry()
     def sputter(self, voltage, current, power, bits):
@@ -176,6 +183,12 @@ class TruPlasmaDC3000Controller(object):
             raise ValueError("type of ramp must be either POWER or CURRENT")
 
         return self.driver.set_byte(self.BYTE_CHANNEL_LONG_RAMP, ramp_type)
+
+    def get_current_voltage(self):
+        return self.get_last_sputter_response().get_voltage()
+
+    def get_current_power(self):
+        return self.get_last_sputter_response().get_power()
 
 
 class SputterThread(StoppableThread):
