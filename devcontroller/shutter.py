@@ -72,6 +72,9 @@ class ShutterController(Loggable):
     def stop(self):
         self.shutter.stop()
 
+    def set_closed(self):
+        self._status = self.STATUS_CLOSED
+
     def reset(self):
         self.stop()
         self._timer.sleep(0.3)
