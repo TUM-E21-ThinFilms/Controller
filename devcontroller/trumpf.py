@@ -126,7 +126,7 @@ class TruPlasmaDC3000Controller(object):
 
         time.sleep(0.3)
 
-        self.driver.remote_control()
+        self.remote_control()
 
         time.sleep(0.3)
 
