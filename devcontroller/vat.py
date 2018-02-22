@@ -119,7 +119,7 @@ class VATController(Loggable):
 
         self.valve.clear()
 
-        voltage = int(self._pressure_to_voltage(pressure)*self._pressure_range/10.0)
+        voltage = int(self.pressure_to_voltage(pressure)*self._pressure_range/10.0)
 
         self.valve.set_pressure(voltage)
 
