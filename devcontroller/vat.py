@@ -89,7 +89,7 @@ class VATController(Loggable):
 
     @retry()
     def get_pressure(self):
-        return self._voltage_to_pressure(self.get_voltage)
+        return self._voltage_to_pressure(self.get_voltage())
         #return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
 
     @retry()
