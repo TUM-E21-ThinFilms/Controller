@@ -94,8 +94,8 @@ class VATController(Loggable):
     @retry()
     def set_pressure(self, pressure):
         # pressure in mbar
-        if pressure >= 1:
-            raise ValueError("Will not set pressure higher than 1 mbar.")
+        if pressure >= 1e-1:
+            raise ValueError("Will not set pressure higher than 1E-1 mbar.")
 
         try:
             p_ref = self._gauge.get_pressure()
