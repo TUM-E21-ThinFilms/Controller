@@ -89,7 +89,14 @@ class VATController(Loggable):
 
     @retry()
     def get_pressure(self):
-        return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
+        return self._voltage_to_pressure(self.get_voltage)
+        #return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
+
+    @retry()
+    def get_voltage(self):
+        return float(self.valve.get_pressure() - self._sensor_offset) / self._pressure_range * 10.0
+
+
 
     @retry()
     def set_pressure(self, pressure):
@@ -111,8 +118,10 @@ class VATController(Loggable):
 
         self.valve.clear()
 
-        voltage = self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset
-        self.valve.set_pressure(int(voltage))
+        voltage = int(self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset)
+        print("Voltage set to %i" % voltage)
+        self.valve.set_pressure(voltage)
+        print("Voltage-reading is %i" % self.get_voltage())
 
     @retry()
     def set_pressure_alignment(self, pressure):
@@ -120,7 +129,7 @@ class VATController(Loggable):
         self.valve.clear()
 
         config = self.valve.get_sensor_configuration()
-        config[1] = "1" # Enable zero - needed to set pressure alignment (otherwise not allowed)
+        config[1] = "0" # Enable zero - needed to set pressure alignment (otherwise not allowed)
         self.valve.set_sensor_configuration(config)
 
         voltage = self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
@@ -132,7 +141,7 @@ class VATController(Loggable):
         try:
             self.valve.clear()
             self._pressure_range = int(self.valve.get_pressure_range())
-            self._sensor_offset  = int(self.valve.get_sensor_offset()/self._pressure_range/10.0)
+            self._sensor_offset = int(self.valve.get_sensor_offset())
         except ErrorResponse as e:
             raise e
         except Exception as e:
