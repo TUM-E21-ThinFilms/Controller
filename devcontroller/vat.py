@@ -65,7 +65,7 @@ class VATController(Loggable):
     """
         Converts a voltage (FullRange Gauge PKR 261) to a pressure in mbar.
     """
-    def _voltage_to_pressure(self, voltage):
+    def voltage_to_pressure(self, voltage):
         # We're using the formula provided by Pfeiffer for the Compact FullRange Gauge PKR 261:
         # pressure p [mbar] = 10^(1.667 * U - d) where
         #   U is the given signal from the gauge
@@ -77,24 +77,25 @@ class VATController(Loggable):
     """
         Converts a pressure [mbar] into a voltage.
     """
-    def _pressure_to_voltage(self, pressure):
+    def pressure_to_voltage(self, pressure):
         # We're using the formula provided by Pfeiffer for the Compact FullRange Gauge PKR 261:
         # voltage U [V] = c + 0.6* log_10(p)   where
         # c = 6.8 a constant
         # p the given pressure in [mbar]
         return 6.8 + 0.6 * log10(pressure)
 
-    def pressure_to_voltage(self, pressure):
-        return self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
+    #def pressure_to_voltage(self, pressure):
+        #return self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
+
 
     @retry()
     def get_pressure(self):
-        return self._voltage_to_pressure(self.get_voltage())
+        return self.voltage_to_pressure(self.get_voltage())
         #return self._voltage_to_pressure(float(self.valve.get_pressure())/(self._pressure_range/10.0) + self._sensor_offset)
 
     @retry()
     def get_voltage(self):
-        return float(self.valve.get_pressure() - self._sensor_offset) / self._pressure_range * 10.0
+        return float(self.valve.get_pressure() + self._sensor_offset) / self._pressure_range * 10.0
 
 
 
@@ -103,7 +104,7 @@ class VATController(Loggable):
         # pressure in mbar
         if pressure >= 1e-1:
             raise ValueError("Will not set pressure higher than 1E-1 mbar.")
-
+        return
         try:
             p_ref = self._gauge.get_pressure()
             p_vat = self.get_pressure()
@@ -118,7 +119,10 @@ class VATController(Loggable):
 
         self.valve.clear()
 
-        voltage = int(self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset)
+        #voltage = int(self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset)
+
+        voltage = int(self.pressure_to_voltage(pressure))
+
         self.valve.set_pressure(voltage)
 
     @retry()
@@ -130,7 +134,7 @@ class VATController(Loggable):
         config[1] = "1" # Enable zero - needed to set pressure alignment (otherwise not allowed)
         self.valve.set_sensor_configuration(config)
 
-        voltage = self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
+        voltage = self.pressure_to_voltage(pressure) * self._pressure_range / 10.0
         self.valve.set_pressure_alignment(int(voltage))
         self.initialize()
 
