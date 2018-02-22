@@ -119,9 +119,7 @@ class VATController(Loggable):
         self.valve.clear()
 
         voltage = int(self._pressure_to_voltage(pressure)*self._pressure_range/10.0 - self._sensor_offset)
-        print("Voltage set to %i" % voltage)
         self.valve.set_pressure(voltage)
-        print("Voltage-reading is %i" % self.get_voltage())
 
     @retry()
     def set_pressure_alignment(self, pressure):
@@ -129,7 +127,7 @@ class VATController(Loggable):
         self.valve.clear()
 
         config = self.valve.get_sensor_configuration()
-        config[1] = "0" # Enable zero - needed to set pressure alignment (otherwise not allowed)
+        config[1] = "1" # Enable zero - needed to set pressure alignment (otherwise not allowed)
         self.valve.set_sensor_configuration(config)
 
         voltage = self._pressure_to_voltage(pressure) * self._pressure_range / 10.0 - self._sensor_offset
