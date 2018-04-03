@@ -21,7 +21,7 @@ from devcontroller.misc.logger import LoggerFactory
 class CompressorController(Loggable):
 
     DOC = """
-        CompressorController - Controlls the compressor (Sumitomo F70H)
+        CompressorController - Controls the compressor (Sumitomo F70H)
 
         Usage:
             turn_on(): Turns the compressor on

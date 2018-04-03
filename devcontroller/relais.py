@@ -24,6 +24,7 @@ class RelaisController(Loggable):
     SCROLL_PORT = RelaisDriver.RELAIS_K1
     LAMP_PORT = RelaisDriver.RELAIS_K3
     BYPASS_PORT = RelaisDriver.RELAIS_K4
+    HELIUM_PORT = RelaisDriver.RELAIS_K5
 
     DOC = """
         RelaisController - Controls the Conrad 197720 Relais.
@@ -32,6 +33,7 @@ class RelaisController(Loggable):
             scroll_on(), scroll_off(): Turns the scroll pump on/off
             lamp_on(), lamp_off()    : Turns the lamp on/off
             bypass_on(), bypass_off(): Opens/Closes the bypass
+            helium_on(), helium_off(): Opens/Closes the helium valve for the cryo
             off()                    : Turns all off (scroll, lamp, bypass)
             is_scroll_on(), ....     : Returns True if the scroll(...) is On.
 
@@ -51,6 +53,14 @@ class RelaisController(Loggable):
         self.relais.setup()
 
         print(self.DOC)
+
+    @retry()
+    def helium_on(self):
+        self.relais.set_single(self.HELIUM_PORT)
+
+    @retry()
+    def helium_off(self):
+        self.relais.del_single(self.HELIUM_PORT)
 
     @retry()
     def scroll_on(self):
@@ -91,6 +101,10 @@ class RelaisController(Loggable):
     @retry()
     def is_bypass_on(self):
         return self.relais.get_port().get_port() & self.BYPASS_PORT > 0
+
+    @retry()
+    def is_helium_on(self):
+        return self.relais.get_port().get_port() & self.HELIUM_PORT > 0
 
     def get_driver(self):
         return self.relais
