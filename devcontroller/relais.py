@@ -24,7 +24,8 @@ class RelaisController(Loggable):
     SCROLL_PORT = RelaisDriver.RELAIS_K1
     LAMP_PORT = RelaisDriver.RELAIS_K3
     BYPASS_PORT = RelaisDriver.RELAIS_K4
-    HELIUM_PORT = RelaisDriver.RELAIS_K5
+    HELIUM_PORT = RelaisDriver.RELAIS_K6
+    HELIUM_LEAK_PORT = RelaisDriver.RELAIS_K5
 
     DOC = """
         RelaisController - Controls the Conrad 197720 Relais.
@@ -57,10 +58,21 @@ class RelaisController(Loggable):
     @retry()
     def helium_on(self):
         self.relais.set_single(self.HELIUM_PORT)
+        self.relais.del_single(self.HELIUM_LEAK_PORT)
 
     @retry()
-    def helium_off(self):
+    def helium_off(self, leak=True):
         self.relais.del_single(self.HELIUM_PORT)
+        if leak:
+            self.relais.set_single(self.HELIUM_LEAK_PORT)
+
+    @retry()
+    def helium_leak_on(self):
+        self.relais.set_single(self.HELIUM_LEAK_PORT)
+
+    @retry()
+    def helium_leak_off(self):
+        self.relais.del_single(self.HELIUM_LEAK_PORT)
 
     @retry()
     def scroll_on(self):
@@ -105,6 +117,10 @@ class RelaisController(Loggable):
     @retry()
     def is_helium_on(self):
         return self.relais.get_port().get_port() & self.HELIUM_PORT > 0
+
+    @retry()
+    def is_helium_leak_on(self):
+        return self.relais.get_port().get_port() & self.HELIUM_LEAK_PORT > 0
 
     def get_driver(self):
         return self.relais
