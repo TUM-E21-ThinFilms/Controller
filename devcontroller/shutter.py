@@ -80,7 +80,7 @@ class ShutterController(Loggable):
         self._timer.sleep(0.3)
         self.initialize(10, 10)
         self._timer.sleep(0.3)
-        self.shutter.move(47)
+        self.shutter.move(49)
         self._status = self.STATUS_CLOSED
         self._timer.sleep(7)
         self.initialize()
@@ -91,7 +91,7 @@ class ShutterController(Loggable):
         self._timer.sleep(0.3)
         self.shutter.move(-75)
         self._timer.sleep(10)
-        self.shutter.move(47)
+        self.shutter.move(49)
         self._timer.sleep(7)
         self.initialize()
         print("done.")
