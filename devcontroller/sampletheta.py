@@ -26,7 +26,7 @@ class SampleThetaController(Loggable, Interruptable):
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
     ANGLE_TOL = 0.001
-    TOTAL_WAITING_TIME = 60
+    TOTAL_WAITING_TIME = 5
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800
 
@@ -43,7 +43,6 @@ class SampleThetaController(Loggable, Interruptable):
 
         self._motor = ThetaMotorController()
         self._encoder = ThetaEncoder()
-        self._moving = False
         self._last_steps = 0
 
         if timer is None:
@@ -63,9 +62,6 @@ class SampleThetaController(Loggable, Interruptable):
 
     @retry()
     def get_angle(self):
-        if not self._moving is False:
-            return self._moving
-
         with self._encoder:
             return self._encoder.get_angle()
 
@@ -73,20 +69,20 @@ class SampleThetaController(Loggable, Interruptable):
     def set_angle(self, angle):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
             raise RuntimeError("New angle is not in the allowed angle range [%s, %s]", self.ANGLE_MIN, self.ANGLE_MAX)
-        try:
-            self._moving = 0
-            with self._encoder:
-                self._move_angle(angle)
-        finally:
-            self._moving = False
+
+        with self._encoder:
+            self._move_angle(angle)
 
     @retry()
     def move_cw(self, angle):
         self.set_angle(abs(angle))
 
     @retry()
-    def move_acw(self, angle):
+    def move_ccw(self, angle):
         self.set_angle(-1.0 * abs(angle))
+
+    def move_acw(self, angle):
+        self.move_ccw(angle)
 
     def search_reference(self):
         try:
@@ -108,6 +104,59 @@ class SampleThetaController(Loggable, Interruptable):
             self._encoder.disconnect()
             self._motor.get_driver().activate_endphase()
 
+    def _set_angle(self, angle):
+        with self._encoder:
+            self._interrupt.stoppable()
+
+            while True:
+                current_angle = self._encoder.get_angle()
+                angle_difference = angle - current_angle
+
+                steps_to_move = self._proposal_steps(angle_difference)
+
+                if steps_to_move < 5:
+                    self._logger.info("---> Angle difference % very low, moving just %s steps. Aborting.", angle_difference, steps_to_move)
+                    break
+                self._interrupt.stoppable()
+
+                try:
+                    self._motor.move(steps_to_move)
+
+                    i = 0.0
+                    while True:
+                        self._interrupt.stoppable()
+                        i += self.WAITING_TIME
+                        if i >= self.TOTAL_WAITING_TIME:
+                            self._logger.info("---> Motor movement exceeded waiting time")
+                            self._motor.stop()
+                            break
+
+                        if not self._motor.is_moving():
+                            break
+
+                        cur_angle = self._encoder.get_angle()
+                        self._moving = cur_angle
+                        self._logger.info("--> Current angle %s", cur_angle)
+
+                        if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
+                            self._logger.error("---> Motor not in allowed range. STOP")
+                            raise RuntimeError("Angle not in allowed position anymore. STOP.")
+
+                        self._timer.sleep(self.WAITING_TIME)
+                except BaseException as e:
+                    self._motor.stop()
+                    raise e
+
+                current_angle = self._encoder.get_angle()
+                angle_difference = angle - current_angle
+
+                if abs(angle_difference) < self.ANGLE_TOL:
+                    self._logger.info("---> Reached target angle %s with current angle %s, difference %s", angle,
+                                      current_angle, angle_difference)
+
+
+
+    """
     def _move_angle(self, angle):
         continue_movement = True
         while continue_movement:
@@ -117,7 +166,7 @@ class SampleThetaController(Loggable, Interruptable):
             diff = angle - cur_angle
 
             if 0.03 < abs(diff) < 0.1:
-                self._logger.info("---> Angle difference %s very low. Read angle again just be sure ...")
+                self._logger.info("---> Angle difference %s very low. Read angle again just to be sure ...", abs(diff))
                 self._timer.sleep(1)
                 cur_angle = self._encoder.get_angle()
                 diff = angle - cur_angle
@@ -167,6 +216,7 @@ class SampleThetaController(Loggable, Interruptable):
                 # self._move_angle(angle)
             else:
                 continue_movement = False
+    """
 
     def _proposal_steps(self, angle_diff):
 
@@ -181,7 +231,7 @@ class SampleThetaController(Loggable, Interruptable):
 
         self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset: %s", self._last_steps, new_proposal, hysteresis_correction)
         self._last_steps = new_proposal + hysteresis_correction
-        return new_proposal
+        return self._last_steps
 
     def signum(self, value):
         if value > 0:

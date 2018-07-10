@@ -123,15 +123,12 @@ class ThetaEncoder(object):
         return self._encoder
 
     def _connect(self):
-        self._encoder = heidenhain.get_theta_encoder()
+        self._encoder = heidenhain.get_encoder()
 
         success = self._encoder.connect() and not self._encoder.hasError()
 
         if not success:
             return False
-
-        if self._encoder.hasReference():
-            self.compute_reference()
 
         return True
 
@@ -145,7 +142,7 @@ class ThetaEncoder(object):
         if not success:
             raise RuntimeError("Could not read next value from encoder")
         #return self._encoder.getPosition() / 4096.0 / 28000 * 360 + 3.85286
-        angle = self._encoder.getAbsoluteDegree(False)
+        angle = self._encoder.getAbsoluteDegree()
         return angle - self._calibration
 
     def calibrate(self, angle):
