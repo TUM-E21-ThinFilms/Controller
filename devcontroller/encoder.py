@@ -235,3 +235,28 @@ class ZEncoder(object):
         new_calib = self.get_position() - position
         self._calibration = old_calib
         return new_calib
+
+
+class ReferenceMarkHelper(object):
+    def __init__(self, encoder):
+        if not isinstance(encoder, HeidenhainEncoder):
+            raise RuntimeError("encoder must be an instance of HeidenhainEncoder")
+
+        self._encoder = encoder
+
+    def _search(self, axis):
+        try:
+            self._encoder.connect()
+            axis.start_reference()
+            while not theta.has_reference():
+                print(theta.info())
+
+        finally:
+            axis.stop_reference()
+            self._encoder.disconnect()
+
+    def search_theta(self):
+        self._search(ThetaEncoder(self._encoder))
+
+    def search_z(self):
+        self._search(ZEncoder(self._encoder))
