@@ -31,11 +31,12 @@ class ADLController(Loggable):
         ADLController - Controls the ADL Sputter power supply
 
         Usage:
-            get_sputter(): Returns the ADLDriver
+            get_driver(): Returns the ADLDriver
             sputter(value, mode): Sputters with mode and value, i.e. mode=ADLSputterDriver.MODE_POWER, value=50 [Watt]
-            sputter_power(power [W]): Sputters in power mode with power in Watt - immediately starts sputtering
-            sputter_voltage(voltage [V]): Sputters in voltage mode with voltage - immediately starts sputtering
-            turn_off(): Turns off sputtering immediately
+            sputter_power(power [W])/power(power [W]): Sputters in power mode with power in Watt
+            sputter_voltage(voltage [V]): Sputters in voltage mode with voltage
+            on()/turn_on(): Sputters with the pre-set values
+            off()/turn_off(): Turns off sputtering immediately
     """
 
     def __init__(self, sputter=None, logger=None, checker=None):
