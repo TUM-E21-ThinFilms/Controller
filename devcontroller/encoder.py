@@ -139,7 +139,7 @@ class ThetaEncoder(object):
 
     def get_trigger(self):
         self._encoder.assert_connected()
-        return self._encoder.get_encoder().getThetaData().getThetaData().getData().trigger
+        return self._encoder.get_encoder().getThetaData().getData().trigger
 
     def start_reference(self):
         self._encoder.assert_connected()
@@ -206,7 +206,7 @@ class ZEncoder(object):
 
     def get_trigger(self):
         self._encoder.assert_connected()
-        return self._encoder.get_encoder().getZData().getThetaData().getData().trigger
+        return self._encoder.get_encoder().getZData().getData().trigger
 
     def start_reference(self):
         self._encoder.assert_connected()
