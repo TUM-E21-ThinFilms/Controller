@@ -63,6 +63,8 @@ class HeidenhainEncoder(object):
             if not suc:
                 raise RuntimeError("Could not disconnect from Heidenhain-Encoder. Releasing lock ...")
 
+            self._connected = False
+
         finally:
             self._lock.release()
 
