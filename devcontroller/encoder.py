@@ -82,7 +82,8 @@ class HeidenhainEncoder(object):
 
     def clear(self):
         self.assert_connected()
-        return self._encoder.clear()
+        self._encoder.clearStatus()
+        self._encoder.clear()
 
     def clear_connection(self):
         return self._encoder.clearConnection()
@@ -246,8 +247,14 @@ class ReferenceMarkHelper(object):
         self._encoder = encoder
 
     def _search(self, axis):
+        is_connected = False
         try:
-            self._encoder.connect()
+            is_connected = self._encoder.is_connected()
+            if not is_connected:
+                self._encoder.connect()
+
+            self._encoder.clear_buffer()
+            axis.clear_reference()
             axis.start_reference()
             while not axis.has_reference():
                 self._encoder.read()
@@ -256,7 +263,8 @@ class ReferenceMarkHelper(object):
             print(e)
         finally:
             axis.stop_reference()
-            self._encoder.disconnect()
+            if not is_connected:
+                self._encoder.disconnect()
 
     def search_theta(self):
         self._search(ThetaEncoder(self._encoder))
