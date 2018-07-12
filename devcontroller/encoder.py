@@ -87,11 +87,8 @@ class HeidenhainEncoder(object):
     def clear_connection(self):
         return self._encoder.clearConnection()
 
-    def read(self, clear=True):
+    def read(self):
         self.assert_connected()
-        if clear:
-            self.clear_buffer()
-
         return self._encoder.read()
 
     def clear_buffer(self):
