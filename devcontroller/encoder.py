@@ -68,6 +68,8 @@ class HeidenhainEncoder(object):
         finally:
             self._lock.release()
 
+        return True
+
     def is_connected(self):
         return self._connected
 
@@ -251,6 +253,7 @@ class ReferenceMarkHelper(object):
             self._encoder.connect()
             axis.start_reference()
             while not axis.has_reference():
+                self._encoder.read(False)
                 print(axis.info())
         except BaseException as e:
             print(e)
