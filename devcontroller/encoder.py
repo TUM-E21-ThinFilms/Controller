@@ -248,9 +248,10 @@ class ReferenceMarkHelper(object):
         try:
             self._encoder.connect()
             axis.start_reference()
-            while not theta.has_reference():
-                print(theta.info())
-
+            while not axis.has_reference():
+                print(axis.info())
+        except BaseException as e:
+            print(e)
         finally:
             axis.stop_reference()
             self._encoder.disconnect()
