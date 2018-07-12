@@ -250,7 +250,7 @@ class ReferenceMarkHelper(object):
             self._encoder.connect()
             axis.start_reference()
             while not axis.has_reference():
-                self._encoder.read(False)
+                self._encoder.read()
                 print(axis.info())
         except BaseException as e:
             print(e)
