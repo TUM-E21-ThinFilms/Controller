@@ -285,7 +285,7 @@ class ReferenceMarkHelper(object):
             if not is_connected:
                 self._encoder.connect()
 
-            while not axis.has_reference():
+            while True:
                 self._encoder.read()
                 print(axis.info())
         except BaseException as e:
