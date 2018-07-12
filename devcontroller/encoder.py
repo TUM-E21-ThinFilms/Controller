@@ -182,7 +182,7 @@ class ZEncoder(object):
     def info(self):
         self._encoder.assert_connected()
 
-        data = self._encoder.get_encoder().getThetaData().getData()
+        data = self._encoder.get_encoder().getZData().getData()
 
         return [data.position, data.status, data.triggerCounter, data.timestamp, data.ref1, data.ref2, data.distCodedRef]
 
@@ -201,11 +201,11 @@ class ZEncoder(object):
         if not self.has_reference():
             raise RuntimeError("Cannot read position, no valid reference given")
 
-        return self._encoder.get_encoder().getThetaData().getAbsoluteDegree() - self._calibration
+        return self._encoder.get_encoder().getZData().getAbsoluteDegree() - self._calibration
 
     def get_trigger(self):
         self._encoder.assert_connected()
-        return self._encoder.get_encoder().getThetaData().getThetaData().getData().trigger
+        return self._encoder.get_encoder().getZData().getThetaData().getData().trigger
 
     def start_reference(self):
         self._encoder.assert_connected()
