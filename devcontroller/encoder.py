@@ -247,6 +247,11 @@ class ReferenceMarkHelper(object):
         self._encoder = encoder
 
     def _search(self, axis):
+
+        self._encoder.read()
+        if axis.has_reference():
+            raise RuntimeError("Axis is already referenced!")
+
         is_connected = False
         try:
             is_connected = self._encoder.is_connected()
@@ -271,3 +276,26 @@ class ReferenceMarkHelper(object):
 
     def search_z(self):
         self._search(ZEncoder(self._encoder))
+
+
+    def _show(self, axis):
+        is_connected = False
+        try:
+            is_connected = self._encoder.is_connected()
+            if not is_connected:
+                self._encoder.connect()
+
+            while not axis.has_reference():
+                self._encoder.read()
+                print(axis.info())
+        except BaseException as e:
+            print(e)
+        finally:
+            if not is_connected:
+                self._encoder.disconnect()
+
+    def show_theta(self):
+        self._show(ThetaEncoder(self._encoder))
+
+    def show_z(self):
+        self._show(ZEncoder(self._encoder))
