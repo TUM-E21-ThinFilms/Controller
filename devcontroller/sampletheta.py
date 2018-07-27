@@ -139,6 +139,7 @@ class SampleThetaController(Loggable, Interruptable):
         # if finished, move the motor in the opposite direction for approx 50-100 steps.
         # if not, then the motor still "pushes" into the direction, which leads to a continuous increment
         # in the angle...
+        self._logger.info("---> Moving %s steps in the opposite direction (prevent small increments of angle)")
         direction = -1 * self.signum(steps_to_move)
         self._motor.move(direction * 100)
         self._last_steps = direction * 100
