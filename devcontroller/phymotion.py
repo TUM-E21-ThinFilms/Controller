@@ -15,7 +15,7 @@
 
 from phytron_phymotion.factory import PhytronFactory
 from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP, PARAMETER_START_STOP_FREQUENCY, \
-    PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT
+    PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT, PARAMETER_CURRENT_DELAY_TIME
 from devcontroller.misc.logger import LoggerFactory
 from e21_util.retry import retry
 from e21_util.interface import Loggable
