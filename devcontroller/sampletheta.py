@@ -17,7 +17,6 @@ from e21_util.interruptor import Interruptor, InterruptableTimer
 from e21_util.retry import retry
 from e21_util.interface import Loggable, Interruptable
 from devcontroller.misc.logger import LoggerFactory
-from devcontroller.encoder.theta import ThetaEncoder
 from devcontroller.phymotion import ThetaMotorController
 from encoder.factory import Factory
 
