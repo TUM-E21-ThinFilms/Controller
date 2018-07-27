@@ -20,6 +20,7 @@ from devcontroller.misc.logger import LoggerFactory
 from devcontroller.phymotion import ThetaMotorController
 from encoder.factory import Factory
 
+
 class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
@@ -94,9 +95,9 @@ class SampleThetaController(Loggable, Interruptable):
 
             steps_to_move = self._proposal_steps(angle_difference)
 
-            if steps_to_move < 5:
-                self._logger.info("---> Angle difference % very low, moving just %s steps. Aborting.", angle_difference,
-                                  steps_to_move)
+            if abs(steps_to_move) < 5:
+                self._logger.info("---> Angle difference %s very low, moving just %s steps. Aborting.",
+                                  angle_difference, steps_to_move)
                 break
             self._interrupt.stoppable()
 
