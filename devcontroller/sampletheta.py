@@ -18,8 +18,8 @@ from e21_util.retry import retry
 from e21_util.interface import Loggable, Interruptable
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.encoder.theta import ThetaEncoder
-from phymotion import ThetaMotorController
-
+from devcontroller.phymotion import ThetaMotorController
+from encoder.factory import Factory
 
 class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
@@ -30,7 +30,7 @@ class SampleThetaController(Loggable, Interruptable):
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800
 
-    def __init__(self, interruptor=None, timer=None, logger=None):
+    def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
 
         if logger is None:
             logger = LoggerFactory().get_sample_theta_logger()
@@ -42,7 +42,11 @@ class SampleThetaController(Loggable, Interruptable):
         Interruptable.__init__(self, interruptor)
 
         self._motor = ThetaMotorController()
-        self._encoder = ThetaEncoder()
+
+        if encoder is None:
+            encoder = Factory().get_interface()
+
+        self._encoder = encoder
         self._last_steps = 0
 
         if timer is None:
@@ -62,16 +66,14 @@ class SampleThetaController(Loggable, Interruptable):
 
     @retry()
     def get_angle(self):
-        with self._encoder:
-            return self._encoder.get_angle()
+        return self._encoder.get_angle()
 
     @retry()
     def set_angle(self, angle):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
             raise RuntimeError("New angle is not in the allowed angle range [%s, %s]", self.ANGLE_MIN, self.ANGLE_MAX)
 
-        with self._encoder:
-            self._move_angle(angle)
+        self._move_angle(angle)
 
     @retry()
     def move_cw(self, angle):
@@ -84,77 +86,55 @@ class SampleThetaController(Loggable, Interruptable):
     def move_acw(self, angle):
         self.move_ccw(angle)
 
-    def search_reference(self):
-        try:
-            self._encoder.connect()
-            self._motor.get_driver().deactivate_endphase()
-
-            self._encoder.start_reference()
-            raw_encoder = self._encoder.get_encoder()
-            raw_encoder.clearBuffer()
-            while not raw_encoder.receivedReference():
-                self._interrupt.stoppable()
-                raw_encoder.read()
-                self._logger.info("At position %s. Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(),
-                                  raw_encoder.getReference2())
-
-            self._encoder.stop_reference()
-
-        finally:
-            self._encoder.disconnect()
-            self._motor.get_driver().activate_endphase()
-
     def _set_angle(self, angle):
-        with self._encoder:
+        self._interrupt.stoppable()
+
+        while True:
+            current_angle = self.get_angle()
+            angle_difference = angle - current_angle
+
+            steps_to_move = self._proposal_steps(angle_difference)
+
+            if steps_to_move < 5:
+                self._logger.info("---> Angle difference % very low, moving just %s steps. Aborting.", angle_difference,
+                                  steps_to_move)
+                break
             self._interrupt.stoppable()
 
-            while True:
-                current_angle = self._encoder.get_angle()
-                angle_difference = angle - current_angle
+            try:
+                self._motor.move(steps_to_move)
 
-                steps_to_move = self._proposal_steps(angle_difference)
+                i = 0.0
+                while True:
+                    self._interrupt.stoppable()
+                    i += self.WAITING_TIME
+                    if i >= self.TOTAL_WAITING_TIME:
+                        self._logger.info("---> Motor movement exceeded waiting time")
+                        self._motor.stop()
+                        break
 
-                if steps_to_move < 5:
-                    self._logger.info("---> Angle difference % very low, moving just %s steps. Aborting.", angle_difference, steps_to_move)
-                    break
-                self._interrupt.stoppable()
+                    if not self._motor.is_moving():
+                        break
 
-                try:
-                    self._motor.move(steps_to_move)
+                    cur_angle = self.get_angle()
+                    self._moving = cur_angle
+                    self._logger.info("--> Current angle %s", cur_angle)
 
-                    i = 0.0
-                    while True:
-                        self._interrupt.stoppable()
-                        i += self.WAITING_TIME
-                        if i >= self.TOTAL_WAITING_TIME:
-                            self._logger.info("---> Motor movement exceeded waiting time")
-                            self._motor.stop()
-                            break
+                    if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
+                        self._logger.error("---> Motor not in allowed range. STOP")
+                        raise RuntimeError("Angle not in allowed position anymore. STOP.")
 
-                        if not self._motor.is_moving():
-                            break
+                    self._timer.sleep(self.WAITING_TIME)
+            except BaseException as e:
+                self._motor.stop()
+                raise e
 
-                        cur_angle = self._encoder.get_angle()
-                        self._moving = cur_angle
-                        self._logger.info("--> Current angle %s", cur_angle)
+            current_angle = self.get_angle()
+            angle_difference = angle - current_angle
 
-                        if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
-                            self._logger.error("---> Motor not in allowed range. STOP")
-                            raise RuntimeError("Angle not in allowed position anymore. STOP.")
-
-                        self._timer.sleep(self.WAITING_TIME)
-                except BaseException as e:
-                    self._motor.stop()
-                    raise e
-
-                current_angle = self._encoder.get_angle()
-                angle_difference = angle - current_angle
-
-                if abs(angle_difference) < self.ANGLE_TOL:
-                    self._logger.info("---> Reached target angle %s with current angle %s, difference %s", angle,
-                                      current_angle, angle_difference)
-
-
+            if abs(angle_difference) < self.ANGLE_TOL:
+                self._logger.info("---> Reached target angle %s with current angle %s, difference %s", angle,
+                                  current_angle, angle_difference)
 
     """
     def _move_angle(self, angle):
@@ -220,7 +200,7 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _proposal_steps(self, angle_diff):
 
-        new_proposal = -1 * int(angle_diff * 2000) # 2000 for 1/128 microsteps, 100 for 1/64
+        new_proposal = -1 * int(angle_diff * 2000)  # 2000 for 1/128 microsteps, 100 for 1/64
 
         hysteresis_correction = 0
         if not self._last_steps == 0:
@@ -229,7 +209,8 @@ class SampleThetaController(Loggable, Interruptable):
             if not sig_new == sig_old:
                 hysteresis_correction = sig_new * self.HYSTERESIS_OFFSET
 
-        self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset: %s", self._last_steps, new_proposal, hysteresis_correction)
+        self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset: %s", self._last_steps, new_proposal,
+                          hysteresis_correction)
         self._last_steps = new_proposal + hysteresis_correction
         return self._last_steps
 
