@@ -88,7 +88,7 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _set_angle(self, angle):
         self._interrupt.stoppable()
-
+        steps_to_move = 0
         while True:
             current_angle = self.get_angle()
             angle_difference = angle - current_angle
@@ -135,6 +135,13 @@ class SampleThetaController(Loggable, Interruptable):
             if abs(angle_difference) < self.ANGLE_TOL:
                 self._logger.info("---> Reached target angle %s with current angle %s, difference %s", angle,
                                   current_angle, angle_difference)
+
+        # if finished, move the motor in the opposite direction for approx 50-100 steps.
+        # if not, then the motor still "pushes" into the direction, which leads to a continuous increment
+        # in the angle...
+        direction = -1 * self.signum(steps_to_move)
+        self._motor.move(direction * 100)
+        self._last_steps = direction * 100
 
     """
     def _move_angle(self, angle):

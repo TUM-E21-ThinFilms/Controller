@@ -14,10 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from e21_util.paths import Paths
 
 class LoggerFactory(object):
 
-    LOG_FILE_CONTROLLER = 'controller.log'
+    LOG_FILE_CONTROLLER = Paths.LOG_PATH + 'controller.log'
 
     def _get_logger(self, name, file):
         logger = logging.getLogger(name)
