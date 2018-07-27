@@ -72,7 +72,7 @@ class SampleThetaController(Loggable, Interruptable):
         if not (self.ANGLE_MIN <= angle <= self.ANGLE_MAX):
             raise RuntimeError("New angle is not in the allowed angle range [%s, %s]", self.ANGLE_MIN, self.ANGLE_MAX)
 
-        self._move_angle(angle)
+        self._set_angle(angle)
 
     @retry()
     def move_cw(self, angle):
