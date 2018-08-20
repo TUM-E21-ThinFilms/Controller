@@ -44,11 +44,6 @@ class ADLController(Loggable):
 
         super(ADLController, self).__init__(logger)
 
-        if checker is None:
-            self.checker = DisabledSputterChecker()
-        else:
-            self.checker = checker
-
         if sputter is None:
             factory = ADLSputterFactory()
             self.sputter = factory.create_sputter()
@@ -85,7 +80,6 @@ class ADLController(Loggable):
 
     @retry()
     def sputter(self, value, mode=ADLSputterDriver.MODE_POWER):
-        self.checker.check()
         self.__check_mode(mode)
         self.sputter.clear()
 
