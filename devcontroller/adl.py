@@ -21,7 +21,6 @@ from adl_x547.factory import ADLSputterFactory
 from devcontroller.misc.error import ExecutionError
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
-from devcontroller.misc.sputtercheck import DisabledSputterChecker
 from e21_util.retry import retry
 from e21_util.interface import Loggable
 

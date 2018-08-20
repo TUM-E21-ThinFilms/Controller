@@ -18,7 +18,6 @@ import time
 from truplasmadc_3000.factory import TruPlasmaDC3000Factory
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.thread import StoppableThread
-from devcontroller.misc.sputtercheck import SputterChecker
 from e21_util.retry import retry
 from e21_util.cache import CACHE_TRUMPFDC, CACHE_TRUMPFDC_NAMESPACE, CACHE
 

@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import time
 from e21_util.gunparameter import *
 from devcontroller.misc.logger import LoggerFactory
 from e21_util.retry import retry
@@ -41,7 +41,7 @@ class GunController(Loggable):
         self._driver = gun_driver
         self._parser = GunConfigParser(Paths.GUN_CONFIG_PATH)
         self._config = self._parser.get_config()
-
+        self._target_gun = None
         self.vend(6)
 
         print(self.DOC)
@@ -118,8 +118,26 @@ class GunController(Loggable):
 
     @retry()
     def set_gun(self, pos):
+        self._target_gun = pos
         steps = self.compute_gun_position(pos)
         self.set_position(steps)
+
+    def wait(self, pos=None):
+        if not pos is None:
+            self.set_gun(pos)
+        else:
+            pos = self._target_gun
+
+        if pos is None:
+            return
+
+        for i in range(0, 300):
+            current = self.get_gun()
+            if current == pos:
+                return
+            time.sleep(1)
+
+        raise RuntimeError("Did not reach gun position %s in 300 seconds" % str(pos))
 
     def calibrate(self, actual_position, new_tol=None, new_diff=None):
         if not actual_position in [1, 2, 3, 4]:

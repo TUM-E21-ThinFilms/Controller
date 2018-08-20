@@ -57,3 +57,9 @@ class CountdownThread(StoppableThread):
             self.t -= 1
         print("\rdone.                  \n")
         self.stop()
+
+def countdown(time):
+    thread = CountdownThread()
+    thread.set_time(time)
+    thread.daemon = True
+    thread.start()
