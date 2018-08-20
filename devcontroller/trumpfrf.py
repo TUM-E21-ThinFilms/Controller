@@ -41,11 +41,6 @@ class TrumpfPFG600Controller(Loggable):
             logger = LoggerFactory().get_trumpf_rf_sputter_logger()
         super(TrumpfPFG600Controller, self).__init__(logger)
 
-        if checker is None:
-            checker = DisabledSputterChecker()
-
-        self.checker = checker
-
         if sputter is None:
             self.sputter = PFG600Factory().create_pfg600()
         else:
@@ -72,7 +67,6 @@ class TrumpfPFG600Controller(Loggable):
 
     @retry()
     def turn_on(self):
-        self.checker.check()
         self.sputter.reset()
 
         try:
