@@ -28,7 +28,7 @@ class SampleZController(Loggable, Interruptable):
     WAITING_TIME = 0.25
     STEP_TOL = 1
 
-    def __init__(self, interruptor=None, timer=None, logger=None):
+    def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
 
         if logger is None:
             logger = LoggerFactory().get_sample_theta_logger()
