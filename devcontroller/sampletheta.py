@@ -25,7 +25,7 @@ class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
-    ANGLE_TOL = 0.001
+    ANGLE_TOL = 0.002
     TOTAL_WAITING_TIME = 5
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800

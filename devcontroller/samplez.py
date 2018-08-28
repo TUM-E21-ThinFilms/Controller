@@ -16,7 +16,7 @@
 from e21_util.interruptor import Interruptor, InterruptableTimer
 from e21_util.retry import retry
 from e21_util.interface import Loggable, Interruptable
-from devcontroller.encoder.z import ZEncoder
+from encoder.factory import Factory
 from devcontroller.misc.logger import LoggerFactory
 from baur_pdcx85.factory import BaurFactory
 
@@ -26,6 +26,7 @@ class SampleZController(Loggable, Interruptable):
     Z_TOL = 2.5e-3
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.25
+    STEP_TOL = 1
 
     def __init__(self, interruptor=None, timer=None, logger=None):
 
@@ -40,8 +41,11 @@ class SampleZController(Loggable, Interruptable):
 
         self._motor = BaurFactory().create_z()
         self._motor.initialize(4000, 20, 500, 300)
-        self._encoder = ZEncoder()
-        self._moving = False
+
+        if encoder is None:
+            encoder = Factory().get_interface()
+
+        self._encoder = encoder
 
         if timer is None:
             timer = InterruptableTimer(self._interrupt)
@@ -60,22 +64,15 @@ class SampleZController(Loggable, Interruptable):
 
     @retry()
     def get_position(self):
-        if not self._moving is False:
-            return self._moving
-
-        with self._encoder:
-            return self._encoder.get_position()
+        return self._encoder.get_z()
 
     @retry()
     def set_position(self, pos):
         if not (self.Z_MIN <= pos <= self.Z_MAX):
             raise RuntimeError("New position is not in the allowed angle range [%s, %s]", self.Z_MIN, self.Z_MAX)
-        try:
-            self._moving = 0
-            with self._encoder:
-                self._move_position(pos)
-        finally:
-            self._moving = False
+
+        self._move_position(pos)
+
 
     def move_up(self, position):
         self.set_position(self.get_position() + abs(position))
@@ -83,32 +80,13 @@ class SampleZController(Loggable, Interruptable):
     def move_down(self, position):
         self.set_position(self.get_position() - abs(position))
 
-    def search_reference(self):
-        try:
-            self._encoder.connect()
-
-            self._encoder.start_reference()
-            raw_encoder = self._encoder.get_encoder()
-            raw_encoder.clearBuffer()
-            while not raw_encoder.receivedReference():
-                self._interruptor.stoppable()
-                raw_encoder.read()
-                self._logger.info("Position: %s, Reference 1: %s, Reference 2: %s", raw_encoder.getPosition(), raw_encoder.getReference1(),
-                                  raw_encoder.getReference2())
-
-            self._encoder.stop_reference()
-
-        finally:
-            self._encoder.disconnect()
-
     def _move_position(self, position):
         current_position = self._encoder.get_position()
-        self._moving = current_position
         diff = position - current_position
         steps = self._proposal_steps(diff)
         self._logger.info("Goal: %s, current: %s, estimated steps: %s", position, current_position, steps)
 
-        if steps == 0:
+        if steps < self.STEP_TOL:
             return
 
         try:
@@ -116,7 +94,7 @@ class SampleZController(Loggable, Interruptable):
             self._move_motor(steps)
             self._motor.stop()
             new_position = self._encoder.get_position()
-            self._moving = new_position
+
             self._logger.info("Current position: %s", new_position)
 
             new_diff = abs(position - new_position)
@@ -141,7 +119,6 @@ class SampleZController(Loggable, Interruptable):
                 break
 
             current_position = self._encoder.get_position()
-            self._moving = current_position
             if not (self.Z_MIN <= current_position <= self.Z_MAX):
                 self._logger.error("Position not in allowed range. STOP")
                 raise RuntimeError("z-position not in allowed range anymore. STOP.")
