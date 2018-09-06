@@ -81,7 +81,7 @@ class SampleZController(Loggable, Interruptable):
         self.set_position(self.get_position() - abs(position))
 
     def _move_position(self, position):
-        current_position = self._encoder.get_position()
+        current_position = self._encoder.get_z()
         diff = position - current_position
         steps = self._proposal_steps(diff)
         self._logger.info("Goal: %s, current: %s, estimated steps: %s", position, current_position, steps)
@@ -93,7 +93,7 @@ class SampleZController(Loggable, Interruptable):
             self._interruptor.stoppable()
             self._move_motor(steps)
             self._motor.stop()
-            new_position = self._encoder.get_position()
+            new_position = self._encoder.get_z()
 
             self._logger.info("Current position: %s", new_position)
 
@@ -118,7 +118,7 @@ class SampleZController(Loggable, Interruptable):
             if self._motor.getPosition() == desired_position or i >= self.TOTAL_WAITING_TIME:
                 break
 
-            current_position = self._encoder.get_position()
+            current_position = self._encoder.get_z()
             if not (self.Z_MIN <= current_position <= self.Z_MAX):
                 self._logger.error("Position not in allowed range. STOP")
                 raise RuntimeError("z-position not in allowed range anymore. STOP.")
