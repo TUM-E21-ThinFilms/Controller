@@ -30,6 +30,7 @@ class ThetaMotorController(Loggable):
 
         super(ThetaMotorController, self).__init__(logger)
 
+        self._speed = 0
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
         self._init_driver_theta(0.8)
@@ -52,7 +53,12 @@ class ThetaMotorController(Loggable):
         if rotations_per_minute < 0 or rotations_per_minute > 10:
             raise RuntimeError("Given rpm is either too high or too low")
 
+        # Nothing to do here
+        if rotations_per_minute == self._speed:
+            return
+
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
+        self._speed = rotations_per_minute
 
     @retry()
     def stop(self):

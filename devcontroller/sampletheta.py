@@ -25,11 +25,11 @@ class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
-    ANGLE_TOL = 0.002
+    ANGLE_TOL = 0.003
     TOTAL_WAITING_TIME = 5
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800
-    STEP_TOL = 20
+    STEP_TOL = 4
 
     def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
 
@@ -42,7 +42,7 @@ class SampleThetaController(Loggable, Interruptable):
         Loggable.__init__(self, logger)
         Interruptable.__init__(self, interruptor)
 
-        self._motor = ThetaMotorController()
+        self._motor = ThetaMotorController(logger=logger)
 
         if encoder is None:
             encoder = Factory().get_interface()
@@ -127,6 +127,14 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _move_motor(self, relative_steps):
         try:
+
+            if relative_steps > 500:
+                self._motor.set_speed(0.8)
+            elif relative_steps > 50:
+                self._motor.set_speed(0.4)
+            else:
+                self._motor.set_speed(0.05)
+
             self._motor.move(relative_steps)
 
             i = 0.0
@@ -155,7 +163,7 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _proposal_steps(self, angle_diff):
 
-        new_proposal = -1 * int(angle_diff * 2000)  # 2000 for 1/128 microsteps, 100 for 1/64
+        new_proposal = -1 * int(angle_diff * 2500)  # 2500 for 1/128 microsteps, 100 for 1/64
 
         hysteresis_correction = 0
         if not self._last_steps == 0:
