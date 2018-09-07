@@ -122,7 +122,7 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _angle_difference(self, target_angle):
         current_angle = self.get_angle()
-        angle_difference = angle - current_angle
+        angle_difference = target_angle - current_angle
         return current_angle, angle_difference
 
     def _move_motor(self, relative_steps):
