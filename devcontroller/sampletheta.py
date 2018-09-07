@@ -30,6 +30,7 @@ class SampleThetaController(Loggable, Interruptable):
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800
     STEP_TOL = 1
+    MAX_ITERATIONS = 25
 
     def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
 
@@ -90,14 +91,20 @@ class SampleThetaController(Loggable, Interruptable):
     def _set_angle(self, angle):
         self._interrupt.stoppable()
         steps_to_move = 0
+        iterations = 0
         while True:
+            iterations += 1
+
+            if iterations > self.MAX_ITERATIONS:
+                self._logger.info("Run out of iterations. Re-engaging completely new ...")
+                self._move_motor(self.signum(self._last_steps) * self.HYSTERESIS_OFFSET * -1)
 
             current_angle, angle_difference = self._angle_difference(angle)
             steps_to_move = self._proposal_steps(angle_difference)
-            self._logger.info("Target angle: %s, current angle: %s, difference: %s, steps: %s", angle, current_angle,
+            self._logger.info("Target: %s, current: %s, difference: %s, steps: %s", angle, current_angle,
                               angle_difference, steps_to_move)
             if abs(steps_to_move) < self.STEP_TOL or abs(angle_difference) < self.ANGLE_TOL:
-                self._logger.info("---> Angle difference %s very low, moving just %s steps. Aborting.",
+                self._logger.info("---> Difference %s very low, moving just %s steps. Aborting.",
                                   angle_difference, steps_to_move)
                 break
 
@@ -108,17 +115,16 @@ class SampleThetaController(Loggable, Interruptable):
             current_angle, angle_difference = self._angle_difference(angle)
 
             if abs(angle_difference) < self.ANGLE_TOL:
-                self._logger.info("---> Reached target angle %s with current angle %s, difference %s", angle,
+                self._logger.info("---> Reached target %s with current %s, difference %s", angle,
                                   current_angle, angle_difference)
 
         # if finished, move the motor in the opposite direction for approx 50-100 steps.
         # if not, then the motor still "pushes" into the direction, which leads to a continuous increment
         # in the angle...
-        direction = -1 * self.signum(steps_to_move)
-        steps = direction * 40
-        self._logger.info("---> Moving %s steps in the opposite direction",
-                          str(steps))
-        self._move_motor(steps)
+        #direction = -1 * self.signum(steps_to_move)
+        #steps = direction * 40
+        #self._logger.info("---> Moving %s steps in the opposite direction", str(steps))
+        # self._move_motor(steps)
 
     def _angle_difference(self, target_angle):
         current_angle = self.get_angle()
