@@ -128,9 +128,9 @@ class SampleThetaController(Loggable, Interruptable):
     def _move_motor(self, relative_steps):
         try:
 
-            if relative_steps > 500:
+            if abs(relative_steps) > 500:
                 self._motor.set_speed(0.8)
-            elif relative_steps > 50:
+            elif abs(relative_steps) > 50:
                 self._motor.set_speed(0.4)
             else:
                 self._motor.set_speed(0.05)
