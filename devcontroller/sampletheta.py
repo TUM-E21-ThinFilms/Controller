@@ -25,7 +25,7 @@ class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
-    ANGLE_TOL = 0.003
+    ANGLE_TOL = 0.001
     TOTAL_WAITING_TIME = 5
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800
@@ -118,7 +118,6 @@ class SampleThetaController(Loggable, Interruptable):
         self._logger.info("---> Moving %s steps in the opposite direction (prevent small increments of angle)",
                           str(steps))
         self._move_motor(steps)
-        self._last_steps = steps
 
     def _angle_difference(self, target_angle):
         current_angle = self.get_angle()
@@ -139,6 +138,7 @@ class SampleThetaController(Loggable, Interruptable):
                 self._motor.set_speed(0.05)
 
             self._motor.move(relative_steps)
+            self._last_steps = relative_steps
 
             i = 0.0
             while True:
@@ -173,7 +173,7 @@ class SampleThetaController(Loggable, Interruptable):
 
     def _proposal_steps(self, angle_diff):
 
-        new_proposal = -1 * int(angle_diff * 2500)  # 2500 for 1/128 microsteps, 100 for 1/64
+        new_proposal = -1 * int(angle_diff * 2000)  # 2000 for 1/128 microsteps, 100 for 1/64
 
         hysteresis_correction = 0
         if not self._last_steps == 0:
@@ -184,8 +184,7 @@ class SampleThetaController(Loggable, Interruptable):
 
         self._logger.info("Last steps: %s, new proposal: %s + hysteresis offset: %s", self._last_steps, new_proposal,
                           hysteresis_correction)
-        self._last_steps = new_proposal + hysteresis_correction
-        return self._last_steps
+        return new_proposal + hysteresis_correction
 
     def signum(self, value):
         if value > 0:
