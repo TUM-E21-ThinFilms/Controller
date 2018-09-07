@@ -117,11 +117,14 @@ class SampleThetaController(Loggable, Interruptable):
         steps = direction * 40
         self._logger.info("---> Moving %s steps in the opposite direction (prevent small increments of angle)",
                           str(steps))
-        #self._move_motor(steps)
+        self._move_motor(steps)
         self._last_steps = steps
 
     def _angle_difference(self, target_angle):
         current_angle = self.get_angle()
+        if target_angle is None:
+            target_angle = current_angle
+
         angle_difference = target_angle - current_angle
         return current_angle, angle_difference
 
@@ -149,8 +152,10 @@ class SampleThetaController(Loggable, Interruptable):
                 if not self._motor.is_moving():
                     break
 
+                # Note: angle_diff is 0 if target_angle is None!
+                cur_angle, angle_diff = self._angle_difference(target_angle)
+
                 if not target_angle is None:
-                    cur_angle, angle_diff = self._angle_difference(target_angle)
                     self._logger.info("--> Current angle %s", cur_angle)
                     if abs(angle_diff) < self.ANGLE_TOL:
                         self._logger.info("---> Reached target angle, difference: %s", angle_diff)
