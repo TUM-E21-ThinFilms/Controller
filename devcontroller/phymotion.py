@@ -51,11 +51,8 @@ class ThetaMotorController(Loggable):
     def set_speed(self, rotations_per_minute):
         if rotations_per_minute < 0 or rotations_per_minute > 10:
             raise RuntimeError("Given rpm is either too high or too low")
-        
-        self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
 
-    @retry()
-    def
+        self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
 
     @retry()
     def stop(self):
