@@ -90,7 +90,7 @@ class SampleZController(Loggable, Interruptable):
             return
 
         try:
-            self._interruptor.stoppable()
+            self._interrupt.stoppable()
             self._move_motor(steps)
             self._motor.stop()
             new_position = self._encoder.get_z()
@@ -113,7 +113,7 @@ class SampleZController(Loggable, Interruptable):
         self._motor.move_abs(desired_position)
         i = 0
         while True:
-            self._interruptor.stoppable()
+            self._interrupt.stoppable()
             i += self.WAITING_TIME
             if self._motor.getPosition() == desired_position or i >= self.TOTAL_WAITING_TIME:
                 break
