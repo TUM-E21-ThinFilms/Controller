@@ -20,6 +20,7 @@ from encoder.factory import Factory
 from devcontroller.misc.logger import LoggerFactory
 from baur_pdcx85.factory import BaurFactory
 
+
 class SampleZController(Loggable, Interruptable):
     Z_MIN = -15.0
     Z_MAX = 10.0
@@ -73,7 +74,6 @@ class SampleZController(Loggable, Interruptable):
 
         self._move_position(pos)
 
-
     def move_up(self, position):
         self.set_position(self.get_position() + abs(position))
 
@@ -84,9 +84,10 @@ class SampleZController(Loggable, Interruptable):
         current_position = self._encoder.get_z()
         diff = position - current_position
         steps = self._proposal_steps(diff)
-        self._logger.info("Goal: %s, current: %s, estimated steps: %s", position, current_position, steps)
+        self._logger.info("Goal: %s mm, current: %s mm, estimated steps: %s", position, current_position, steps)
 
-        if steps < self.STEP_TOL:
+        if abs(steps) < self.STEP_TOL:
+            self._logger.info("Estimated steps %s smaller than STEP_TOLERANCE %s", steps, self.STEP_TOL)
             return
 
         try:
@@ -103,13 +104,14 @@ class SampleZController(Loggable, Interruptable):
             raise e
 
         if new_diff > self.Z_TOL:
-            self._logger.info("Goal: %s, current: %s, difference: %s", position, new_position, new_diff)
+            self._logger.info("Goal: %s mm, current: %s mm, difference: %s", position, new_position, new_diff)
             self._move_position(position)
 
     def _move_motor(self, diff_steps):
         cur_steps = self._motor.get_position()
         desired_position = cur_steps + diff_steps
 
+        self._logger.info("Moving motor to position %s ...", desired_position)
         self._motor.move_abs(desired_position)
         i = 0
         while True:
