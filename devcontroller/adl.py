@@ -38,7 +38,7 @@ class ADLController(Loggable):
             off()/turn_off(): Turns off sputtering immediately
     """
 
-    def __init__(self, sputter=None, logger=None, checker=None):
+    def __init__(self, sputter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_adl_sputter_logger()
 
@@ -95,7 +95,6 @@ class ADLController(Loggable):
 
     @retry()
     def sputter_power(self, power):
-        self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_POWER)
         power = self.sputter.convert_into_power(power, coeff=self.coeff_power)
         self.sputter.clear()
@@ -103,7 +102,6 @@ class ADLController(Loggable):
 
     @retry()
     def sputter_voltage(self, voltage):
-        self.checker.check()
         self.__check_mode(ADLSputterDriver.MODE_VOLTAGE)
         voltage = self.sputter.convert_into_voltage(voltage, coeff=self.coeff_volt)
         self.sputter.clear()
@@ -111,7 +109,6 @@ class ADLController(Loggable):
 
     @retry()
     def turn_on(self):
-        self.checker.check()
         if self.thread is None or not self.thread.is_running():
             self.thread = TurnOnThread()
             self.thread.daemon = True

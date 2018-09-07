@@ -94,7 +94,7 @@ class SampleThetaController(Loggable, Interruptable):
 
             current_angle, angle_difference = self._angle_difference(angle)
             steps_to_move = self._proposal_steps(angle_difference)
-            self._logger.info("Target angle: %s, current angle: %s, difference: %s, steps: %s", angle, current_angle,
+            self._logger.info("Target: %s, current: %s, difference: %s, steps: %s", angle, current_angle,
                               angle_difference, steps_to_move)
             if abs(steps_to_move) < self.STEP_TOL or abs(angle_difference) < self.ANGLE_TOL:
                 self._logger.info("---> Angle difference %s very low, moving just %s steps. Aborting.",
@@ -118,7 +118,7 @@ class SampleThetaController(Loggable, Interruptable):
         steps = direction * 40
         self._logger.info("---> Moving %s steps in the opposite direction",
                           str(steps))
-        self._move_motor(steps)
+        #self._move_motor(steps)
 
     def _angle_difference(self, target_angle):
         current_angle = self.get_angle()
