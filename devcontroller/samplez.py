@@ -107,7 +107,7 @@ class SampleZController(Loggable, Interruptable):
             self._move_position(position)
 
     def _move_motor(self, diff_steps):
-        cur_steps = self._motor.getPosition()
+        cur_steps = self._motor.get_position()
         desired_position = cur_steps + diff_steps
 
         self._motor.move_abs(desired_position)
@@ -115,7 +115,7 @@ class SampleZController(Loggable, Interruptable):
         while True:
             self._interrupt.stoppable()
             i += self.WAITING_TIME
-            if self._motor.getPosition() == desired_position or i >= self.TOTAL_WAITING_TIME:
+            if self._motor.get_position() == desired_position or i >= self.TOTAL_WAITING_TIME:
                 break
 
             current_position = self._encoder.get_z()
@@ -127,5 +127,5 @@ class SampleZController(Loggable, Interruptable):
 
             self._timer.sleep(self.WAITING_TIME)
 
-    def _proposal_steps(self, angle_diff):
-        return -1 * int(angle_diff * 5000)
+    def _proposal_steps(self, distance_diff_mm):
+        return int(distance_diff_mm * 5000)
