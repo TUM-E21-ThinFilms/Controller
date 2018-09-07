@@ -55,7 +55,7 @@ class TruPlasmaDC3000Controller(object):
             turn_off(): turns sputtering off
     """
 
-    def __init__(self, sputter=None, logger=None, checker=None):
+    def __init__(self, sputter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_sputter_logger()
 

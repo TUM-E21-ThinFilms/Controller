@@ -36,7 +36,7 @@ class TrumpfPFG600Controller(Loggable):
 
     DEFAULT_VOLTAGE_LIMIT = 1000
 
-    def __init__(self, sputter=None, logger=None, checker=None):
+    def __init__(self, sputter=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_trumpf_rf_sputter_logger()
         super(TrumpfPFG600Controller, self).__init__(logger)
