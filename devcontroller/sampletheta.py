@@ -29,7 +29,7 @@ class SampleThetaController(Loggable, Interruptable):
     TOTAL_WAITING_TIME = 5
     WAITING_TIME = 0.1
     HYSTERESIS_OFFSET = 800
-    STEP_TOL = 4
+    STEP_TOL = 1
 
     def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
 
@@ -102,7 +102,7 @@ class SampleThetaController(Loggable, Interruptable):
 
             self._interrupt.stoppable()
 
-            self._move_motor(steps_to_move)
+            self._move_motor(steps_to_move, angle)
 
             current_angle, angle_difference = self._angle_difference(angle)
 
@@ -114,10 +114,10 @@ class SampleThetaController(Loggable, Interruptable):
         # if not, then the motor still "pushes" into the direction, which leads to a continuous increment
         # in the angle...
         direction = -1 * self.signum(steps_to_move)
-        steps = direction * 100
+        steps = direction * 40
         self._logger.info("---> Moving %s steps in the opposite direction (prevent small increments of angle)",
                           str(steps))
-        self._move_motor(steps)
+        #self._move_motor(steps)
         self._last_steps = steps
 
     def _angle_difference(self, target_angle):
@@ -125,7 +125,7 @@ class SampleThetaController(Loggable, Interruptable):
         angle_difference = target_angle - current_angle
         return current_angle, angle_difference
 
-    def _move_motor(self, relative_steps):
+    def _move_motor(self, relative_steps, target_angle=None):
         try:
 
             if abs(relative_steps) > 500:
@@ -149,8 +149,13 @@ class SampleThetaController(Loggable, Interruptable):
                 if not self._motor.is_moving():
                     break
 
-                cur_angle = self.get_angle()
-                self._logger.info("--> Current angle %s", cur_angle)
+                if not target_angle is None:
+                    cur_angle, angle_diff = self._angle_difference(target_angle)
+                    self._logger.info("--> Current angle %s", cur_angle)
+                    if abs(angle_diff) < self.ANGLE_TOL:
+                        self._logger.info("---> Reached target angle, difference: %s", angle_diff)
+                        self._motor.stop()
+                        break
 
                 if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
                     self._logger.error("---> Motor not in allowed range. STOP")
