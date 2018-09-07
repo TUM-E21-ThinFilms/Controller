@@ -98,6 +98,8 @@ class SampleThetaController(Loggable, Interruptable):
             if iterations > self.MAX_ITERATIONS:
                 self._logger.info("Run out of iterations. Re-engaging completely new ...")
                 self._move_motor(self.signum(self._last_steps) * self.HYSTERESIS_OFFSET * -1)
+                iterations = 0
+
 
             current_angle, angle_difference = self._angle_difference(angle)
             steps_to_move = self._proposal_steps(angle_difference)
