@@ -32,14 +32,11 @@ class ThetaMotorController(Loggable):
 
         self._mod = module
         self._driver_theta = PhytronFactory().create_driver()
-        self._driver_theta.set_axis(1, 1)
-        self._set_speed_theta(0.8)
-
-    def _init_driver_theta(self):
-        self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
+        self._init_driver_theta(0.8)
 
     @retry()
-    def _set_speed_theta(self, rotations_per_minute):
+    def _init_driver_theta(self, rotations_per_minute):
+        self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
         self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11)  # 1/128 pulse per step
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
@@ -47,8 +44,18 @@ class ThetaMotorController(Loggable):
         self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 10)  # 0.1 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
-        self._driver_theta.set_parameter(PARAMETER_CURRENT_DELAY_TIME, 40) # 40 ms of boost current after last movement
+        self._driver_theta.set_parameter(PARAMETER_CURRENT_DELAY_TIME, 40)  # 40 ms of boost current after last movement
         self._driver_theta.set_parameter(32, 1)  # linear ramp form
+
+    @retry()
+    def set_speed(self, rotations_per_minute):
+        if rotations_per_minute < 0 or rotations_per_minute > 10:
+            raise RuntimeError("Given rpm is either too high or too low")
+        
+        self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
+
+    @retry()
+    def
 
     @retry()
     def stop(self):
