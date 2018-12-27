@@ -13,22 +13,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from relais_197720.factory import RelaisFactory
-from relais_197720.driver import RelaisDriver
+from relais_197720.factory import RelayFactory
+from relais_197720.constants import Relay
 from devcontroller.misc.logger import LoggerFactory
 from e21_util.retry import retry
 from e21_util.interface import Loggable
 
 
+# TODO: Rename to RelayController
 class RelaisController(Loggable):
-    SCROLL_PORT = RelaisDriver.RELAIS_K1
-    LAMP_PORT = RelaisDriver.RELAIS_K3
-    BYPASS_PORT = RelaisDriver.RELAIS_K4
-    HELIUM_PORT = RelaisDriver.RELAIS_K6
-    HELIUM_LEAK_PORT = RelaisDriver.RELAIS_K5
+
+    SCROLL_PORT = (Relay.PORT_1, 1)
+    LAMP_PORT = (Relay.PORT_3, 1)
+    BYPASS_PORT = (Relay.PORT_4, 1)
+    HELIUM_PORT = (Relay.PORT_6, 1)
+    HELIUM_LEAK_PORT = (Relay.PORT_5, 1)
 
     DOC = """
-        RelaisController - Controls the Conrad 197720 Relais.
+        RelayController - Controls the Conrad 197720 Relais.
 
         Usage:
             scroll_on(), scroll_off(): Turns the scroll pump on/off
@@ -40,87 +42,89 @@ class RelaisController(Loggable):
 
     """
 
-    def __init__(self, relais=None, logger=None):
+    def __init__(self, relay=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_relais_logger()
         super(RelaisController, self).__init__(logger)
 
-        if relais is None:
-            self.factory = RelaisFactory()
-            self.relais = self.factory.create_relais()
+        if relay is None:
+            self.relay = RelayFactory().create_relay()
         else:
-            self.relais = relais
+            self.relay = relay
 
-        self.relais.setup()
+        response = self.relay.setup()
+
+        if not response.get_number_of_devices() == 1:
+            raise RuntimeError(
+                "Expected to have exactly one relay module, but got {}".format(response.get_number_of_devices()))
 
         print(self.DOC)
 
     @retry()
     def helium_on(self):
-        self.relais.set_single(self.HELIUM_PORT)
-        self.relais.del_single(self.HELIUM_LEAK_PORT)
+        self.relay.set_single(*self.HELIUM_PORT)
+        self.relay.del_single(*self.HELIUM_LEAK_PORT)
 
     @retry()
     def helium_off(self, leak=True):
-        self.relais.del_single(self.HELIUM_PORT)
+        self.relay.del_single(*self.HELIUM_PORT)
         if leak:
-            self.relais.set_single(self.HELIUM_LEAK_PORT)
+            self.relay.set_single(*self.HELIUM_LEAK_PORT)
 
     @retry()
     def helium_leak_on(self):
-        self.relais.set_single(self.HELIUM_LEAK_PORT)
+        self.relay.set_single(*self.HELIUM_LEAK_PORT)
 
     @retry()
     def helium_leak_off(self):
-        self.relais.del_single(self.HELIUM_LEAK_PORT)
+        self.relay.del_single(*self.HELIUM_LEAK_PORT)
 
     @retry()
     def scroll_on(self):
-        self.relais.set_single(self.SCROLL_PORT)
+        self.relay.set_single(*self.SCROLL_PORT)
 
     @retry()
     def scroll_off(self):
-        self.relais.del_single(self.SCROLL_PORT)
+        self.relay.del_single(*self.SCROLL_PORT)
 
     @retry()
     def lamp_on(self):
-        self.relais.set_single(self.LAMP_PORT)
+        self.relay.set_single(*self.LAMP_PORT)
 
     @retry()
     def lamp_off(self):
-        self.relais.del_single(self.LAMP_PORT)
+        self.relay.del_single(*self.LAMP_PORT)
 
     @retry()
     def bypass_on(self):
-        self.relais.set_single(self.BYPASS_PORT)
+        self.relay.set_single(*self.BYPASS_PORT)
 
     @retry()
     def bypass_off(self):
-        self.relais.del_single(self.BYPASS_PORT)
+        self.relay.del_single(*self.BYPASS_PORT)
 
     @retry()
     def off(self):
-        self.relais.set_port(0)
+        self.relay.set_port(0, 1)
 
     @retry()
+    def is_port_on(self, port):
+        return self.relay.get_port(1).get_port() & port[0] > 0
+
     def is_scroll_on(self):
-        return self.relais.get_port().get_port() & self.SCROLL_PORT > 0
+        return self.is_port_on(self.SCROLL_PORT)
 
-    @retry()
     def is_lamp_on(self):
-        return self.relais.get_port().get_port() & self.LAMP_PORT > 0
+        return self.is_port_on(self.LAMP_PORT)
 
-    @retry()
     def is_bypass_on(self):
-        return self.relais.get_port().get_port() & self.BYPASS_PORT > 0
+        return self.is_port_on(self.BYPASS_PORT)
 
-    @retry()
     def is_helium_on(self):
-        return self.relais.get_port().get_port() & self.HELIUM_PORT > 0
+        return self.is_port_on(self.HELIUM_PORT)
 
-    @retry()
     def is_helium_leak_on(self):
-        return self.relais.get_port().get_port() & self.HELIUM_LEAK_PORT > 0
+        return self.is_port_on(self.HELIUM_LEAK_PORT)
 
     def get_driver(self):
-        return self.relais
+        return self.relay
