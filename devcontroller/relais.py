@@ -23,11 +23,13 @@ from e21_util.interface import Loggable
 # TODO: Rename to RelayController
 class RelaisController(Loggable):
 
-    SCROLL_PORT = (Relay.PORT_1, 1)
-    LAMP_PORT = (Relay.PORT_3, 1)
-    BYPASS_PORT = (Relay.PORT_4, 1)
-    HELIUM_PORT = (Relay.PORT_6, 1)
-    HELIUM_LEAK_PORT = (Relay.PORT_5, 1)
+    RELAY_ADDRESS = 1
+
+    SCROLL_PORT = (1, Relay.PORT_1)
+    LAMP_PORT = (1, Relay.PORT_3)
+    BYPASS_PORT = (1, Relay.PORT_4)
+    HELIUM_PORT = (1, Relay.PORT_6)
+    HELIUM_LEAK_PORT = (1, Relay.PORT_5)
 
     DOC = """
         RelayController - Controls the Conrad 197720 Relais.
@@ -45,6 +47,7 @@ class RelaisController(Loggable):
     def __init__(self, relay=None, logger=None):
         if logger is None:
             logger = LoggerFactory().get_relais_logger()
+
         super(RelaisController, self).__init__(logger)
 
         if relay is None:
@@ -105,11 +108,11 @@ class RelaisController(Loggable):
 
     @retry()
     def off(self):
-        self.relay.set_port(0, 1)
+        self.relay.set_port(self.RELAY_ADDRESS, 0)
 
     @retry()
     def is_port_on(self, port):
-        return self.relay.get_port(1).get_port() & port[0] > 0
+        return self.relay.get_port(self.RELAY_ADDRESS).get_port() & port[1] > 0
 
     def is_scroll_on(self):
         return self.is_port_on(self.SCROLL_PORT)
