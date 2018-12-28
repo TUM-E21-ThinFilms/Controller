@@ -112,7 +112,7 @@ class RelaisController(Loggable):
 
     @retry()
     def is_port_on(self, port):
-        return self.relay.get_port(self.RELAY_ADDRESS).get_port() & port[1] > 0
+        return self.relay.get_port(self.RELAY_ADDRESS).get_response().get_port() & port[1] > 0
 
     def is_scroll_on(self):
         return self.is_port_on(self.SCROLL_PORT)
