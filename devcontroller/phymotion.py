@@ -42,7 +42,7 @@ class ThetaMotorController(Loggable):
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))
         self._driver_theta.set_parameter(PARAMETER_START_STOP_FREQUENCY, 1)  # 1 Hz start-stop freq.
-        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 10)  # 0.1 A stopping current
+        self._driver_theta.set_parameter(PARAMETER_STOP_CURRENT, 0)  # 0.0 A stopping current
         self._driver_theta.set_parameter(PARAMETER_BOOST_CURRENT, 200)  # 2.0 A
         self._driver_theta.set_parameter(PARAMETER_ENABLE_BOOST, 2)  # enables boost if motor is in ramp
         self._driver_theta.set_parameter(PARAMETER_CURRENT_DELAY_TIME, 40)  # 40 ms of boost current after last movement

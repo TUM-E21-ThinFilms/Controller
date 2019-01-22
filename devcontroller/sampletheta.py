@@ -25,12 +25,12 @@ class SampleThetaController(Loggable, Interruptable):
     MAX_ANGLE_MOVE = 10
     ANGLE_MIN = -10.0
     ANGLE_MAX = 10.0
-    ANGLE_TOL = 0.001
+    ANGLE_TOL = 0.003
     TOTAL_WAITING_TIME = 5
     WAITING_TIME = 0.1
-    HYSTERESIS_OFFSET = 800
+    HYSTERESIS_OFFSET = 1000
     STEP_TOL = 1
-    MAX_ITERATIONS = 25
+    MAX_ITERATIONS = 20
 
     def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
 
@@ -97,7 +97,7 @@ class SampleThetaController(Loggable, Interruptable):
 
             if iterations > self.MAX_ITERATIONS:
                 self._logger.info("Run out of iterations. Re-engaging completely new ...")
-                self._move_motor(self.signum(self._last_steps) * self.HYSTERESIS_OFFSET * -1)
+                self._move_motor(self.signum(self._last_steps) * 2 * self.HYSTERESIS_OFFSET * -1)
                 iterations = 0
 
 
@@ -123,10 +123,10 @@ class SampleThetaController(Loggable, Interruptable):
         # if finished, move the motor in the opposite direction for approx 50-100 steps.
         # if not, then the motor still "pushes" into the direction, which leads to a continuous increment
         # in the angle...
-        #direction = -1 * self.signum(steps_to_move)
-        #steps = direction * 40
-        #self._logger.info("---> Moving %s steps in the opposite direction", str(steps))
-        # self._move_motor(steps)
+        direction = -1 * self.signum(steps_to_move)
+        steps = direction * 10
+        self._logger.info("---> Moving %s steps in the opposite direction", str(steps))
+        self._move_motor(steps)
 
     def _angle_difference(self, target_angle):
         current_angle = self.get_angle()
@@ -147,7 +147,8 @@ class SampleThetaController(Loggable, Interruptable):
                 self._motor.set_speed(0.05)
 
             self._motor.move(relative_steps)
-            self._last_steps = relative_steps
+            if abs(relative_steps) > 50:
+                self._last_steps = relative_steps
 
             i = 0.0
             while True:
@@ -164,12 +165,11 @@ class SampleThetaController(Loggable, Interruptable):
                 # Note: angle_diff is 0 if target_angle is None!
                 cur_angle, angle_diff = self._angle_difference(target_angle)
 
-                if not target_angle is None:
-                    self._logger.info("--> Current angle %s", cur_angle)
-                    if abs(angle_diff) < self.ANGLE_TOL:
-                        self._logger.info("---> Reached target angle, difference: %s", angle_diff)
-                        self._motor.stop()
-                        break
+                self._logger.info("--> Current angle %s", cur_angle)
+                if abs(angle_diff) < self.ANGLE_TOL and not target_angle is None:
+                    self._logger.info("---> Reached target angle, difference: %s", angle_diff)
+                    self._motor.stop()
+                    break
 
                 if not (self.ANGLE_MIN <= cur_angle <= self.ANGLE_MAX):
                     self._logger.error("---> Motor not in allowed range. STOP")
@@ -185,7 +185,7 @@ class SampleThetaController(Loggable, Interruptable):
         if angle_diff > 0.2:
             new_proposal = -1 * int(angle_diff * 2000)  # 2000 for 1/128 microsteps, 100 for 1/64
         else:
-            new_proposal = -1 * int(angle_diff * 1500)
+            new_proposal = -1 * int(angle_diff * 1300)
 
         hysteresis_correction = 0
         if not self._last_steps == 0:

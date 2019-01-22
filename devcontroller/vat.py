@@ -100,9 +100,9 @@ class VATController(Loggable):
 
 
     @retry()
-    def set_pressure(self, pressure):
+    def set_pressure(self, pressure, force=False):
         # pressure in mbar
-        if pressure >= 1e-1:
+        if pressure >= 1e-1 and not force:
             raise ValueError("Will not set pressure higher than 1E-1 mbar.")
 
         try:

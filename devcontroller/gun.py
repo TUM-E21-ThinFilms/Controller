@@ -42,7 +42,7 @@ class GunController(Loggable):
         self._parser = GunConfigParser(Paths.GUN_CONFIG_PATH)
         self._config = self._parser.get_config()
         self._target_gun = None
-        self.vend(6)
+        self.vend(10)
 
         print(self.DOC)
 

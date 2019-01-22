@@ -23,7 +23,7 @@ from baur_pdcx85.factory import BaurFactory
 
 class SampleZController(Loggable, Interruptable):
     Z_MIN = -15.0
-    Z_MAX = 11.0
+    Z_MAX = 15.0
     Z_TOL = 4e-4
     TOTAL_WAITING_TIME = 100
     WAITING_TIME = 0.25
