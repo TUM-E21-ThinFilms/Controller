@@ -167,6 +167,8 @@ class ShutterController(Loggable):
         try:
             self.shutter.move(-23)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
+            # wait one second until the shutter is closed
+            self.countdown(1)
         except:
             self._logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")

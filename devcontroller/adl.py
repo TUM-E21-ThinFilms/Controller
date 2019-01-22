@@ -145,6 +145,9 @@ class ADLController(Loggable):
     def get_voltage(self):
         return self.sputter.convert_from_voltage(self.get_actual_values().get_voltage(), coeff=self.coeff_volt)
 
+    def get_current(self):
+        return self.sputter.convert_from_current(self.get_actual_values().get_current(), coeff=self.coeff_current)
+
 
 class TurnOnThread(StoppableThread):
     def __init__(self):

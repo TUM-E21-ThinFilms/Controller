@@ -97,8 +97,6 @@ class VATController(Loggable):
     def get_voltage(self):
         return float(self.valve.get_pressure() + self._sensor_offset) / self._pressure_range * 10.0
 
-
-
     @retry()
     def set_pressure(self, pressure, force=False):
         # pressure in mbar
