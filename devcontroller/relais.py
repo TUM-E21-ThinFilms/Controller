@@ -57,7 +57,7 @@ class RelaisController(Loggable):
 
         response = self.relay.setup()
 
-        if not response.get_number_of_devices() == 1:
+        if not response.get_number() == 1:
             raise RuntimeError(
                 "Expected to have exactly one relay module, but got {}".format(response.get_number_of_devices()))
 
