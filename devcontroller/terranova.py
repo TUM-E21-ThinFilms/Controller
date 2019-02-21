@@ -13,9 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from terranova_751a.factory import *
-
-from devcontroller.misc.logger import LoggerFactory
+from terranova_751a.driver import Terranova751ADriver
 
 from e21_util.interface import Loggable
 from e21_util.retry import retry
@@ -35,21 +33,13 @@ class TerranovaController(Loggable):
             get_pressure(): Returns the current pressure in the desired units (mBar typically), only if the pump is on
     """
 
-
-    def __init__(self, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_shutter_logger()
-
+    def __init__(self, driver, logger):
         super(TerranovaController, self).__init__(logger)
+        assert isinstance(driver, Terranova751ADriver)
 
-        self.driver = None
-
-        self.initialize()
+        self.driver = driver
 
         print(self.DOC)
-
-    def initialize(self):
-        self.driver = Terranova751AFactory().create_terranova()
 
     def get_driver(self):
         return self.driver

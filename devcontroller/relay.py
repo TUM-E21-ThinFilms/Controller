@@ -13,16 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from relais_197720.factory import RelayFactory
+from relais_197720.driver import RelayDriver
 from relais_197720.constants import Relay
-from devcontroller.misc.logger import LoggerFactory
+
 from e21_util.retry import retry
 from e21_util.interface import Loggable
 
 
 # TODO: Rename to RelayController
-class RelaisController(Loggable):
-
+class RelayController(Loggable):
     RELAY_ADDRESS = 1
 
     SCROLL_PORT = (1, Relay.PORT_1)
@@ -44,24 +43,23 @@ class RelaisController(Loggable):
 
     """
 
-    def __init__(self, relay=None, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_relais_logger()
+    def __init__(self, relay, logger):
+        super(RelayController, self).__init__(logger)
+        assert isinstance(relay, RelayDriver)
 
-        super(RelaisController, self).__init__(logger)
+        self.relay = relay
 
-        if relay is None:
-            self.relay = RelayFactory().create_relay()
-        else:
-            self.relay = relay
+        self.initialize()
 
+        print(self.DOC)
+
+    @retry()
+    def initialize(self):
         response = self.relay.setup()
 
         if not response.get_number() == 1:
             raise RuntimeError(
                 "Expected to have exactly one relay module, but got {}".format(response.get_number_of_devices()))
-
-        print(self.DOC)
 
     @retry()
     def helium_on(self):

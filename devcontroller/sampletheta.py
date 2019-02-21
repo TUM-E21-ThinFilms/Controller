@@ -32,10 +32,7 @@ class SampleThetaController(Loggable, Interruptable):
     STEP_TOL = 1
     MAX_ITERATIONS = 20
 
-    def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
-
-        if logger is None:
-            logger = LoggerFactory().get_sample_theta_logger()
+    def __init__(self, motor, encoder, logger, interruptor=None, timer=None):
 
         if interruptor is None:
             interruptor = Interruptor()
@@ -43,7 +40,7 @@ class SampleThetaController(Loggable, Interruptable):
         Loggable.__init__(self, logger)
         Interruptable.__init__(self, interruptor)
 
-        self._motor = ThetaMotorController(logger=logger)
+        assert isinstance(motor, ThetaMotorController)
 
         if encoder is None:
             encoder = Factory().get_interface()
@@ -99,7 +96,6 @@ class SampleThetaController(Loggable, Interruptable):
                 self._logger.info("Run out of iterations. Re-engaging completely new ...")
                 self._move_motor(self.signum(self._last_steps) * 2 * self.HYSTERESIS_OFFSET * -1)
                 iterations = 0
-
 
             current_angle, angle_difference = self._angle_difference(angle)
             steps_to_move = self._proposal_steps(angle_difference)

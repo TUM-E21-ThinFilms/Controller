@@ -13,31 +13,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from phytron_phymotion.factory import PhytronFactory
-from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP, PARAMETER_START_STOP_FREQUENCY, \
-    PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT, PARAMETER_CURRENT_DELAY_TIME
-from devcontroller.misc.logger import LoggerFactory
+from phytron_phymotion.driver import PhytronDriver
+from phytron_phymotion.messages.parameter import PARAMETER_CURRENT, PARAMETER_FREQUENCY, PARAMETER_MICROSTEP, \
+    PARAMETER_START_STOP_FREQUENCY, PARAMETER_BOOST_CURRENT, PARAMETER_ENABLE_BOOST, PARAMETER_STOP_CURRENT, \
+    PARAMETER_CURRENT_DELAY_TIME
+
 from e21_util.retry import retry
 from e21_util.interface import Loggable
 
 
 class ThetaMotorController(Loggable):
+    ADDRESS = 0
     AXIS_THETA = 1
+    MODULE = 1
 
-    def __init__(self, module=1, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_theta_logger()
-
+    def __init__(self, driver, logger):
         super(ThetaMotorController, self).__init__(logger)
 
+        assert isinstance(driver, PhytronDriver)
+
         self._speed = 0
-        self._mod = module
-        self._driver_theta = PhytronFactory().create_driver()
+
         self._init_driver_theta(0.8)
 
     @retry()
     def _init_driver_theta(self, rotations_per_minute):
-        self._driver_theta.set_axis(self._mod, self.AXIS_THETA)
+        self._driver_theta.set_address(self.ADDRESS)
+        self._driver_theta.set_axis(self.MODULE, self.AXIS_THETA)
         self._driver_theta.set_parameter(PARAMETER_MICROSTEP, 11)  # 1/128 pulse per step
         self._driver_theta.set_parameter(PARAMETER_CURRENT, 150)  # 1.5 A
         self._driver_theta.set_parameter(PARAMETER_FREQUENCY, int(rotations_per_minute * 200 * 128 / 60.0))

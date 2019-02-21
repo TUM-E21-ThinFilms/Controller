@@ -16,8 +16,8 @@
 import logging
 from e21_util.paths import Paths
 
-class LoggerFactory(object):
 
+class LoggerFactory(object):
     LOG_FILE_CONTROLLER = Paths.LOG_PATH + 'controller.log'
 
     def _get_logger(self, name, file):
@@ -30,12 +30,18 @@ class LoggerFactory(object):
         logger.addHandler(fh)
         return logger
 
+    def get_logger(self, name, file):
+        return self._get_logger(name, Paths.LOG_PATH + file)
+
+    def get(self, device):
+        return self._get_logger(device, Paths.LOG_PATH + device.lower() + ".log")
+
     def get_turbo_logger(self):
         return self._get_logger('Controller: Turbo', self.LOG_FILE_CONTROLLER)
 
     def get_adl_sputter_logger(self):
         return self._get_logger('Controller: ADL Sputter', self.LOG_FILE_CONTROLLER)
-    
+
     def get_trumpf_sputter_logger(self):
         return self._get_logger('Controller: Trumpf DC', self.LOG_FILE_CONTROLLER)
 
@@ -69,7 +75,7 @@ class LoggerFactory(object):
     def get_theta_logger(self):
         return self._get_logger('Controller: Theta', self.LOG_FILE_CONTROLLER)
 
-    def get_relais_logger(self):
+    def get_relay_logger(self):
         return self._get_logger('Controller: Relais', self.LOG_FILE_CONTROLLER)
 
     def get_compressor_logger(self):
@@ -80,3 +86,6 @@ class LoggerFactory(object):
 
     def get_edwards_nxds_logger(self):
         return self._get_logger('Controller: Edwards nXDS', self.LOG_FILE_CONTROLLER)
+
+    def get_terranova_logger(self):
+        return self._get_logger('Controller: Terranova', self.LOG_FILE_CONTROLLER)
