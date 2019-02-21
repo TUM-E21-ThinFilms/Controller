@@ -32,7 +32,7 @@ class SampleThetaController(Loggable, Interruptable):
     STEP_TOL = 1
     MAX_ITERATIONS = 20
 
-    def __init__(self, motor, encoder, logger, interruptor=None, timer=None):
+    def __init__(self, driver, encoder, logger, interruptor=None, timer=None):
 
         if interruptor is None:
             interruptor = Interruptor()

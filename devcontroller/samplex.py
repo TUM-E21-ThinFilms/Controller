@@ -17,25 +17,25 @@ from e21_util.interruptor import InterruptableTimer, Interruptor, StopException
 from e21_util.retry import retry
 from e21_util.interface import Loggable, Interruptable
 from devcontroller.misc.logger import LoggerFactory
-from baur_pdcx85.factory import BaurFactory
+from baur_pdcx85.driver import BaurDriver
+
 
 class SampleXController(Loggable, Interruptable):
-    def __init__(self, timer=None, interruptor=None, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_sample_x_logger()
-
+    def __init__(self, driver, logger, timer=None, interruptor=None):
         if interruptor is None:
             interruptor = Interruptor()
 
         Loggable.__init__(self, logger)
         Interruptable.__init__(self, interruptor)
 
+        assert isinstance(driver, BaurDriver)
+
         if timer is None:
             timer = InterruptableTimer(self._interrupt)
 
         self._timer = timer
 
-        self._motor = BaurFactory().create_x()
+        self._motor = driver
         self._motor.initialize(4000, 20, 400, 300)
 
     def get_motor(self):
@@ -121,7 +121,8 @@ class SampleXController(Loggable, Interruptable):
         abs_stps = abs(steps)
         if abs_stps > 30000:
             raise RuntimeError("Will not move more than 30.000 steps in total")
-        self._logger.info("Moving %s steps to the right. This corresponds to %s mm", steps, self._steps_to_mm(-1 * steps))
+        self._logger.info("Moving %s steps to the right. This corresponds to %s mm", steps,
+                          self._steps_to_mm(-1 * steps))
         self._move(-1 * steps)
 
     def _mm_to_steps(self, mm):

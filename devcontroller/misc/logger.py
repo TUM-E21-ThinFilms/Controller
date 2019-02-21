@@ -75,6 +75,12 @@ class LoggerFactory(object):
     def get_theta_logger(self):
         return self._get_logger('Controller: Theta', self.LOG_FILE_CONTROLLER)
 
+    def get_x_logger(self):
+        return self._get_logger('Motor: X', self.LOG_FILE_CONTROLLER)
+
+    def get_z_logger(self):
+        return self._get_logger('Motor: Z', self.LOG_FILE_CONTROLLER)
+
     def get_relay_logger(self):
         return self._get_logger('Controller: Relais', self.LOG_FILE_CONTROLLER)
 

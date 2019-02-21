@@ -16,9 +16,8 @@
 from e21_util.interruptor import Interruptor, InterruptableTimer
 from e21_util.retry import retry
 from e21_util.interface import Loggable, Interruptable
-from encoder.factory import Factory
-from devcontroller.misc.logger import LoggerFactory
-from baur_pdcx85.factory import BaurFactory
+from baur_pdcx85.driver import BaurDriver
+from encoder.interface import EncoderInterface
 
 
 class SampleZController(Loggable, Interruptable):
@@ -29,10 +28,7 @@ class SampleZController(Loggable, Interruptable):
     WAITING_TIME = 0.25
     STEP_TOL = 1
 
-    def __init__(self, interruptor=None, encoder=None, timer=None, logger=None):
-
-        if logger is None:
-            logger = LoggerFactory().get_sample_theta_logger()
+    def __init__(self, driver, encoder, logger, interruptor=None, timer=None):
 
         if interruptor is None:
             interruptor = Interruptor()
@@ -40,11 +36,11 @@ class SampleZController(Loggable, Interruptable):
         Loggable.__init__(self, logger)
         Interruptable.__init__(self, interruptor)
 
-        self._motor = BaurFactory().create_z()
-        self._motor.initialize(4000, 20, 500, 300)
+        assert isinstance(driver, BaurDriver)
+        assert isinstance(encoder, EncoderInterface)
 
-        if encoder is None:
-            encoder = Factory().get_interface()
+        self._motor = driver
+        self._motor.initialize(4000, 20, 500, 300)
 
         self._encoder = encoder
 

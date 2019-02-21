@@ -19,6 +19,9 @@ from e21_util.retry import retry
 from e21_util.interface import Loggable
 from e21_util.paths import Paths
 
+from baur_pdcx85.driver import BaurDriver
+from e21_util.gunparameter import GunConfig
+
 class GunController(Loggable):
     DOC = """
         GunController - Controller for controller the gun position
@@ -33,16 +36,20 @@ class GunController(Loggable):
 
     """
 
-    def __init__(self, gun_driver, logger=None):
+    def __init__(self, driver, config_parser, logger=None):
         if logger is None:
             logger = LoggerFactory().get_gun_logger()
 
         super(GunController, self).__init__(logger)
-        self._driver = gun_driver
-        self._parser = GunConfigParser(Paths.GUN_CONFIG_PATH)
+
+        assert isinstance(driver, BaurDriver)
+        assert isinstance(config_parser, GunConfigParser)
+
+        self._driver = driver
+        self._parser = config_parser
         self._config = self._parser.get_config()
         self._target_gun = None
-        self.vend(10)
+        self._driver.initialize(4000, 1, 1, 10)
 
         print(self.DOC)
 
