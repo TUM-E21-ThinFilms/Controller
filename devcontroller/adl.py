@@ -74,7 +74,7 @@ class ADLController(Loggable):
     def __check_mode(self, new_mode):
         if self.current_mode is not None and not self.current_mode == new_mode:
             self._logger.error("Already sputtering in mode %s. Cannot sputter in new mode %s" % self.mode % new_mode)
-            raise ExecutionError("Already sputting in different mode.")
+            raise ExecutionError("Already sputtering in different mode.")
 
         self.current_mode = new_mode
 

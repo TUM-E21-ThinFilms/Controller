@@ -40,11 +40,12 @@ class SampleThetaController(Loggable, Interruptable):
         Loggable.__init__(self, logger)
         Interruptable.__init__(self, interruptor)
 
-        assert isinstance(motor, ThetaMotorController)
+        assert isinstance(driver, ThetaMotorController)
 
         if encoder is None:
             encoder = Factory().get_interface()
 
+        self._motor = driver
         self._encoder = encoder
         self._last_steps = 0
 
