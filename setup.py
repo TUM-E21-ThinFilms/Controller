@@ -14,13 +14,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-
+import platform
 from setuptools import setup, find_packages
 
-requires = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590', 'vat_641',
-            'trinamic_pd110', 'lakeshore336', 'pfg_600', 'julabo_fl', 'ps9000', 'phytron_phymotion', 'baur_pdcx85', 'terranova_751a']
+requires_insitu = ['slave', 'relais_197720', 'stp_ix455', 'tpg26x', 'adl_x547', 'truplasmadc_3000', 'vat_590',
+                   'vat_641', 'trinamic_pd110', 'lakeshore336', 'pfg_600', 'julabo_fl', 'ps9000', 'phytron_phymotion',
+                   'baur_pdcx85', 'terranova_751a']
 
-desc = ('Controller')
+requires_pvd = ['cesar136']
+
+requires_all = requires_insitu + requires_pvd
+
+required = requires_all
+user = platform.node()
+
+if user == 'sputter-control':
+    required = requires_insitu
+elif user == 'e21-big-chamber':
+    required = requires_pvd
 
 setup(
     name='devcontroller',
@@ -29,9 +40,9 @@ setup(
     author_email='alexander.book@frm2.tum.de',
     license='GNU General Public License (GPL), Version 3',
     url='https://github.com/TUM-E21-ThinFilms/Controller',
-    description=desc,
+    description='Controller',
     long_description=open('README.md').read(),
     packages=find_packages(),
     include_package_data=True,
-    install_requires=requires,
+    install_requires=required,
 )
