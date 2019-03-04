@@ -47,4 +47,4 @@ class Instantiator(object):
     def get_cesar(self, interrupt=None):
         transport, logger, interrupt = self._get(Devices.DEVICE_CESAR, interrupt)
 
-        return CesarController(CesarFactory(transport, logger), logger, interrupt)
+        return CesarController(CesarFactory.create(transport, logger), logger, interrupt)
