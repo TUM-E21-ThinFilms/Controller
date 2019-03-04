@@ -1,3 +1,19 @@
+#  Copyright (C) 2019, see AUTHORS.md
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 from e21_util.insitu.connection import Connection
 from e21_util.insitu.devices import Devices
 
@@ -9,6 +25,7 @@ from relais_197720.factory import RelayFactory
 from terranova_751a.factory import Terranova751AFactory
 from phytron_phymotion.factory import PhytronFactory
 from baur_pdcx85.factory import BaurFactory
+from edwards_nxds.factory import EdwardsNXDSFactory
 
 from devcontroller.relay import RelayController
 from devcontroller.terranova import TerranovaController
@@ -17,6 +34,7 @@ from devcontroller.sampletheta import SampleThetaController
 from devcontroller.gun import GunController
 from devcontroller.samplex import SampleXController
 from devcontroller.samplez import SampleZController
+from devcontroller.nxds import nXDSController
 
 from e21_util.paths import Paths
 from e21_util.gunparameter import GunConfigParser
@@ -82,3 +100,6 @@ class Instantiator(object):
     def get_z(self):
         return SampleZController(self.get_z_motor(), self.get_position_encoder(), self._log.get_z_logger())
 
+    def get_scroll(self):
+        transport, logger = self._get(Devices.DEVICE_SCROLL)
+        return nXDSController(EdwardsNXDSFactory.create(transport, logger), logger)

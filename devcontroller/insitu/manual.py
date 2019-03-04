@@ -24,6 +24,7 @@ inst = Instantiator(Connection())
 terranova = inst.get_ion_getter()
 relay = inst.get_relay()
 gun = inst.get_gun()
+scroll = inst.get_scroll()
 
 # TODO:
 #   Add the following drivers to Instantiator ...

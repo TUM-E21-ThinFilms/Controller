@@ -13,35 +13,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-
-from edwards_nxds.factory import EdwardsNXDSFactory
+from edwards_nxds.driver import EdwardsNXDSDriver
 
 from e21_util.retry import retry
 from e21_util.interface import Loggable
-from devcontroller.misc.logger import LoggerFactory
 
 
 class nXDSController(Loggable):
     DOC = """
         Edwards nXDS Scroll pump controller
-
+        
         Usage:
-
+            on()/off: Turns the scroll pump on/off
+            is_on(): Returns true if the pump is on
+            get_rotation(): Returns the rpm of the pump
+            has_warning()/has_fault(): Returns true if the pump has a warning/fault            
     """
 
-    def __init__(self, pump=None, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_lakeshore_logger()
-
+    def __init__(self, driver, logger):
         super(nXDSController, self).__init__(logger)
 
-        if pump is None:
-            self.pump = EdwardsNXDSFactory().create_pump()
-        else:
-            self.pump = pump
-
-        self.pump.clear()
+        assert isisntance(driver, EdwardsNXDSDriver)
+        
+        self._driver = driver
+        self._driver.clear()
 
         print(self.DOC)
 
@@ -49,29 +44,29 @@ class nXDSController(Loggable):
         return self._logger
 
     def get_driver(self):
-        return self.pump
+        return self._driver
 
     @retry()
     def on(self):
-        self.pump.start_pump()
+        self._driver.start_pump()
 
     @retry()
     def off(self):
-        self.pump.stop_pump()
+        self._driver.stop_pump()
 
     @retry()
     def is_on(self):
-        return self.pump.get_status().get_register1().flag_running() > 0
+        return self._driver.get_status().get_register1().flag_running() > 0
 
     @retry()
     def get_rotation(self):
         # returns the rotation of the pump in rpm.
-        return self.pump.get_status().get_rotation() * 60
+        return self._driver.get_status().get_rotation() * 60
 
     @retry()
     def has_warning(self):
-        return self.pump.get_status().get_register2().flag_warning() > 0
+        return self._driver.get_status().get_register2().flag_warning() > 0
 
     @retry()
     def has_fault(self):
-        return self.pump.get_status().get_register2().flag_fault() > 0
+        return self._driver.get_status().get_register2().flag_fault() > 0
