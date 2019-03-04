@@ -33,7 +33,7 @@ class nXDSController(Loggable):
     def __init__(self, driver, logger):
         super(nXDSController, self).__init__(logger)
 
-        assert isisntance(driver, EdwardsNXDSDriver)
+        assert isinstance(driver, EdwardsNXDSDriver)
         
         self._driver = driver
         self._driver.clear()
