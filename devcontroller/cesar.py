@@ -17,11 +17,10 @@ from cesar136.driver import Driver
 from cesar136.constants import Parameter
 
 from devcontroller.misc.error import ExecutionError
-from devcontroller.misc.thread import StoppableThread
 
 from e21_util.retry import retry
 from e21_util.interface import Loggable, Interruptable
-from e21_util.interruptor import InterruptableTimer
+from e21_util.interruptor import InterruptableTimerThread
 
 
 class CesarController(Loggable, Interruptable):
@@ -92,14 +91,14 @@ class CesarController(Loggable, Interruptable):
     @retry()
     def turn_on(self):
         if self._thread is None or not self._thread.is_running():
-            self._thread = TurnOnThread(InterruptableTimer(self._interruptor, 0.1))
+            self._thread = TurnOnThread(self._interrupt, InterruptableTimer(self._interruptor, 0.1))
             self._thread.daemon = True
             self._thread.set_driver(self._driver, self._logger)
             self._thread.start()
 
     @retry()
     def turn_off(self):
-        if not self.thread is None:
+        if self.thread is not None:
             self._thread.stop()
 
         self._thread = None
@@ -120,10 +119,9 @@ class CesarController(Loggable, Interruptable):
         return self._driver.get_delivered_power()
 
 
-class TurnOnThread(StoppableThread):
-    def __init__(self, timer):
-        super(TurnOnThread, self).__init__()
-        self._timer = timer
+class TurnOnThread(InterruptableTimerThread):
+    def __init__(self, interrupt, timer):
+        super(TurnOnThread, self).__init__(interrupt, timer)
         self._logger = None
         self._driver = None
 
