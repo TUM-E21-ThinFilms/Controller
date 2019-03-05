@@ -29,6 +29,7 @@ from edwards_nxds.factory import EdwardsNXDSFactory
 from tpg26x.factory import PfeifferTPG26xFactory
 from julabo_fl.factory import JulaboFactory
 from vat_590.factory import VAT590Factory
+from adl_x547.factory import ADLSputterFactory
 
 from devcontroller.relay import RelayController
 from devcontroller.terranova import TerranovaController
@@ -40,6 +41,7 @@ from devcontroller.samplez import SampleZController
 from devcontroller.nxds import nXDSController
 from devcontroller.julabo import JulaboController
 from devcontroller.vat import VATController
+from devcontroller.adl import ADLController
 
 from e21_util.paths import Paths
 from e21_util.gunparameter import GunConfigParser
@@ -128,3 +130,11 @@ class Instantiator(object):
     def get_valve_oxygen(self):
         transport, logger = self._get(Devices.DEVICE_LEAK_VALVE_OXYGEN)
         return VATController(VAT590Factory.create(transport, logger), self.get_gauge_main(), logger)
+
+    def get_adl_a(self):
+        transport, logger = self._get(Devices.DEVICE_DC_SPUTTER_1)
+        return ADLController(ADLSputterFactory.create(transport, logger), logger)
+
+    def get_adl_b(self):
+        transport, logger = self._get(Devices.DEVICE_DC_SPUTTER_2)
+        return ADLController(ADLSputterFactory.create(transport, logger), logger)

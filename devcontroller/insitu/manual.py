@@ -32,15 +32,17 @@ julabo = inst.get_julabo()
 vat_ar = inst.get_valve_argon()
 vat_o2 = inst.get_valve_oxygen()
 
+adl_a = inst.get_adl_a()
+adl_b = inst.get_adl_b()
+
+phymotion = inst.get_theta_motor()
+
 # TODO:
 #   Add the following drivers to Instantiator ...
 #
 
 """
 # terranova = TerranovaController()
-adl_a = ADLController()
-adl_b = ADLController(ADLSputterFactory().create_sputter_b())
-
 try:
     dc = TruPlasmaDC3000Controller()
 except Exception as e:
@@ -54,7 +56,6 @@ heating = HeaterController()
 
 turbovalve = TurboVATController()
 # thermometer = VoltcraftIR1200Factory().create_thermometer()
-phymotion = ThetaMotorController()
 """
 
 DOC = """
