@@ -28,6 +28,7 @@ from baur_pdcx85.factory import BaurFactory
 from edwards_nxds.factory import EdwardsNXDSFactory
 from tpg26x.factory import PfeifferTPG26xFactory
 from julabo_fl.factory import JulaboFactory
+from vat_590.factory import VAT590Factory
 
 from devcontroller.relay import RelayController
 from devcontroller.terranova import TerranovaController
@@ -38,6 +39,7 @@ from devcontroller.samplex import SampleXController
 from devcontroller.samplez import SampleZController
 from devcontroller.nxds import nXDSController
 from devcontroller.julabo import JulaboController
+from devcontroller.vat import VATController
 
 from e21_util.paths import Paths
 from e21_util.gunparameter import GunConfigParser
@@ -118,3 +120,11 @@ class Instantiator(object):
     def get_julabo(self):
         transport, logger = self._get(Devices.DEVICE_JULABO)
         return JulaboController(JulaboFactory.create(transport, logger), logger)
+
+    def get_valve_argon(self):
+        transport, logger = self._get(Devices.DEVICE_LEAK_VALVE_ARGON)
+        return VATController(VAT590Factory.create(transport, logger), self.get_gauge_main(), logger)
+
+    def get_valve_oxygen(self):
+        transport, logger = self._get(Devices.DEVICE_LEAK_VALVE_OXYGEN)
+        return VATController(VAT590Factory.create(transport, logger), self.get_gauge_main(), logger)

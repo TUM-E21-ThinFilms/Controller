@@ -29,18 +29,17 @@ gauge = inst.get_gauge_main()
 gauge_cryo = inst.get_gauge_cryo()
 julabo = inst.get_julabo()
 
+vat_ar = inst.get_valve_argon()
+vat_o2 = inst.get_valve_oxygen()
+
 # TODO:
 #   Add the following drivers to Instantiator ...
 #
 
 """
-julabo = JulaboController()
-
 # terranova = TerranovaController()
 adl_a = ADLController()
 adl_b = ADLController(ADLSputterFactory().create_sputter_b())
-vat_ar = VATController()
-vat_o2 = VATController(VAT590Factory().create_oxygen_valve())
 
 try:
     dc = TruPlasmaDC3000Controller()
