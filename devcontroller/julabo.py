@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from julabo_fl.factory import JulaboFactory
+from julabo_fl.driver import JulaboDriver
 from e21_util.retry import retry
 from e21_util.interface import Loggable
-from devcontroller.misc.logger import LoggerFactory
+
 
 class JulaboController(Loggable):
 
@@ -33,51 +33,43 @@ class JulaboController(Loggable):
             get_driver(): returns the julabo driver
     """
 
-    def __init__(self, julabo=None, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_julabo_logger()
-
+    def __init__(self, julabo, logger):
         super(JulaboController, self).__init__(logger)
-
-        if julabo is None:
-            self.factory = JulaboFactory()
-            self.julabo = self.factory.create_julabo()
-        else:
-            self.julabo = julabo
-
-        self.julabo.clear()
+        
+        self._driver = julabo
+        self._driver.clear()
 
         print(self.DOC)
 
     def get_driver(self):
-        return self.julabo
+        return self._driver
 
     @retry()
     def turn_on(self):
-        self.julabo.turn_on()
+        self._driver.turn_on()
 
     @retry()
     def turn_off(self):
-        self.julabo.turn_off()
+        self._driver.turn_off()
 
     @retry()
     def get_on(self):
-        return self.julabo.get_on() == 1
+        return self._driver.get_on() == 1
 
     @retry()
     def set_temperature(self, temperature):
-        self.julabo.set_setpoint(temperature)
+        self._driver.set_setpoint(temperature)
 
     @retry()
     def get_target_temperature(self):
-        return self.julabo.get_setpoint()
+        return self._driver.get_setpoint()
 
     @retry()
     def get_temperature(self):
-        return self.julabo.get_temperature()
+        return self._driver.get_temperature()
 
     def get_version(self):
-        return self.julabo.get_version()
+        return self._driver.get_version()
 
     def on(self):
         self.turn_on()

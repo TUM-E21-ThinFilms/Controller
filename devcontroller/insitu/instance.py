@@ -27,6 +27,7 @@ from phytron_phymotion.factory import PhytronFactory
 from baur_pdcx85.factory import BaurFactory
 from edwards_nxds.factory import EdwardsNXDSFactory
 from tpg26x.factory import PfeifferTPG26xFactory
+from julabo_fl.factory import JulaboFactory
 
 from devcontroller.relay import RelayController
 from devcontroller.terranova import TerranovaController
@@ -36,6 +37,7 @@ from devcontroller.gun import GunController
 from devcontroller.samplex import SampleXController
 from devcontroller.samplez import SampleZController
 from devcontroller.nxds import nXDSController
+from devcontroller.julabo import JulaboController
 
 from e21_util.paths import Paths
 from e21_util.gunparameter import GunConfigParser
@@ -112,3 +114,7 @@ class Instantiator(object):
     def get_gauge_cryo(self):
         transport, logger = self._get(Devices.DEVICE_GAUGE_CRYO)
         return PfeifferTPG26xFactory.create(transport, logger)
+
+    def get_julabo(self):
+        transport, logger = self._get(Devices.DEVICE_JULABO)
+        return JulaboController(JulaboFactory.create(transport, logger), logger)

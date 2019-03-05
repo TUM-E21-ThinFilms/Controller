@@ -27,6 +27,7 @@ gun = inst.get_gun()
 scroll = inst.get_scroll()
 gauge = inst.get_gauge_main()
 gauge_cryo = inst.get_gauge_cryo()
+julabo = inst.get_julabo()
 
 # TODO:
 #   Add the following drivers to Instantiator ...
