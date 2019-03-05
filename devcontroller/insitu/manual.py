@@ -25,13 +25,14 @@ terranova = inst.get_ion_getter()
 relay = inst.get_relay()
 gun = inst.get_gun()
 scroll = inst.get_scroll()
+gauge = inst.get_gauge_main()
+gauge_cryo = inst.get_gauge_cryo()
 
 # TODO:
 #   Add the following drivers to Instantiator ...
 #
 
 """
-gauge = PfeifferTPG26xFactory().create_gauge()
 julabo = JulaboController()
 
 # terranova = TerranovaController()
@@ -50,7 +51,7 @@ compressor = CompressorController()
 lakeshore = LakeshoreController()
 trumpfrf = TrumpfPFG600Controller()
 heating = HeaterController()
-gauge_cryo = PfeifferTPG26xFactory().create_gauge_cryo()
+
 turbovalve = TurboVATController()
 # thermometer = VoltcraftIR1200Factory().create_thermometer()
 phymotion = ThetaMotorController()

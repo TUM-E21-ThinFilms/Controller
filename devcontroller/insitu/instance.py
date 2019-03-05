@@ -26,6 +26,7 @@ from terranova_751a.factory import Terranova751AFactory
 from phytron_phymotion.factory import PhytronFactory
 from baur_pdcx85.factory import BaurFactory
 from edwards_nxds.factory import EdwardsNXDSFactory
+from tpg26x.factory import PfeifferTPG26xFactory
 
 from devcontroller.relay import RelayController
 from devcontroller.terranova import TerranovaController
@@ -103,3 +104,11 @@ class Instantiator(object):
     def get_scroll(self):
         transport, logger = self._get(Devices.DEVICE_SCROLL)
         return nXDSController(EdwardsNXDSFactory.create(transport, logger), logger)
+
+    def get_gauge_main(self):
+        transport, logger = self._get(Devices.DEVICE_GAUGE_MAIN_CHAMBER)
+        return PfeifferTPG26xFactory.create(transport, logger)
+
+    def get_gauge_cryo(self):
+        transport, logger = self._get(Devices.DEVICE_GAUGE_CRYO)
+        return PfeifferTPG26xFactory.create(transport, logger)
