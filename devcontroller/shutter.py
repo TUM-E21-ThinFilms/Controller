@@ -71,8 +71,8 @@ class ShutterController(Loggable):
         return response.is_successful()
 
     def initialize(self, accel=100, speed=100):
-        self._driver.set_global_parameter(Parameter.Axis.MAX_ACCELERATION, accel)
-        self._driver.set_global_parameter(Parameter.Axis.MAX_POSITIONING_SPEED, speed)
+        self._driver.set_axis_parameter(Parameter.Axis.MAX_ACCELERATION, accel)
+        self._driver.set_axis_parameter(Parameter.Axis.MAX_POSITIONING_SPEED, speed)
 
     def get_driver(self):
         return self._driver
