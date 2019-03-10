@@ -14,12 +14,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from trinamic_pd110.factory import TrinamicPD110Factory
+
+
 from devcontroller.misc.thread import CountdownThread
 from devcontroller.misc.logger import LoggerFactory
 from devcontroller.misc.error import ExecutionError
-from e21_util.interface import Loggable
 
+from e21_util.interface import Loggable
+from e21_util.serial_connection import SerialTimeoutException
+from e21_util.retry import retry
+
+from trinamic_pd110.driver import TrinamicPD110Driver, Parameter
 
 class ShutterController(Loggable):
     DOC = """
@@ -27,8 +32,8 @@ class ShutterController(Loggable):
 
         Usage:
             timer(self._timer [s]): opens the shutter, waits self._timer, closes shutter
-            move(deg=180 [degree]): moves the shutter with deg degree
-            stop(): stoppes current movement
+            move(deg [degree]): moves the shutter for deg degree
+            stop(): stops current movement
             open(), close(): opens/closes the shutter
             init(): Initializes the shutter to find the correct starting position
             reset(): Resets the shutter to the starting position (open() is then possible)
@@ -39,10 +44,11 @@ class ShutterController(Loggable):
     STATUS_CLOSED = 2
     STATUS_CLOSED_RESET_REQUIRED = 3
 
-    def __init__(self, shutter=None, logger=None, timer=None):
-        if logger is None:
-            logger = LoggerFactory().get_shutter_logger()
+    STEP_ANGLE = 1.8 # 1.8 degree per full step
+
+    def __init__(self, shutter, logger, timer=None):
         super(ShutterController, self).__init__(logger)
+        assert isinstance(shutter, TrinamicPD110Driver)
 
         self._status = self.STATUS_UNKNOWN
 
@@ -51,10 +57,7 @@ class ShutterController(Loggable):
 
         self._timer = timer
 
-        if shutter is None:
-            self.shutter = TrinamicPD110Factory().create_shutter()
-        else:
-            self.shutter = shutter
+        self._driver = shutter
 
         self.countdown_thread = None
 
@@ -62,15 +65,21 @@ class ShutterController(Loggable):
 
         print(self.DOC)
 
+    @retry()
+    def is_on(self):
+        response = self._driver.stop()
+        return response.is_successful()
+
     def initialize(self, accel=100, speed=100):
-        self.shutter.acceleration = accel
-        self.shutter.speed_max = speed
+        self._driver.set_global_parameter(Parameter.Axis.MAX_ACCELERATION, accel)
+        self._driver.set_global_parameter(Parameter.Axis.MAX_POSITIONING_SPEED, speed)
 
     def get_driver(self):
-        return self.shutter
+        return self._driver
 
+    @retry()
     def stop(self):
-        self.shutter.stop()
+        self._driver.stop()
 
     def set_closed(self):
         self._status = self.STATUS_CLOSED
@@ -80,7 +89,7 @@ class ShutterController(Loggable):
         self._timer.sleep(0.3)
         self.initialize(10, 10)
         self._timer.sleep(0.3)
-        self.shutter.move(49)
+        self._driver.move(49)
         self._status = self.STATUS_CLOSED
         self._timer.sleep(7)
         self.initialize()
@@ -89,16 +98,26 @@ class ShutterController(Loggable):
         print("moving shutter to the leftmost position ...")
         self.initialize(10, 10)
         self._timer.sleep(0.3)
-        self.shutter.move(-75)
+        self._driver.move(-75)
         self._timer.sleep(10)
-        self.shutter.move(49)
+        self._driver.move(49)
         self._timer.sleep(7)
         self.initialize()
         print("done.")
         self._status = self.STATUS_CLOSED
 
-    def move(self, degree=180):
-        self.shutter.move(degree)
+    def move(self, degree):
+        full_steps_for_full_rotation = 360 / self.STEP_ANGLE
+
+        # assuming motor is set to 1/64 microsteps
+        full_rotation = full_steps_for_full_rotation * 64
+
+        try:
+            self._driver.move(int(degree/360 * full_rotation))
+        except SerialTimeoutException:
+            # It happens kind of often that the device does not respond
+            # but it still moves ...
+            pass
 
     def countdown(self, t):
         thread = CountdownThread()
@@ -151,7 +170,7 @@ class ShutterController(Loggable):
             self.countdown(time_sec)
 
             try:
-                self.shutter.move(-25)
+                self._driver.move(-25)
                 self._status = self.STATUS_OPEN
             except KeyboardInterrupt:
                 raise
@@ -165,10 +184,10 @@ class ShutterController(Loggable):
                 self.countdown_thread.stop()
 
         try:
-            self.shutter.move(-23)
+            self._driver.move(-23)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
             # wait one second until the shutter is closed
-            self.countdown(1)
+            self._timer.sleep(1)
         except:
             self._logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")

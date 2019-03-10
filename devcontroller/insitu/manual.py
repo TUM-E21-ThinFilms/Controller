@@ -36,6 +36,7 @@ adl_a = inst.get_adl_a()
 adl_b = inst.get_adl_b()
 
 phymotion = inst.get_theta_motor()
+shutter = inst.get_shutter()
 
 # TODO:
 #   Add the following drivers to Instantiator ...
@@ -48,7 +49,6 @@ try:
 except Exception as e:
     print(e)
     
-shutter = ShutterController()
 compressor = CompressorController()
 lakeshore = LakeshoreController()
 trumpfrf = TrumpfPFG600Controller()
