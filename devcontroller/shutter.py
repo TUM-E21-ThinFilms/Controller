@@ -170,11 +170,11 @@ class ShutterController(Loggable):
             self.countdown(time_sec)
 
             try:
-                self._driver.move(-25)
+                self.move(-25)
                 self._status = self.STATUS_OPEN
             except KeyboardInterrupt:
                 raise
-            except Exception as e:
+            except Exception:
                 self._logger.exception("Received exception while opening")
                 raise ExecutionError("Could not open shutter")
 
@@ -184,11 +184,11 @@ class ShutterController(Loggable):
                 self.countdown_thread.stop()
 
         try:
-            self._driver.move(-23)
+            self.move(-23)
             self._status = self.STATUS_CLOSED_RESET_REQUIRED
             # wait one second until the shutter is closed
             self._timer.sleep(1)
-        except:
+        except Exception:
             self._logger.exception("Received exception while closing")
             raise ExecutionError("Could not close shutter")
 
