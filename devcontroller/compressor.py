@@ -16,7 +16,6 @@
 from sumitomo_f70h.factory import SumitomoF70HFactory
 from e21_util.retry import retry
 from e21_util.interface import Loggable
-from devcontroller.misc.logger import LoggerFactory
 
 class CompressorController(Loggable):
 
@@ -30,43 +29,36 @@ class CompressorController(Loggable):
             get_status(): returns the status
     """
 
-    def __init__(self, compressor=None, logger=None):
-
-        if logger is None:
-            logger = LoggerFactory().get_compressor_logger()
-
+    def __init__(self, compressor, logger):
         super(CompressorController, self).__init__(logger)
 
-        if compressor is None:
-            self.compressor = SumitomoF70HFactory().create()
-        else:
-            self.compressor = compressor
+        self._driver = compressor
 
-        self.compressor.clear()
+        self._driver.clear()
 
         print(self.DOC)
 
     @retry()
     def turn_on(self):
-        self.compressor.turn_on()
+        self._driver.turn_on()
 
     @retry()
     def turn_off(self):
-        self.compressor.turn_off()
+        self._driver.turn_off()
 
     @retry()
     def get_all_temperatures(self):
-        return self.compressor.get_all_temperatures()
+        return self._driver.get_all_temperatures()
 
     def reset(self):
-        self.compressor.reset()
+        self._driver.reset()
 
     @retry()
     def get_status(self):
-        return self.compressor.get_status()
+        return self._driver.get_status()
 
     def get_driver(self):
-        return self.compressor
+        return self._driver
 
     def on(self):
         self.turn_on()

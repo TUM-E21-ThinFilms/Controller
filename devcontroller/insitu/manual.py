@@ -37,19 +37,18 @@ adl_b = inst.get_adl_b()
 
 phymotion = inst.get_theta_motor()
 shutter = inst.get_shutter()
+compressor = inst.get_compressor()
 
 # TODO:
 #   Add the following drivers to Instantiator ...
 #
 
 """
-# terranova = TerranovaController()
 try:
     dc = TruPlasmaDC3000Controller()
 except Exception as e:
     print(e)
     
-compressor = CompressorController()
 lakeshore = LakeshoreController()
 trumpfrf = TrumpfPFG600Controller()
 heating = HeaterController()
