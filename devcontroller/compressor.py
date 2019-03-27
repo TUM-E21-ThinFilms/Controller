@@ -57,6 +57,10 @@ class CompressorController(Loggable):
     def get_status(self):
         return self._driver.get_status()
 
+    @retry()
+    def is_on(self):
+        return self._driver.get_on()
+
     def get_driver(self):
         return self._driver
 
