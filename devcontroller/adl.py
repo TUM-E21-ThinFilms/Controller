@@ -126,7 +126,7 @@ class ADLController(Loggable):
         self.turn_off()
 
     def power(self, sputter_power):
-        self._driver_power(sputter_power)
+        self.sputter_power(sputter_power)
 
     @retry()
     def get_actual_values(self):
