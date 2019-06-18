@@ -155,4 +155,4 @@ class Instantiator(object):
 
     def get_lakeshore(self):
         transport, logger = self._get(Devices.DEVICE_LAKESHORE)
-        return LakeshoreController(LakeShore336Factory(transport, logger))
+        return LakeshoreController(LakeShore336Factory.create(transport, logger))
