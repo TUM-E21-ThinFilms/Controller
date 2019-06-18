@@ -156,7 +156,7 @@ class VATController(Loggable):
     @retry()
     def get_position(self):
         return self._driver.get_position()
-    
+
     @retry()
     def hold(self):
         self._driver.clear()

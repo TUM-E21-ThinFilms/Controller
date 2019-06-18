@@ -32,6 +32,7 @@ from vat_590.factory import VAT590Factory
 from adl_x547.factory import ADLSputterFactory
 from trinamic_pd110.factory import TrinamicPD110Factory
 from sumitomo_f70h.factory import SumitomoF70HFactory
+from lakeshore336.factory import LakeShore336Factory
 
 from devcontroller.relay import RelayController
 from devcontroller.terranova import TerranovaController
@@ -46,6 +47,7 @@ from devcontroller.vat import VATController
 from devcontroller.adl import ADLController
 from devcontroller.shutter import ShutterController
 from devcontroller.compressor import CompressorController
+from devcontroller.lakeshore import LakeshoreController
 
 from e21_util.paths import Paths
 from e21_util.gunparameter import GunConfigParser
@@ -150,3 +152,7 @@ class Instantiator(object):
     def get_compressor(self):
         transport, logger = self._get(Devices.DEVICE_COMPRESSOR)
         return CompressorController(SumitomoF70HFactory.create(transport, logger), logger)
+
+    def get_lakeshore(self):
+        transport, logger = self._get(Devices.DEVICE_LAKESHORE)
+        return LakeshoreController(LakeShore336Factory(transport, logger))

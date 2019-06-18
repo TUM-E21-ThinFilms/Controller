@@ -14,11 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from lakeshore336.factory import LakeShore336Factory
 from lakeshore336.driver import LakeShore336Driver
 from e21_util.retry import retry
 from e21_util.interface import Loggable
-from devcontroller.misc.logger import LoggerFactory
 
 
 class LakeshoreController(Loggable):
@@ -31,26 +29,18 @@ class LakeshoreController(Loggable):
             turn_off(input [1-4]): Turns the heater off on input.
     """
 
-    def __init__(self, lakeshore=None, logger=None):
-        if logger is None:
-            logger = LoggerFactory().get_lakeshore_logger()
-
+    def __init__(self, lakeshore, logger):
         super(LakeshoreController, self).__init__(logger)
+        assert isinstance(lakeshore, LakeShore336Driver)
 
-        if lakeshore is None:
-            self.lakeshore = LakeShore336Factory().create_lakeshore()
-        else:
-            self.lakeshore = lakeshore
 
+        self.lakeshore = lakeshore
         self.lakeshore.clear()
 
         print(self.DOC)
 
-    def get_logger(self):
-        return self._logger
-
     @retry()
-    def heat(self, heat, input=1, intensity=LakeShore336Driver.HEATER_RANGE_HIGH):
+    def heat(self, heat, input=1, intensity=LakeShore336Driver.HEATER_RANGE_LOW):
         self.lakeshore.set_control_setpoint(input, heat)
         self.lakeshore.set_heater_range(input, intensity)
 

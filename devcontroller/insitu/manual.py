@@ -39,6 +39,7 @@ phymotion = inst.get_theta_motor()
 shutter = inst.get_shutter()
 compressor = inst.get_compressor()
 
+lakeshore = inst.get_lakeshore()
 
 # TODO:
 #   Add the following drivers to Instantiator ...
