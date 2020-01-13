@@ -94,7 +94,7 @@ class GunController(Loggable):
         self.set_position(self.get_position() + total_steps)
 
     def steps_per_degree(self):
-        total_steps = sum([self._config.get_differences()])
+        total_steps = sum(self._config.get_differences())
         return total_steps / 270.0
 
     def compute_gun_position(self, gun_pos):
