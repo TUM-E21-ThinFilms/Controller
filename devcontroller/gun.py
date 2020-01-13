@@ -72,7 +72,7 @@ class GunController(Loggable):
             self.current_pos_cached = self._driver.get_position()
             self.current_pos_time = time.time()
 
-        return self._current_pos_cached
+        return self.current_pos_cached
 
     @retry()
     def set_position(self, position):
