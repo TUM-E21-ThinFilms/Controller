@@ -22,6 +22,7 @@ from e21_util.paths import Paths
 from baur_pdcx85.driver import BaurDriver
 from e21_util.gunparameter import GunConfig
 
+
 class GunController(Loggable):
     DOC = """
         GunController - Controller for controller the gun position
@@ -51,6 +52,10 @@ class GunController(Loggable):
         self._target_gun = None
         self._driver.initialize(4000, 1, 1, 10)
 
+        self.current_pos_time = None
+        self.current_pos_cached = None
+        self.current_pos_time_limit = 0.5
+
         print(self.DOC)
 
     def update_config(self):
@@ -61,7 +66,13 @@ class GunController(Loggable):
 
     @retry()
     def get_position(self):
-        return self._driver.get_position()
+
+        # A little implementation of a cache so that we do not kill the device by sending too much messages
+        if self.current_pos_cached is None or abs(time.time() - self.current_pos_time) > self.current_pos_time_limit:
+            self.current_pos_cached = self._driver.get_position()
+            self.current_pos_time = time.time()
+
+        return self._current_pos_cached
 
     @retry()
     def set_position(self, position):
@@ -76,14 +87,57 @@ class GunController(Loggable):
     def move_right(self, steps):
         self._driver.move_rel(abs(int(steps)))
 
+    def move_angle(self, angle):
+        # moving positive angles moves the gun to higher positions
+        # since a higher position means lower steps, the sign must be negative
+        total_steps = -1 * angle * self.steps_per_degree()
+        self.set_position(self.get_position() + total_steps)
+
+    def steps_per_degree(self):
+        total_steps = sum([self._config.get_differences()])
+        return total_steps / 270.0
+
     def compute_gun_position(self, gun_pos):
-        if not gun_pos in [1, 2, 3, 4]:
-            raise ValueError("Only position 1,2,3,4 are allowed")
+        self.is_valid_gun(gun_pos)
 
-        gun_1 = self._config.get_absolute_gun_position()
-        diff = self._config.get_difference()
+        step_gun_1 = self._config.get_absolute_gun_position()
 
-        return gun_1 - (gun_pos - 1) * diff
+        # Calculating the gun position works as follows:
+        # 1. Calculate the steps to position 1 (starting from pos "current")
+        # 2. Calculate the steps to position x (starting from pos 1)
+
+        # Calculate the steps to position 1:
+        current_steps = self.get_position()
+        to_gun_1 = step_gun_1 - current_steps
+        to_gun_x = self.step_difference(1, gun_pos)
+
+        # Note that, it's on purpose a bit more complicated that just "step_difference(current, gun_pos),
+        # because now one can move to any position even if the current gun position is not correctly defined.
+
+        return current_steps + to_gun_1 - to_gun_x
+
+    def is_valid_gun(self, gun):
+        if not gun in [1, 2, 3, 4]:
+            raise ValueError("Only guns 1, 2, 3, 4 are allowed")
+
+        return True
+
+    def step_difference(self, from_gun, to_gun):
+
+        self.is_valid_gun(from_gun)
+        self.is_valid_gun(to_gun)
+
+        sgn = -1
+
+        if from_gun > to_gun:
+            from_gun, to_gun = to_gun, from_gun
+            sgn = 1
+
+        if from_gun == to_gun:
+            return 0
+
+        return sgn * sum(self._config.get_differences()[from_gun-1:to_gun-1])
+
 
     @retry()
     def get_gun(self):
@@ -146,20 +200,21 @@ class GunController(Loggable):
 
         raise RuntimeError("Did not reach gun position %s in 300 seconds" % str(pos))
 
-    def calibrate(self, actual_position, new_tol=None, new_diff=None):
-        if not actual_position in [1, 2, 3, 4]:
-            raise ValueError("Cannot re-calibrate with wrong gun number...")
+    def calibrate(self, actual_position, new_tol=None, new_diffs=None):
+        self.is_valid_gun(actual_position)
 
         if new_tol is None or new_tol < 0:
             new_tol = self._config.get_tolerance()
 
-        if new_diff is None or new_diff < 0:
-            new_diff = self._config.get_difference()
+        if new_diffs is None or not len(new_diffs) == 3:
+            new_diffs = self._config.get_differences()
 
-        gun_pos = self.get_position()
-        gun_1_pos = gun_pos + (actual_position - 1) * new_diff
+        # do this now, so that step_difference works with the updated values
+        self._config.set_differences(new_diffs)
+
+        gun_1_pos = self.get_position() + self.step_difference(actual_position, 1)
+
 
         self._config.set_tolerance(new_tol)
-        self._config.set_difference(new_diff)
         self._config.set_absolute_gun_position(gun_1_pos)
         self._parser.write_config(self._config)
