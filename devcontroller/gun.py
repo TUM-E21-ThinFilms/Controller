@@ -114,7 +114,7 @@ class GunController(Loggable):
         # Note that, it's on purpose a bit more complicated that just "step_difference(current, gun_pos),
         # because now one can move to any position even if the current gun position is not correctly defined.
 
-        return current_steps + to_gun_1 - to_gun_x
+        return current_steps + to_gun_1 + to_gun_x
 
     def is_valid_gun(self, gun):
         if not gun in [1, 2, 3, 4]:
